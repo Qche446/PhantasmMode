@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\tModLoader.targets" />
+
+	<!-- 定义Mods文件夹路径变量 -->
+	<PropertyGroup>
+		<ModsFolder>$(USERPROFILE)\Documents\My Games\Terraria\tModLoader\Mods</ModsFolder>
+	  <UserSecretsId>e7ff75d2-70e6-46ca-9358-e08ea683f1c6</UserSecretsId>
+  </PropertyGroup>
+	<ItemGroup>
+	  <None Remove="assets\autoloadedeffects\shaders\AbomSkyEffect.fx" />
+	  <None Remove="assets\autoloadedeffects\shaders\BurnText.fx" />
+	  <None Remove="assets\autoloadedeffects\shaders\PungentAuraProj.fx" />
+	  <None Remove="Content\Buffs\NanoErosionBuff.png" />
+	  <None Remove="Content\Buffs\PlaceholderBuff.png" />
+	  <None Remove="Content\Buffs\PlaceholderDebuff.png" />
+	  <None Remove="Content\Sky\MutantSky.png" />
+	  <None Remove="Content\Sky\MutantSky2.png" />
+	  <None Remove="Content\Sky\MutantSky_April.png" />
+	  <None Remove="Content\Sky\MutantStatic.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- 使用变量路径 -->
+		<Reference Include="Fargowiltas">
+		  <HintPath>Fargowiltas.dll</HintPath>
+		</Reference>
+		<Reference Include="FargowiltasSouls">
+			<HintPath>$(ModsFolder)\FargowiltasSouls.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<Reference Include="Luminance">
+			<HintPath>$(ModsFolder)\Luminance.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<!-- 如果Luminance有XML文档文件 -->
+		<Reference Include="Luminance">
+			<HintPath>$(ModsFolder)\Luminance.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<!-- 将XML文件作为内容包含 -->
+		<Content Include="$(ModsFolder)\Luminance.xml" Condition="Exists('$(ModsFolder)\Luminance.xml')">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>Luminance.xml</Link>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Assets\Sounds\" />
+	  <Folder Include="Assets\Music\" />
+	  <Folder Include="Content\Projectiles\Souls\" />
+	  <Folder Include="Content\MiniBossBar\" />
+	  <Folder Include="Core\Systems\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="tModLoader.CodeAssist" Version="0.1.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Publicize Include="FargowiltasSouls" IncludeVirtualMembers="false" />
+		<Publicize Include="tModLoader" IncludeVirtualMembers="false" />
+		<Publicize Include="Fargowiltas" IncludeVirtualMembers="false" />
+		<Publicize Include="Terraria" IncludeVirtualMembers="false" />
+	</ItemGroup>
+</Project>

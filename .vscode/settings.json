@@ -1,0 +1,29 @@
+{
+  // ===== 热重载 ====
+  // 保存文件时自动将代码变更注入运行中的游戏
+  "csharp.experimental.debug.hotReload": true,
+  "csharp.debug.hotReloadOnSave": true,
+
+  // ===== C# 扩展设置 =====
+  // 使用 C# Dev Kit 进行语言服务
+  "csharp.semanticHighlighting.enabled": true,
+
+  // ===== 文件关联 ====
+  "files.associations": {
+    "*.hjson": "jsonc",
+    "*.cs": "csharp"
+  },
+
+  // ===== 排除二进制/生成目录，提升性能 =====
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "files.watcherExclude": {
+    "**/bin/**": true,
+    "**/obj/**": true
+  },
+
+  // ===== 自动 restore =====
+  "dotnet.defaultSolution": "FargosPhantasmMode.sln"
+}
