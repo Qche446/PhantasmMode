@@ -9,6 +9,9 @@ using System;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
+    /// <summary>
+    /// ai[0]maxtime,ai[1]whoami,ai[2]角度角
+    /// </summary>
     public class SpazmatismGlowLine : GlowLine
     {
         float angle = 0;
@@ -22,7 +25,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             if (angle == 0)
                 angle = Projectile.ai[2];
-            int maxTime = 60;
+            int maxTime = (int)Projectile.ai[0];
             float alphaModifier = 10;
             Projectile.ai[2] -= angle / (maxTime-1);
             color = Color.Green;

@@ -32,10 +32,11 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using MonoMod.Logs;
-using FargosPhantasmMode.Content.Bosses.Twins;
+using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
+    /*
     public class PHRetinazer : Retinazer
     {
         public int P2Timer = 0;
@@ -844,6 +845,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         public float RealRotation;           // 实际旋转角度（用于火焰轮）
         public int RespawnTimer;             // 复活计时器（受虐模式下）
         */
+    /*
         int P2Timer = 0;
         int P2State = 0;
         float P2flag = 0;
@@ -1199,6 +1201,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     }
                     */
                 }//粒子效果和领域展开
+/*
                 Player player = Main.player[npc.target];
                 npc.AddBuff(BuffID.CursedInferno,9999999);
                 npc.AddBuff(BuffID.Ichor, 9999999);
@@ -1739,4 +1742,5 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             c.Emit(OpCodes.Ret);
         }
     }
-}
+    */
+//}

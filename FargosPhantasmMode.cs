@@ -1,56 +1,39 @@
-using FargowiltasSouls.Content.Items.Summons;
-using FargowiltasSouls.Core.Systems;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
 using Terraria.ModLoader;
-using FargosPhantasmMode;
-using Terraria.ID;
-using FargosPhantasmMode.Content.Bosses.AbomBoss;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using FargowiltasSouls.Core.Toggler;
 using Terraria.GameContent;
+using Terraria.Graphics.Effects;
+using Microsoft.Xna.Framework;
+using Humanizer;
+using Terraria;
+using FargosPhantasmMode.Assets.ExtraTextures;
+using Luminance.Core.Graphics;
+using System;
+using FargosPhantasmMode.Content.Render;
+using Steamworks;
+using FargosPhantasmMode.Common.Particles;
 
 
 namespace FargosPhantasmMode
 {
     public class FargosPhantasmMode : Mod
     {
-        
         internal static FargosPhantasmMode Instance;
-        internal bool LoadedNewSprites;
-        internal struct TextureBuffer
-        {
-            public static readonly Dictionary<int, Asset<Texture2D>> NPC = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> NPCHeadBoss = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> Gore = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> Golem = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> Dest = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> GlowMask = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> Extra = [];
-            public static readonly Dictionary<int, Asset<Texture2D>> Projectile = [];
-            public static Asset<Texture2D> Ninja = null;
-            public static Asset<Texture2D> Probe = null;
-            public static Asset<Texture2D> BoneArm = null;
-            public static Asset<Texture2D> BoneArm2 = null;
-            public static Asset<Texture2D> BoneLaser = null;
-            public static Asset<Texture2D> BoneEyes = null;
-            public static Asset<Texture2D> Chain12 = null;
-            public static Asset<Texture2D> Chain26 = null;
-            public static Asset<Texture2D> Chain27 = null;
-            public static Asset<Texture2D> Wof = null;
-            public static Asset<Texture2D> EyeLaser = null;
-        }
+        public static ManagedRenderTarget Rt;
         public override void Load()
         {
+            On_FilterManager.EndCapture += FilterManager_EndCapture;
+            Rt = new ManagedRenderTarget(true,
+                (width, heigth) => new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight));
+
             Instance = this;
         }
         public override void Unload()
         {
+            /*
+            #region Sprites
             static void RestoreSprites(Dictionary<int, Asset<Texture2D>> buffer, Asset<Texture2D>[] original)
             {
                 foreach (KeyValuePair<int, Asset<Texture2D>> pair in buffer)
@@ -90,7 +73,50 @@ namespace FargosPhantasmMode
                 TextureAssets.Wof = TextureBuffer.Wof;
 
             ToggleLoader.Unload();
+            #endregion
+            */
+            On_FilterManager.EndCapture -= FilterManager_EndCapture;
         }
-        
+        private void FilterManager_EndCapture(On_FilterManager.orig_EndCapture orig, FilterManager self, RenderTarget2D finalTexture, RenderTarget2D screenTarget1, RenderTarget2D screenTarget2, Color clearColor)
+        {
+            GraphicsDevice gd = Main.instance.GraphicsDevice;
+            SpriteBatch sb = Main.spriteBatch;
+
+            #region ¡°UIÓîÖæÖ®»ð¡±
+            gd.SetRenderTarget(Main.screenTargetSwap);
+            gd.Clear(Color.Transparent);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            sb.Draw(Main.screenTarget, Vector2.Zero, Color.White);
+            sb.End();
+
+
+            gd.SetRenderTarget(Rt);
+            gd.Clear(Color.Transparent);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            Texture2D tex = ModContent.Request<Texture2D>("FargosPhantasmMode/Content/Dusts/CosmicFlame").Value;
+            FirePartiRe.AllDraw(sb, tex);
+            FirePartiRe.UpdateParticle();
+            //LightningPartiRe.AllDraw(sb);
+            LightningPartiRe.UpdateParticle();
+            sb.End();
+
+            gd.SetRenderTarget(Main.screenTarget);
+            gd.Clear(Color.Transparent);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            sb.Draw(Main.screenTargetSwap, Vector2.Zero, Color.White);
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.BigTentacle");
+            gd.Textures[1] = PhantasmTextureRegistry.UniverseNoise.Value;
+            shader.TrySetParameter("color", new Color(54, 255, 236));//102, 26, 179£¨×Ï£©  54£¬255£¬236(Çà)
+            shader.TrySetParameter("m", 0.62f);
+            shader.TrySetParameter("n", 0.01f);
+            shader.Apply("Tentacle");
+            sb.Draw(Rt, Vector2.Zero, Color.White);
+            sb.End();
+            #endregion
+
+            orig(self, finalTexture, screenTarget1, screenTarget2, clearColor);
+        }
     }
 }

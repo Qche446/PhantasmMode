@@ -7,9 +7,35 @@
 	  <UserSecretsId>e7ff75d2-70e6-46ca-9358-e08ea683f1c6</UserSecretsId>
   </PropertyGroup>
 	<ItemGroup>
+	  <AdditionalFiles Remove="Content\Buffs\Global\新文件夹\**" />
+	  <AdditionalFiles Remove="Content\Buffs\新文件夹\**" />
+	  <AdditionalFiles Remove="Content\MiniBossBar\**" />
+	  <Compile Remove="Content\Buffs\Global\新文件夹\**" />
+	  <Compile Remove="Content\Buffs\新文件夹\**" />
+	  <Compile Remove="Content\MiniBossBar\**" />
+	  <EmbeddedResource Remove="Content\Buffs\Global\新文件夹\**" />
+	  <EmbeddedResource Remove="Content\Buffs\新文件夹\**" />
+	  <EmbeddedResource Remove="Content\MiniBossBar\**" />
+	  <None Remove="Content\Buffs\Global\新文件夹\**" />
+	  <None Remove="Content\Buffs\新文件夹\**" />
+	  <None Remove="Content\MiniBossBar\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AdditionalFiles Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
+	</ItemGroup>
+	<ItemGroup>
 	  <None Remove="assets\autoloadedeffects\shaders\AbomSkyEffect.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\BigTentacle.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
 	  <None Remove="assets\autoloadedeffects\shaders\BurnText.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\EoCFire.fx" />
+	  <None Remove="assets\autoloadedeffects\shaders\projectiles\BossBarShader.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\Projectiles\MoonTrailShader.fx" />
 	  <None Remove="assets\autoloadedeffects\shaders\PungentAuraProj.fx" />
+	  <None Remove="Assets\ExtraTextures\Noise\Neurons2.png" />
+	  <None Remove="Assets\ExtraTextures\Noise\UniverseNoise.png" />
+	  <None Remove="Content\Bossbar\PhantasmBossBar.png" />
+	  <None Remove="Content\Bosses\VanillaEternity\Twins\SpazmatismGlowLine.png" />
 	  <None Remove="Content\Buffs\NanoErosionBuff.png" />
 	  <None Remove="Content\Buffs\PlaceholderBuff.png" />
 	  <None Remove="Content\Buffs\PlaceholderDebuff.png" />
@@ -50,9 +76,10 @@
 	<ItemGroup>
 	  <Folder Include="Assets\Sounds\" />
 	  <Folder Include="Assets\Music\" />
+	  <Folder Include="Content\Bosses\VanillaEternity\BrainOfCthulhu\" />
+	  <Folder Include="Content\Bosses\VanillaEternity\KingSlime\" />
 	  <Folder Include="Content\Projectiles\Souls\" />
-	  <Folder Include="Content\MiniBossBar\" />
-	  <Folder Include="Core\Systems\" />
+	  <Folder Include="Content\Dusts\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -64,6 +91,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Publicize Include="Luminance" IncludeVirtualMembers="false" />
 		<Publicize Include="FargowiltasSouls" IncludeVirtualMembers="false" />
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" />
 		<Publicize Include="Fargowiltas" IncludeVirtualMembers="false" />

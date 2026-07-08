@@ -5,10 +5,9 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargosPhantasmMode.Content.Bosses.VanillaBoss;
 using Terraria.DataStructures;
 using FargowiltasSouls;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
+using FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu;
 
 namespace FargosPhantasmMode.Content.NPCs
 {

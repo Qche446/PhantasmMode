@@ -29,6 +29,7 @@ using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using FargosPhantasmMode.Content.Bossbar;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
@@ -68,7 +69,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             npc.lifeMax = Main.expertMode ? 9700000 : 5100000;//原版字段
             npc.damage = 444 + 44;
             npc.defense = 255;
-            //npc.BossBar = ModContent.GetInstance<MutantBar>();
+            npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
         }
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
@@ -656,7 +657,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (--NPC.ai[1] < 0)
             {
                 if (FargoSoulsUtil.HostCheck)
-                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(10 - 0 * Math.Abs(NPC.ai[2]) / MathHelper.PiOver2, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(9 - 0 * Math.Abs(NPC.ai[2]) / MathHelper.PiOver2, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
                 NPC.ai[1] = WorldSavingSystem.MasochistModeReal ? 3 : 5; //delay between projs
                 NPC.ai[2] += NPC.ai[3];
                 if (NPC.localAI[0]++ == 20 || NPC.localAI[0] == 40)
@@ -1057,33 +1058,33 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
 
-        private void VoidRaysP2(NPC NPC)//12P2虚无射线
+        private void VoidRaysP2(NPC npc)//12P2虚无射线
         {
-            NPC.velocity = Vector2.Zero;
-            if (--NPC.ai[1] < 0)
+            npc.velocity = Vector2.Zero;
+            if (--npc.ai[1] < 0)
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(8, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
-                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(8, 0).RotatedBy(NPC.ai[2] + MathHelper.Pi), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2] + MathHelper.Pi), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
                 }
-                NPC.ai[1] = 4;
-                NPC.ai[2] += NPC.ai[3];
+                npc.ai[1] = 4;
+                npc.ai[2] += npc.ai[3];
 
-                if (NPC.localAI[0]++ == 20 || NPC.localAI[0] == 40)
+                if (npc.localAI[0]++ == 20 || npc.localAI[0] == 40)
                 {
-                    NPC.netUpdate = true;
-                    NPC.ai[2] -= NPC.ai[3] / (WorldSavingSystem.MasochistModeReal ? 3 : 2);
+                    npc.netUpdate = true;
+                    npc.ai[2] -= npc.ai[3] / (WorldSavingSystem.MasochistModeReal ? 3 : 2);
 
-                    if (NPC.localAI[0] == 21 && endTimeVariance > 0.33f //sometimes skip to end
-                    || NPC.localAI[0] == 41 && endTimeVariance < -0.33f)
-                        NPC.localAI[0] = 60;
+                    if (npc.localAI[0] == 21 && endTimeVariance > 0.33f //sometimes skip to end
+                    || npc.localAI[0] == 41 && endTimeVariance < -0.33f)
+                        npc.localAI[0] = 60;
 
-                    EdgyBossText(NPC, GFBQuote(6));
+                    EdgyBossText(npc, GFBQuote(6));
                 }
-                else if (NPC.localAI[0] >= 60)
+                else if (npc.localAI[0] >= 60)
                 {
-                    ChooseNextAttack(NPC, 13, 19, 21, 24, 31, 39, 41, 42, 49, 50);
+                    ChooseNextAttack(npc, 13, 19, 21, 24, 31, 39, 41, 42, 49, 50);
                 }
             }
             int num = 0;
@@ -1280,12 +1281,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         max += 1;
                     for (int i = 0; i < max; i++)
                     {
-                        float vel = 4.5f + (NPC.ai[3] - 60f) / 60f;
-                        if (vel > 10.5f)
+                        float vel = 4.5f + (NPC.ai[3] - 60f) / 55f;
+                        if (vel > 11)
                         {
-                            vel = 10.5f;
+                            vel = 11f;
                         }
-                        vel *= Main.getGoodWorld ? 1.2f : 1f;
+                        vel *= Main.getGoodWorld ? 1.17f : 1f;
                         Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(0f, -vel).RotatedBy(NPC.ai[2] + Math.PI * 2 / max * i),
                             ModContent.ProjectileType<PHMutantEye>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer);
                     }
@@ -2683,11 +2684,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             //Vector2 targetPos = player.Center + 360 * NPC.DirectionFrom(player.Center).RotatedBy(MathHelper.ToRadians(10)); Movement(targetPos, 0.25f);
             NPC.velocity = Vector2.Zero;
-
-            int attackThreshold = (WorldSavingSystem.MasochistModeReal ? 48 : 60) / 2;
-            int timesToAttack = (4 + (int)Math.Round(3 * endTimeVariance)) * 2;
             int startup = 90;
-
+            float multiple = 0.5f;
+            int attackThreshold = (int)((WorldSavingSystem.MasochistModeReal ? 48 : 60) * multiple);
+            int timesToAttack = (4 + (int)Math.Round(3 * endTimeVariance)) * 2;
+            
             if (NPC.ai[1] == 0)
             {
                 SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
@@ -2827,18 +2828,27 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Vector2 targetPos = player.Center + NPC.DirectionFrom(player.Center) * 300;
             Movement(NPC, targetPos, 0.3f);
 
-            int attackDelay = WorldSavingSystem.MasochistModeReal ? 50 : 70;
+            int attackDelay = WorldSavingSystem.MasochistModeReal ? Main.getGoodWorld ? 55 : 50 : 70;//减少ftw加速影响
 
             if (NPC.ai[1] > 0 && NPC.ai[1] % attackDelay == 0)
             {
                 EdgyBossText(NPC, GFBQuote(35));
-                float angle = 0;
-                Vector2 unitX = Vector2.UnitX.RotatedBy(angle);
+                float angle = Main.getGoodWorld ? Main.rand.Next(0, 3) * 30 : 0;
+                Vector2 unitX = Vector2.UnitX.RotatedBy(MathHelper.ToRadians(angle));
                 Vector2 unitY = unitX.RotatedBy(MathHelper.PiOver2);
                 Vector2 centerPoint = FargoSoulsUtil.ProjectileExists(ritualProj, ModContent.ProjectileType<PHMutantRitual>()) == null ? player.Center : Main.projectile[ritualProj].Center;
                 Vector2 goalPos = Main.rand.Next(-500, 501) * unitX + Main.rand.Next(-500, 501) * unitY;
                 while ((goalPos - SansOldPos).Length() > 250)
                     goalPos = Main.rand.Next(-500, 501) * unitX + Main.rand.Next(-500, 501) * unitY;
+                if (NPC.localAI[0] == 0)
+                {
+                    NPC.localAI[0] = 1;
+                    goalPos = player.Center - centerPoint;
+                    if (goalPos.Length() > 600)
+                    {
+                        goalPos = 600 * goalPos.SafeNormalize(Vector2.Zero);
+                    }
+                }
                 centerPoint += goalPos;
                 SansOldPos = goalPos;
                 int travelTime = 50;
@@ -2879,6 +2889,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         }
                     }
                 }
+                NPC.netUpdate = true;
             }
 
             //(attacks + 1) - 5 to stop mutant from doing the last one, give a gap to next attack
@@ -3007,6 +3018,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 npc.localAI[0] = Main.rand.Next(500, 701);
                 npc.localAI[1] = player.Center.Y - centerPoint.Y > 0 ? 1 : -1;
+                npc.netUpdate = true;
             }
             Vector2 targetPos = centerPoint - npc.localAI[1] * npc.localAI[0] * Vector2.UnitY;
             int starttime = WorldSavingSystem.MasochistModeReal ? 60 : 90;
@@ -3076,6 +3088,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, distance,
                             ModContent.ProjectileType<IronVirgin>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.75f), 0f, Main.myPlayer, npc.localAI[1], -1, 0);
                     }
+                    npc.netUpdate = true;
                 }
                 if (timer % delay == delay / 2)
                 {
@@ -3087,6 +3100,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, distance,
                             ModContent.ProjectileType<IronVirgin>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.75f), 0f, Main.myPlayer, npc.localAI[1], 1, MathHelper.Pi / 4);
                     }
+                    npc.netUpdate = true;
                 }
                 /*弃用的差分
                 if (timer % (delay / 2) == 0)
@@ -3118,8 +3132,8 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (++npc.ai[1] > starttime + 360 + 120)
             {
-
                 ChooseNextAttack(npc, 11, 13, 16, 21, 24, 26, 29, 31, 33, 35, 39, 41, 44, 45, 47, 49, 50);
+                npc.netUpdate = true;
             }
 
 
@@ -3152,6 +3166,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         Projectile.NewProjectile(npc.GetSource_FromThis(), LieFlightPos, Vector2.Zero, ModContent.ProjectileType<BloomLine>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, 1, angle);
                     }
                 }
+                npc.netUpdate = true;
             }
             if (npc.ai[1] == StartTime)
             {
@@ -3190,6 +3205,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 npc.ai[1] = 0;
                 LieFlightPos = Vector2.Zero;
                 ChooseNextAttack(npc, 13, 19, 21, 24, 28, 31, 39, 41, 42, 49, 50);
+                npc.netUpdate = true;
             }
         }
         /*
@@ -3272,6 +3288,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(npc, GFBQuote(11));
                 if (FargoSoulsUtil.HostCheck)
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, -2);
+                npc.netUpdate = true;
             }
             if (/*npc.ai[1] >= 60 && */npc.ai[1] % 10 == 0 && npc.ai[1] <= 420)
             {   
@@ -3284,6 +3301,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (npc.localAI[0] == 1 && npc.ai[1] > 4 * 60 - 30)
             {
                 npc.localAI[0] = 2;//用于给诅咒棺材弹幕传参决定是否显现
+                npc.netUpdate = true;
             }
 
             // 360帧后结束发射，等待60帧后选择下一招
@@ -3298,11 +3316,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MutantWillBomb>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, 
                         MathHelper.PiOver4, npc.whoAmI, i > 3 ? 1 : -1);
                 }
+                npc.netUpdate = true;
             }
 
             if (++npc.ai[1] > 420 + 120 + 120)
             {
                 ChooseNextAttack(npc, 13, 19, 20, 21, 24, 31, 33, /*35,*/ 41, 44, 50);
+                npc.netUpdate = true;
             }
             
         }

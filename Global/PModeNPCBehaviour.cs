@@ -9,17 +9,23 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core;
+using FargowiltasSouls;
+using System.IO;
+using Terraria.ModLoader.IO;
+using Luminance.Core.Graphics;
 
 namespace FargosPhantasmMode.Global
 {
-    /*
+    /// <summary>
+    /// 作为EModeNPCBehaviour的copy版本(×
+    /// </summary>
     public abstract class PModeNPCBehaviour : GlobalNPC
     {
         public NPCMatcher Matcher;
 
         public override bool InstancePerEntity => true;
-
-        public bool RunEmodeAI = true;
+        //public float AIState = 0;
+        public bool RunPmodeAI = true;
 
         public sealed override bool AppliesToEntity(NPC entity, bool lateInstantiation)
         {
@@ -34,14 +40,10 @@ namespace FargosPhantasmMode.Global
 
         public abstract NPCMatcher CreateMatcher();
 
-        // TODO I hope no behaviours actually needed the old NewInstance method
-        // In all of tML's endless wisdom, the only way to properly instantiate
-        // a global is to return base.NewInstance() and that can't fit into the
-        // old API. In the interest of making literally half the mod work, this
-        // is just a bandaid fix.
         public override GlobalNPC NewInstance(NPC target)
         {
-            TryLoadSprites(target);
+            //材质替换交给原法的globalnpc
+            //TryLoadSprites(target);材质替换交给原法的globalnpc
             if (!WorldSavingSystem.EternityVanillaBehaviour && target.ModNPC == null)
             {
                 return null;
@@ -49,19 +51,19 @@ namespace FargosPhantasmMode.Global
             return WorldSavingSystem.EternityMode && Matcher.Satisfies(target.type) ? base.NewInstance(target) : null;
         }
 
-        public bool FirstTick = true; //trying to set this false on spawn before it triggers results in a null instance error and other issues, assumedly because of the NewInstance method, so don't do that
+        public bool FirstTick = true; 
         public virtual void OnFirstTick(NPC npc) { }
-
+        public abstract void StopEmodeAI(NPC npc);//字面意思
         public virtual bool SafePreAI(NPC npc) => base.PreAI(npc);
         public sealed override bool PreAI(NPC npc)
         {
             if (FirstTick)
             {
                 FirstTick = false;
-
+                StopEmodeAI(npc);
                 OnFirstTick(npc);
             }
-            if (!RunEmodeAI)
+            if (!RunPmodeAI)
             {
                 return false;
             }
@@ -70,12 +72,32 @@ namespace FargosPhantasmMode.Global
         public virtual void SafePostAI(NPC npc) => base.PostAI(npc);
         public sealed override void PostAI(NPC npc)
         {
-            if (!RunEmodeAI)
+            if (!RunPmodeAI)
             {
                 return;
             }
             SafePostAI(npc);
             return;
+        }
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
+        {
+            base.SendExtraAI(npc, bitWriter, binaryWriter);
+
+            binaryWriter.Write(npc.localAI[0]);
+            binaryWriter.Write(npc.localAI[1]);
+            binaryWriter.Write(npc.localAI[2]);
+            binaryWriter.Write(npc.localAI[3]);
+            //binaryWriter.Write(AIState);
+        }
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
+        {
+            base.ReceiveExtraAI(npc, bitReader, binaryReader);
+
+            npc.localAI[0] = binaryReader.ReadSingle();
+            npc.localAI[1] = binaryReader.ReadSingle();
+            npc.localAI[2] = binaryReader.ReadSingle();
+            npc.localAI[3] = binaryReader.ReadSingle();
+            //AIState = binaryReader.ReadSingle();
         }
 
         public virtual void ModifyHitByAnything(NPC npc, Player player, ref NPC.HitModifiers modifiers) { }
@@ -141,7 +163,7 @@ namespace FargosPhantasmMode.Global
             if (Main.netMode != NetmodeID.SinglePlayer)
                 NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
         }
-
+        /*
         /// <summary>
         /// Checks if loading sprites is necessary and does it if so.
         /// </summary>
@@ -150,9 +172,9 @@ namespace FargosPhantasmMode.Global
             if (!Main.dedServ)
             {
                 bool recolor = SoulConfig.Instance.BossRecolors && WorldSavingSystem.EternityMode;
-                if (recolor || FargosPhantasmMode.Instance.LoadedNewSprites)
+                if (recolor || FargowiltasSouls.FargowiltasSouls.Instance.LoadedNewSprites)
                 {
-                    FargosPhantasmMode.Instance.LoadedNewSprites = true;
+                    FargowiltasSouls.FargowiltasSouls.Instance.LoadedNewSprites = true;
                     LoadSprites(npc, recolor);
                 }
             }
@@ -209,20 +231,19 @@ namespace FargosPhantasmMode.Global
                 }
             }
         }
-
         protected static void LoadNPCSprite(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Npc, FargosPhantasmMode.TextureBuffer.NPC, "NPC_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Npc, FargowiltasSouls.FargowiltasSouls.TextureBuffer.NPC, "NPC_");
         }
 
         protected static void LoadBossHeadSprite(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.NpcHeadBoss, FargosPhantasmMode.TextureBuffer.NPCHeadBoss, "NPC_Head_Boss_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.NpcHeadBoss, FargowiltasSouls.FargowiltasSouls.TextureBuffer.NPCHeadBoss, "NPC_Head_Boss_");
         }
 
         protected static void LoadGore(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Gore, FargosPhantasmMode.TextureBuffer.Gore, "Gores/Gore_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Gore, FargowiltasSouls.FargowiltasSouls.TextureBuffer.Gore, "Gores/Gore_");
         }
 
         protected static void LoadGoreRange(bool recolor, int type, int lastType)
@@ -233,27 +254,28 @@ namespace FargosPhantasmMode.Global
 
         protected static void LoadExtra(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Extra, FargosPhantasmMode.TextureBuffer.Extra, "Extra_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Extra, FargowiltasSouls.FargowiltasSouls.TextureBuffer.Extra, "Extra_");
         }
 
         protected static void LoadGolem(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Golem, FargosPhantasmMode.TextureBuffer.Golem, "GolemLights");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Golem, FargowiltasSouls.FargowiltasSouls.TextureBuffer.Golem, "GolemLights");
         }
 
         protected static void LoadDest(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Dest, FargosPhantasmMode.TextureBuffer.Dest, "Dest");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Dest, FargowiltasSouls.FargowiltasSouls.TextureBuffer.Dest, "Dest");
         }
         protected static void LoadGlowMask(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.GlowMask, FargosPhantasmMode.TextureBuffer.GlowMask, "Glow_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.GlowMask, FargowiltasSouls.FargowiltasSouls.TextureBuffer.GlowMask, "Glow_");
         }
         protected static void LoadProjectile(bool recolor, int type)
         {
-            LoadSpriteBuffered(recolor, type, TextureAssets.Projectile, FargosPhantasmMode.TextureBuffer.Projectile, "Projectile_");
+            LoadSpriteBuffered(recolor, type, TextureAssets.Projectile, FargowiltasSouls.FargowiltasSouls.TextureBuffer.Projectile, "Projectile_");
         }
         #endregion
+        */
     }
-    */
+    
 }

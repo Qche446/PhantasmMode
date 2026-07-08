@@ -1,5 +1,5 @@
-displayName = Fargo's Phantasm Mode（境妄模式）
+displayName = Fargo's Phantasm Mode
 author = Qche
-version = 0.2
-modReferences = FargowiltasSouls@1.7.3.7
+version = 0.22
+modReferences = FargowiltasSouls@1.7.3.9
 sortAfter = FargowiltasSouls

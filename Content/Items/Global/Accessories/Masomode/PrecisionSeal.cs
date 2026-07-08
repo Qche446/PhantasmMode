@@ -41,7 +41,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
             MethodInfo method2 = typeof(PrecisionHurtboxDrawLayer).GetMethod("Draw", BindingFlags.Instance | BindingFlags.NonPublic);
             MonoModHooks.Modify(method2, ILHurtboxDraw);
         }
-        public void ILHurtbox(ILContext il)
+        public static void ILHurtbox(ILContext il)
         {
             ILCursor c = new(il);
             c.Goto(0);
@@ -61,7 +61,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
             });
             c.Emit(OpCodes.Ret);
         }
-        public void ILHurtboxDraw(ILContext il)
+        public static void ILHurtboxDraw(ILContext il)
         {
             ILCursor c = new(il);
             if (!c.TryGotoNext(MoveType.After, i => i.MatchLdcR4(1)))

@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls;
-using FargosPhantasmMode.Utilities;
+using Luminance.Common.Utilities;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

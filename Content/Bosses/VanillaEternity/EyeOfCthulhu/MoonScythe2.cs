@@ -14,7 +14,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using FargowiltasSouls;
 
-namespace FargosPhantasmMode.Content.Bosses.VanillaBoss
+namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     public class MoonScythe2 : ModProjectile, IPixelatedPrimitiveRenderer
     {
@@ -127,7 +127,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaBoss
                 if (eoc.active)
                 {
                     // 根据克眼localAI[3]的值设置无害模式
-                    _harmlessMode = eoc.localAI[3] == 0f;
+                    _harmlessMode = eoc.localAI[3] != 0f;
 
                     // 在无害模式下降低弹幕透明度
                     if (_harmlessMode && Projectile.alpha < 200)

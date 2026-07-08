@@ -17,13 +17,15 @@ using FargowiltasSouls.Assets.ExtraTextures;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
+    /// <summary>
+    /// ai[0] = whoami,ai[1] = npc.type
+    /// </summary>
     public class TwinsFireBackground : ModProjectile
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
-
         public override Color? GetAlpha(Color lightColor) => lightColor * Projectile.Opacity;
 
-        ref float NPCID => ref Projectile.ai[0];
+        //ref float NPCID => ref Projectile.ai[0];
 
 
         public override void SetStaticDefaults()
@@ -47,8 +49,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override void AI()
         {
-            int npcID = (int)NPCID;
-            if (!npcID.IsWithinBounds(Main.maxNPCs))
+            int npcID = (int)Projectile.ai[0];
+            if (FargoSoulsUtil.NPCExists(npcID, NPCID.Retinazer, NPCID.Spazmatism) == null)
             {
                 Deplete();
                 return;
@@ -88,7 +90,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (!blackTile.IsLoaded || !diagonalNoise.IsLoaded)
                 return false;
 
-            ManagedShader shader = Projectile.ai[1] == 0 ? ShaderManager.GetShader("FargosPhantasmMode.RetinazerBackgroundShader") : ShaderManager.GetShader("FargosPhantasmMode.SpazmationBackgroundShader");
+            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
+            shader.TrySetParameter("isRetinazer", (int)Projectile.ai[1] == NPCID.Retinazer);
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", radius);

@@ -19,7 +19,6 @@ using FargowiltasSouls.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Terraria.GameContent;
 using FargosPhantasmMode.Content.Bosses.EyeOfCthulhu;
-using FargosPhantasmMode.Content.Bosses.VanillaBoss;
 using FargowiltasSouls.Content.Projectiles.BossWeapons;
 using FargosPhantasmMode.Content.NPCs;
 using System.IO;
@@ -32,7 +31,7 @@ using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
-
+    /*
     internal class PHEyeOfCthulhu : EyeofCthulhu
     {
         
@@ -44,7 +43,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         Vector2 targetCenter = Vector2.Zero;
         Vector2 Direct = Vector2.Zero;
         public int DeathTimer = -1;
-
+        public int ScytheSpawnTimer;
 
         public override bool SafePreAI(NPC npc)
         {
@@ -53,7 +52,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 DeathAnimation(npc);
                 if (++DeathTimer >= 180) // 300帧后真正死亡
                 {
-
                     npc.life = 0;
                     npc.dontTakeDamage = false;
                     npc.checkDead();
@@ -61,7 +59,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             npc.aiStyle = -1;
             PHEyeofCthulhuAI(npc);
-            return false;//是的是的，我选择重写
+            return false;
         }
         public bool PHEyeofCthulhuAI(NPC npc)
         {
@@ -83,7 +81,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 {
                     player.velocity += (1 + (player.Center - npc.Center).Length() - auraDistance) * Vector2.Normalize(npc.Center - player.Center);
                 }
-            }//自然仪式圈对玩家的限制
+            }//仪式圈限制
             if (ScytheSpawnTimer > 0)
             {
                 if (ScytheSpawnTimer % (IsInFinalPhase ? 2 : 6) == 0 && FargoSoulsUtil.HostCheck)
@@ -631,7 +629,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                         {
                             AITimer = 70;
                         }
-                        */
+                        *//*
                     }
                     break;
             }
@@ -742,7 +740,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             /*
             if (npc.localAI[2] >= 1)
                 return false;
-            */
+            *//*
             if (npc.life < npc.lifeMax * 0.8f && Main.expertMode)
             {
                 if (FargoSoulsUtil.HostCheck)
@@ -877,7 +875,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 spriteBatch.End();
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
             }
-            */
+            *//*
             return base.PreDraw(npc, spriteBatch, screenPos, drawColor);
 
         }
@@ -1025,6 +1023,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
         }
     }
+    /*
     public class PHEyeOfCthulhuModSystem : ModSystem
     {
         private delegate bool orig_SafePreAI(NPC npc);
@@ -1045,7 +1044,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             
             return orig(npc);//调用基方法
         }
-        */
+     */
+    /*
         private void ApplyILEdits()
         {
             // First, get the MethodInfo of the method you want to apply the IL patch to.
@@ -1078,4 +1078,5 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             f.Emit(OpCodes.Ldc_I4, 1);
         }
     }
+    */
 }
