@@ -1,4 +1,5 @@
-﻿using FargowiltasSouls;
+﻿using FargosPhantasmMode.Content.Bossbar;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
@@ -29,7 +30,6 @@ using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargosPhantasmMode.Content.Bossbar;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
@@ -986,7 +986,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             else if (npc.ai[1] == 150)
             {
                 SoundEngine.PlaySound(SoundID.Roar, npc.Center);
-
+                npc.netUpdate = true; 
                 if (FargoSoulsUtil.HostCheck)
                 {
                     //Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<Projectiles.GlowRingHollow>(), 0, 0f, Main.myPlayer, 5);

@@ -1,5 +1,4 @@
-﻿using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Terraria;
 
 namespace FargosPhantasmMode.Common

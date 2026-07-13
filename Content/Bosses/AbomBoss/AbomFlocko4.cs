@@ -1,6 +1,4 @@
 ﻿using FargowiltasSouls;
-using FargowiltasSouls.Content.Bosses.AbomBoss;
-using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;

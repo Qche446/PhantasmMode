@@ -1,15 +1,14 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Common.Graphics.Particles;
+using FargowiltasSouls.Content.Projectiles.Masomode;
+using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls;
-using FargowiltasSouls.Common.Graphics.Particles;
-using Luminance.Core.Graphics;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using System.Collections.Generic;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {
     public class Lightning : ModProjectile

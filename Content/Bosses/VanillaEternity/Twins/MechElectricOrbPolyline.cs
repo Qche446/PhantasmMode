@@ -1,15 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Projectiles.Masomode;
+using FargowiltasSouls.Core.Globals;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
+using ReLogic.Content;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
-using Terraria.ModLoader;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using System.Threading;
-using ReLogic.Content;
-using System.IO;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -41,6 +38,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 Projectile.velocity = 2.5f * oldvel.Length() * Vector2.Normalize(Projectile.velocity).RotatedBy(detalangle);
                 turntimer++;
             }
+            NPC npc = FargoSoulsUtil.NPCExists(EModeGlobalNPC.retiBoss, NPCID.Retinazer);
+            if (npc != null)
+            {
+                npc.TryGetGlobalNPC<P_Retinazer>(out P_Retinazer re);
+                if (Projectile.Distance(npc.Center) > re.AuraRadius && Projectile.timeLeft > 30)
+                    Projectile.timeLeft = 30;
+            }
+             
+            
             base.AI();
         }
         public override bool PreDraw(ref Color lightColor)
@@ -133,6 +139,38 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 rectangle, Color.White, // 使用纯白色（无着色）
                 Projectile.rotation, origin, Projectile.scale, spriteEffects, 0);
             return false;
+        }
+    }
+    public class DarkStarPolyline : DarkStar
+    {
+        float timer = 0;
+        int turntimer = 0;
+        Vector2 oldvel = Vector2.Zero;
+        public override void AI()
+        {
+            if (timer == 0)
+            {
+                oldvel = Projectile.velocity;
+            }
+            if (++timer >= 40 && turntimer < 6)
+            {
+                Projectile.velocity *= 0.96f;
+            }
+            if (timer % 40 == 0 && timer >= 40)
+            {
+                float detalangle = Projectile.ai[1] * (turntimer == 0 ? MathHelper.PiOver4 : MathHelper.PiOver2);
+                Projectile.ai[1] = Projectile.ai[1] == -1 ? 1 : -1;
+                Projectile.velocity = 2.5f * oldvel.Length() * Vector2.Normalize(Projectile.velocity).RotatedBy(detalangle);
+                turntimer++;
+            }
+            NPC npc = FargoSoulsUtil.NPCExists(EModeGlobalNPC.retiBoss, NPCID.Retinazer);
+            if (npc != null)
+            {
+                npc.TryGetGlobalNPC<P_Retinazer>(out P_Retinazer re);
+                if (Projectile.Distance(npc.Center) > re.AuraRadius && Projectile.timeLeft > 30)
+                    Projectile.timeLeft = 30;
+            }
+            base.AI();
         }
     }
 }

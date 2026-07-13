@@ -1,13 +1,10 @@
-﻿using FargowiltasSouls.Core.Systems;
-using FargowiltasSouls.Core;
+﻿using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Content.Projectiles.Masomode;
+using FargowiltasSouls.Core.Systems;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using System.Drawing;
-using FargowiltasSouls.Content.Buffs.Masomode;
 
 namespace FargosPhantasmMode.Content.Projectiles.Masomode
 {

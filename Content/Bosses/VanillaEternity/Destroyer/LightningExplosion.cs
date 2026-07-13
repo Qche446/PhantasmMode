@@ -1,10 +1,8 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Projectiles.Souls;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using FargowiltasSouls.Content.Projectiles.Souls;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer;
 

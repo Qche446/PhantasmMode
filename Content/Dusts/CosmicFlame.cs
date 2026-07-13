@@ -1,8 +1,7 @@
-﻿using Luminance.Core.Graphics;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Dusts
 {

@@ -1,9 +1,9 @@
-﻿using Terraria;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.AbomBoss;
+using FargowiltasSouls.Content.Buffs.Masomode;
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Projectiles
 {

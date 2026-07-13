@@ -1,30 +1,26 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.ID;
-using Terraria.ModLoader;
-using FargosPhantasmMode.Content.Bosses.AbomBoss;
+﻿using FargosPhantasmMode.Content.Bosses.AbomBoss;
 using FargowiltasSouls;
-using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.Systems;
-using FargosPhantasmMode.Content.Sky;
-using System.IO;
-using Terraria.DataStructures;
-using System.Linq;
-using Luminance.Common.Utilities;
-using Terraria.ModLoader.IO;
+using FargowiltasSouls.Assets.Sounds;
+using FargowiltasSouls.Content.BossBars;
+using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Buffs.Souls;
-using Terraria.GameContent.Creative;
-using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls.Content.Bosses.AbomBoss;
-using FargowiltasSouls.Content.Bosses.Champions.Shadow;
 using FargowiltasSouls.Content.Items.Summons;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using FargowiltasSouls.Content.BossBars;
+using FargowiltasSouls.Core.Globals;
+using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
+using Microsoft.Xna.Framework;
+using System;
+using System.IO;
+using System.Linq;
+using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent.Creative;
 using Terraria.Graphics.Effects;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Globals
 {
@@ -672,9 +668,6 @@ namespace FargosPhantasmMode.Globals
                                 Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Main.rand.NextFloat(10f, 30f) * Vector2.Normalize(NPC.velocity).RotatedByRandom(MathHelper.ToRadians(40)),
                                     ModContent.ProjectileType<Content.Bosses.AbomBoss.AbomPhoenix>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, ai2: 1);
                             }
-
-                            float rotation = -MathHelper.Pi * 1.5f;
-                            const int timeleft = 30;
                             //Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Normalize(NPC.velocity).RotatedBy(-rotation / 2),
                             //ModContent.ProjectileType<AbomStyxGazerDash>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, rotation / timeleft * 2, timeleft);
                         }

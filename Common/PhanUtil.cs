@@ -3,8 +3,6 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.GameContent.Animations;
-using Terraria.Utilities;
 
 namespace FargosPhantasmMode.Common
 {
@@ -126,6 +124,25 @@ namespace FargosPhantasmMode.Common
                 points.Add(basePos + nt * offset);
             }
             return points;
+        }
+        static float ColorTimer;
+        public static Color MechColor()
+        {
+            Color destColor = new(80, 174, 255);
+            Color retiColor = new(255, 241, 38);
+            Color spazColor = new(0, 255, 17);
+            Color primColor = new(255, 0, 0);
+            ColorTimer += 0.5f;
+            if (ColorTimer > 320)
+                ColorTimer = 0;
+            if (ColorTimer < 80)
+                return Color.Lerp(destColor, retiColor, ColorTimer / 80);
+            else if (ColorTimer < 160)
+                return Color.Lerp(retiColor, spazColor, (ColorTimer - 80) / 80);
+            else if (ColorTimer < 240)
+                return Color.Lerp(spazColor, primColor, (ColorTimer - 160) / 80);
+            else
+                return Color.Lerp(primColor, destColor, (ColorTimer - 240) / 80);
         }
     }
 }

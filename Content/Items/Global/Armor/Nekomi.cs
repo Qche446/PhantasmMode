@@ -1,22 +1,20 @@
-﻿using Terraria;
-using Terraria.ModLoader;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Armor;
-using FargowiltasSouls.Core.ModPlayers;
-using Microsoft.Xna.Framework;
-using System.Reflection;
-using MonoMod.Cil;
-using System;
-using Mono.Cecil.Cil;
-using static Terraria.Player;
-using FargosPhantasmMode.Content.Projectiles;
-using FargowiltasSouls.Core.Systems;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Content.Projectiles.Minions;
+using FargowiltasSouls.Core.ModPlayers;
+using FargowiltasSouls.Core.Systems;
+using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using System.Collections.Generic;
 using Terraria.Localization;
+using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Global.Armor
 {
     public class NekomiOverride : GlobalItem

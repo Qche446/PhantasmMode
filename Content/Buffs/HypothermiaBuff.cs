@@ -1,7 +1,6 @@
-﻿using Terraria.ID;
+﻿using FargosPhantasmMode.Content.Buffs.Global;
 using Terraria;
 using Terraria.ModLoader;
-using FargosPhantasmMode.Content.Buffs.Global;
 
 namespace FargosPhantasmMode.Content.Buffs
 {

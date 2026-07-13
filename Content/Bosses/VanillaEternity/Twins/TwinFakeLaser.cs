@@ -1,16 +1,12 @@
-﻿using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Projectiles.Masomode;
-using Terraria.ID;
-using Terraria;
-using FargowiltasSouls.Common.Graphics.Particles;
-using Microsoft.Xna.Framework;
-using Luminance.Core.Graphics;
-using FargosPhantasmMode.Content.Render;
-using Microsoft.Xna.Framework.Graphics;
-using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
+using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ID;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -78,6 +74,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             */
             if (Projectile.IsFinalExtraUpdate())
                 base.AI();
+        }
+        public override void OnHitPlayer(Player target, Player.HurtInfo info)
+        {
+            target.AddBuff(BuffID.Ichor, 300);
+            target.AddBuff(BuffID.Burning, 120);
+            target.AddBuff(BuffID.OnFire, 120);
         }
         public override bool PreDraw(ref Color lightColor) => false;
         public float WidthFunction(float ratio) => Projectile.width * Projectile.scale;

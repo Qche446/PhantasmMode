@@ -1,7 +1,4 @@
 ﻿using Terraria.ModLoader;
-using Terraria;
-using FargowiltasSouls.Content.Bosses.MutantBoss;
-using FargowiltasSouls.Content.Bosses.AbomBoss;
 
 namespace FargosPhantasmMode.Content.SceneEffect
 {

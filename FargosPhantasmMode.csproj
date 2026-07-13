@@ -35,6 +35,7 @@
 	  <None Remove="Assets\ExtraTextures\Noise\Neurons2.png" />
 	  <None Remove="Assets\ExtraTextures\Noise\UniverseNoise.png" />
 	  <None Remove="Content\Bossbar\PhantasmBossBar.png" />
+	  <None Remove="Content\Bosses\VanillaEternity\Twins\DarkStar_Glow.png" />
 	  <None Remove="Content\Bosses\VanillaEternity\Twins\SpazmatismGlowLine.png" />
 	  <None Remove="Content\Buffs\NanoErosionBuff.png" />
 	  <None Remove="Content\Buffs\PlaceholderBuff.png" />

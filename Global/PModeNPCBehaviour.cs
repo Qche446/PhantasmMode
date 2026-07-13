@@ -1,18 +1,10 @@
 ﻿using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
-using System.Collections.Generic;
+using System.IO;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core;
-using FargowiltasSouls;
-using System.IO;
 using Terraria.ModLoader.IO;
-using Luminance.Core.Graphics;
 
 namespace FargosPhantasmMode.Global
 {

@@ -1,19 +1,11 @@
-using System.Collections.Generic;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
-using FargowiltasSouls.Core.Toggler;
-using Terraria.GameContent;
-using Terraria.Graphics.Effects;
-using Microsoft.Xna.Framework;
-using Humanizer;
-using Terraria;
 using FargosPhantasmMode.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
-using System;
 using FargosPhantasmMode.Content.Render;
-using Steamworks;
-using FargosPhantasmMode.Common.Particles;
+using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.Graphics.Effects;
+using Terraria.ModLoader;
 
 
 namespace FargosPhantasmMode

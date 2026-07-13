@@ -1,19 +1,17 @@
 ﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Bosses.Champions.Cosmos;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
 using System;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria;
-using Microsoft.Xna.Framework;
-using Luminance.Common.Utilities;
-using Fargowiltas.NPCs;
-using FargowiltasSouls.Content.Projectiles;
-using static Terraria.ModLoader.BackupIO;
-using FargowiltasSouls.Content.Bosses.Champions.Cosmos;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

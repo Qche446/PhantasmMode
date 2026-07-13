@@ -1,23 +1,13 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Content.Buffs.Minions;
 using FargowiltasSouls.Content.Items;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Content.Items.Accessories.Masomode;
-using FargowiltasSouls.Content.Items.Consumables;
-using FargowiltasSouls.Content.Items.Materials;
-using FargowiltasSouls.Content.Items.Placables;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Toggler;
-using FargowiltasSouls.Core.Toggler.Content;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static FargowiltasSouls.FargoSoulsSets;
 
 namespace FargosPhantasmMode.Content.Items
 {

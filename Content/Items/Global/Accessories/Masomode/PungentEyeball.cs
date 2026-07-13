@@ -1,24 +1,19 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Content.Projectiles;
+using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ID;
-using System.Reflection;
-using MonoMod.Cil;
-using System;
-using System.Text.RegularExpressions;
-using Mono.Cecil.Cil;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.ModPlayers;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Content.Projectiles;
-using System.Linq;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Globals;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {
     public class PungentEyeballOverride : GlobalItem

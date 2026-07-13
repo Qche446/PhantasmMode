@@ -1,19 +1,16 @@
-﻿using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.IO;
 using Terraria;
-using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using System.Collections.Generic;
-using Terraria.GameContent;
-using System.IO;
-using Terraria.ModLoader.IO;
-using System;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {

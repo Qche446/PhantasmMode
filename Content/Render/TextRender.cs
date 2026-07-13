@@ -1,11 +1,9 @@
-﻿using Terraria.ModLoader;
-using Terraria;
-using Microsoft.Xna.Framework.Graphics;
-using FargosPhantasmMode.Assets.ExtraTextures;
+﻿using FargosPhantasmMode.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
-using System;
-using Terraria.GameContent;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Render
 {

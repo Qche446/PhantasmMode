@@ -1,21 +1,17 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Projectiles.Masomode;
+using FargowiltasSouls;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
+using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
+using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Toggler.Content;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ID;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
-using FargowiltasSouls.Core.Toggler;
-using FargosPhantasmMode.Content.Buffs;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Content.Projectiles.Souls;
-using FargowiltasSouls.Core.ModPlayers;
-using System;
-using FargosPhantasmMode.Content.Projectiles.Masomode;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {
@@ -56,8 +52,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
             if (player.whoAmI == Main.myPlayer)
             {
                 FargoSoulsPlayer modPlayer = player.FargoSouls();
-                int currentOrbs = player.ownedProjectileCounts[ModContent.ProjectileType<FusedLensMechElectricOrb>()];
-                int damage = FargoSoulsUtil.HighestDamageTypeScaling(player, 30);
+                int currentOrbs = player.ownedProjectileCounts[ModContent.ProjectileType<FusedLensMechElectricOrb>()] + player.ownedProjectileCounts[ModContent.ProjectileType<FusedLensDarkStar>()];
+                int damage = 40;
                 int max = 2;
                 bool dubiouscircuitry = modPlayer.DubiousCircuitry;
                 bool masosoul = modPlayer.MasochistSoul;
@@ -65,12 +61,12 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
                 if (masosoul)
                 {
                     max = 8;
-                    damage *= 6;
+                    damage *= 15;
                 }
                 else if (dubiouscircuitry) //可疑电路
                 {
                     max = 4;
-                    damage = FargoSoulsUtil.HighestDamageTypeScaling(player, 40);
+                    damage = 60;
                 }
 
                 //spawn for first time
@@ -82,7 +78,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
                     {
                         Vector2 spawnPos = player.Center + new Vector2(60, 0f).RotatedBy(rotation * i);
                         Vector2 vel = (spawnPos - player.Center).RotatedBy(MathHelper.PiOver2);
-                        int p = Projectile.NewProjectile(player.GetSource_Misc(""), spawnPos, vel / 4, ModContent.ProjectileType<FusedLensMechElectricOrb>(), damage, 10f, player.whoAmI, 0, ai2 : (i + 2) % 4);
+                        int projType = player.ichor || player.onFire2 ? ModContent.ProjectileType<FusedLensDarkStar>() : ModContent.ProjectileType<FusedLensMechElectricOrb>();
+                        int p = Projectile.NewProjectile(player.GetSource_FromThis(), spawnPos, vel / 4, projType, damage, 10f, player.whoAmI, 0, ai2 : (i + 2) % 4);
                         Main.projectile[p].FargoSouls().CanSplit = false;
                     }
                     Timer = 0;

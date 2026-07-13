@@ -1,18 +1,13 @@
-﻿using FargosPhantasmMode.Common;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
-using FargowiltasSouls.Content.Projectiles.Deathrays;
-using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
-using Terraria.Map;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
@@ -20,26 +15,49 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
     /// <summary>
     /// 双子眼弯曲假激光（弹幕静止，曲线由虚拟尖端的历史位置构成）
     /// ai0 : 所属 NPC 的 whoAmI
-    /// ai1 : maxTime
-    /// ai2 : 颜色索引（保留）
+    /// ai1 : 角度（角度制）
+    /// ai2 : 方向
     /// </summary>
-    public class TwinCurvedLaser : BaseDeathray, IPixelatedPrimitiveRenderer
+    public class TwinCurvedLaser : ModProjectile, IPixelatedPrimitiveRenderer
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
-        public TwinCurvedLaser() : base(120) { }
-        public Vector2[] CollisionPoint = new Vector2[40];
+        public List<Vector2> trailPos = [];
+        public bool active = false;
+        protected readonly int grazeCD = 5;
         public override void SetStaticDefaults()
         {
-            base.SetStaticDefaults();
+            ProjectileID.Sets.DrawScreenCheckFluff[Type] = 2000;
         }
         public override void SetDefaults()
         {
-            Projectile.hide = true;
+            Projectile.width = 16;
+            Projectile.height = 16;
+            Projectile.timeLeft = 360;
+            Projectile.penetrate = -1;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
             Projectile.tileCollide = false;
-            Projectile.width = 8;
-            Projectile.height = 8;
-            base.SetDefaults();
+            Projectile.ignoreWater = true;
+            Projectile.alpha = 100;
+            Projectile.FargoSouls().GrazeCheck =
+                Projectile =>
+                {
+                    if (active)
+                    {
+                        for (int i = 0; i < trailPos.Count; i++)
+                        {
+                            float pr = 0.8f * (Projectile.width * Projectile.scale);
+                            float gr = Main.LocalPlayer.FargoSouls().GrazeRadius;
+                            if (Main.LocalPlayer.Center.Distance(trailPos[i]) <= pr + gr)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                };
         }
+        public override bool ShouldUpdatePosition() => false;
         public override void AI()
         {
             if (Projectile.velocity.HasNaNs() || Projectile.velocity == Vector2.Zero)
@@ -48,7 +66,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             NPC retinazer = FargoSoulsUtil.NPCExists(Projectile.ai[0], NPCID.Retinazer);
             if (retinazer != null)
             {
-                // 从 npc 的中心加上基于其旋转的偏移量，得到射线的起始点
                 Projectile.Center = P_Retinazer.ShootPos(retinazer);
             }
             else
@@ -60,34 +77,97 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 Projectile.velocity = -Vector2.UnitY;
 
             FargoSoulsUtil.ScreenshakeRumble(2);
-            Projectile.scale *= 0.9f;
-            if (Projectile.localAI[0] == 0)
-                Projectile.localAI[1] = Projectile.velocity.ToRotation();
-            CollisionPoint = PhanUtil.GetArcPoints(Projectile.Center, 40 * (Projectile.localAI[1].ToRotationVector2()), Main.player[retinazer.target].Center, 2f, 40);
+
+            if (Projectile.localAI[0] < 120)
+            {
+                //Projectile.scale = 2;
+                float omiga = Projectile.ai[2] * MathHelper.Lerp(MathF.PI / 240f, 0, Math.Clamp((Projectile.localAI[0]) / 60f, 0, 1));
+                Projectile.velocity = Projectile.velocity.RotatedBy(omiga);
+                Projectile.scale = MathHelper.Lerp(0, 2, Projectile.localAI[0] / 120f);
+                active = false;
+                trailPos = [];
+                Laser(Projectile.ai[1], false, false);
+            }
+            else if(Projectile.localAI[0] < 300)
+            {
+                active = true;
+                float omiga = Projectile.ai[2] * MathHelper.Lerp(0, MathF.PI / 240f, Math.Clamp((Projectile.localAI[0] - 120f) / 60f, 0, 1));
+                trailPos = [];
+                Laser(Projectile.ai[1], false, true);
+                Projectile.velocity = Projectile.velocity.RotatedBy(omiga);
+            }
+            else
+            {
+                float omiga = Projectile.ai[2] * MathHelper.Lerp(0, MathF.PI / 240f, (-Projectile.localAI[0] + 360f) / 60f);
+                Projectile.scale = MathHelper.Lerp(0, 2, (-Projectile.localAI[0] + 360f) / 60f);
+                trailPos = [];
+                Laser(Projectile.ai[1], false, true);
+                Projectile.velocity = Projectile.velocity.RotatedBy(omiga);
+            }
+            if (Projectile.FargoSouls().GrazeCD > grazeCD)
+                Projectile.FargoSouls().GrazeCD = grazeCD;
+            //Laser(MathHelper.Pi / 3f, true, true);
             // 更新存在时间，到达限制则消散
             Projectile.localAI[0] += 1f;
-            if (Projectile.localAI[0] >= Projectile.ai[1] || Projectile.scale < 0.1f)
+
+        }
+        public void Laser(float targetRotation, bool dust = false, bool someWhatDust = false)
+        {
+            for (int i = 0; i <= 100; i++)
             {
-                Projectile.Kill();
-                return;
+                //float mult = 0f;
+                float lerpMult = (float)i / 100f;
+                //float sin = (float)Math.Sin(MathHelper.ToRadians(Projectile.ai[0] * 10f + (float)(i * 3)));
+                Vector2 unitTrue = new Vector2(32f, 0f).RotatedBy(Projectile.velocity.ToRotation() + MathHelper.ToRadians(targetRotation * lerpMult));
+                if (i <= 0)
+                {
+                    Vector2 position = Projectile.Center + unitTrue * i;
+                    trailPos.Add(position);
+                    if ((dust && i % 3 == 0) || (someWhatDust && Main.rand.NextBool(360)))
+                    {
+                        Dust dust2 = Dust.NewDustPerfect(position, DustID.GemRuby);
+                        dust2.noGravity = true;
+                        dust2.velocity *= 0.3f;
+                        dust2.scale *= 2.4f;
+                        dust2.fadeIn = 0.1f;
+                        dust2.alpha = 100;
+                        dust2.color = ((!Main.rand.NextBool(4)) ? new Color(255, 233, 2, 50) : new Color(220, 95, 210, 50));
+                        dust2.velocity += Main.rand.NextVector2Circular(3f, 3f);
+                    }
+                }
+                else
+                {
+                    Vector2 position = trailPos[i - 1] + unitTrue;
+                    trailPos.Add(position);
+                    if ((dust && i % 3 == 0) || (someWhatDust && Main.rand.NextBool(360)))
+                    {
+                        Dust dust2 = Dust.NewDustPerfect(position, DustID.GemRuby);
+                        dust2.noGravity = true;
+                        dust2.velocity *= 0.3f;
+                        dust2.scale *= 2.4f;
+                        dust2.fadeIn = 0.1f;
+                        dust2.alpha = 100;
+                        dust2.color = ((!Main.rand.NextBool(4)) ? new Color(255, 233, 2, 50) : new Color(220, 95, 210, 50));
+                        dust2.velocity += Main.rand.NextVector2Circular(3f, 3f);
+                    }
+                }
             }
-            // 让射线方向垂直于激光眼的正面（rotation）
-            // 射线旋转 = 激光眼的旋转角度（即与面垂直的方向）
-            float parentRotation = retinazer.rotation;
-            //Projectile.rotation = parentRotation;
-            parentRotation += MathHelper.PiOver2; // velocity 为垂直于正面的方向（射线发射方向）
-            //Projectile.velocity = parentRotation.ToRotationVector2();
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            for (int i = 0; i < CollisionPoint.Length - 1; i++) 
+            if (!active)
+                return false;
+            //int width = (int)(Projectile.width * Projectile.scale);
+            //Rectangle rect;
+            for (int i = 0; i < trailPos.Count; i++)
             {
-                int width = (int)(Projectile.width * Projectile.scale);
-                Vector2 length = CollisionPoint[i + 1] - CollisionPoint[i];
-                float rotation = length.ToRotation();
-                Rectangle rect = new Rectangle((int)CollisionPoint[i].X, (int)CollisionPoint[i].Y, width, (int)length.Length());
-                if (CollisionDetector.Intersects(new RotatedRectangle(rect, rotation), targetHitbox))
+                float width = 0.8f * (Projectile.width * Projectile.scale);
+                //int length = 14;
+                //rect = new Rectangle((int)trailPos[i].X, (int)trailPos[i].Y, (int)trailPos[i + 1].X - (int)trailPos[i].X, (int)trailPos[i + 1].Y - (int)trailPos[i].Y);
+                if (Utilities.CircularHitboxCollision(trailPos[i], width, targetHitbox))
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -105,14 +185,23 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 behindNPCs.Add(index);
         }
 
-        public override bool PreDraw(ref Color lightColor) => false;
-
-        public float WidthFunction(float ratio) => Projectile.width * Projectile.scale;
-        public static Color ColorFunction(float ratio)
+        public override bool PreDraw(ref Color lightColor)
+        {
+            /*
+            SpriteBatch spriteBatch = Main.spriteBatch;
+            for (int i = 0; i < trailPos.Count - 1; i++)
+            {
+                spriteBatch.DrawBloomLine(trailPos[i], trailPos[i + 1], Color.Green, 32);
+            }
+            */
+            return false;
+        }
+        public float WidthFunction(float ratio) => Projectile.width * Projectile.scale * (!active ? 0.1f : 1);
+        public Color ColorFunction(float ratio)
         {
             Color color = Color.Red;
             color.A = 0;
-            return color * (1f );
+            return color * (!active ? 0.5f : 1) * Projectile.scale;
         }
         public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
         {
@@ -130,7 +219,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             shader.TrySetParameter("useFadeIn", true);
 
             // 以像素化方式渲染轨迹
-            PrimitiveRenderer.RenderTrail(CollisionPoint, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader));
+            PrimitiveRenderer.RenderTrail(trailPos, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader));
         }
     }
 }

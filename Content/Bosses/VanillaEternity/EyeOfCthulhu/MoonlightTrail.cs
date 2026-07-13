@@ -1,14 +1,10 @@
-﻿using FargosPhantasmMode.Assets.ExtraTextures;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Content.Bosses.Champions.Will;
-using FargowiltasSouls;
-using Luminance.Assets;
-using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

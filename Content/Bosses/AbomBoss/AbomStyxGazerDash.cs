@@ -1,13 +1,10 @@
-﻿using FargowiltasSouls.Core.Systems;
+﻿using FargowiltasSouls;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Terraria.Map;
 using Terraria.ModLoader;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

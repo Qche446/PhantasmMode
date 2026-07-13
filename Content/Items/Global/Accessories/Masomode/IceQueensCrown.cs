@@ -1,16 +1,14 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Buffs;
+using FargowiltasSouls;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargowiltasSouls.Content.Projectiles;
-using FargowiltasSouls.Content.Buffs.Souls;
-using System.Linq;
-using FargowiltasSouls;
-using FargosPhantasmMode.Content.Buffs;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {

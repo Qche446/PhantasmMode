@@ -1,19 +1,19 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
+using FargowiltasSouls.Content.Bosses.MutantBoss;
+using FargowiltasSouls.Content.Buffs.Boss;
+using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria;
-using FargowiltasSouls.Content.Projectiles.Deathrays;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using Microsoft.Xna.Framework.Graphics;
-using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.Utilities;
-using FargowiltasSouls.Content.Buffs.Boss;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

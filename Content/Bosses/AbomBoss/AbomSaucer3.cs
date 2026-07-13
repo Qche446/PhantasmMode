@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargowiltasSouls;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -6,8 +7,6 @@ using Terraria.Audio;
 using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls;
-using FargosPhantasmMode.Content.Bosses.AbomBoss;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {
@@ -242,9 +241,6 @@ namespace FargosPhantasmMode.Content.Bosses.AbomBoss
                     }
                 }
             }
-            // 计算发射角度
-            // 基础角度：正下方 (MathHelper.Pi / 2 = 90°)
-            float baseAngle = MathHelper.PiOver2;
             Vector2 baseangle2 = Vector2.Normalize(targetPlayer.Center - NPC.Center);
             // 正弦波动：sin(π * 经过的帧数 / 30) * 90°
             float timeSinceAttackStart = NPC.ai[1] - AttackStartTime;

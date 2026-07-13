@@ -1,19 +1,12 @@
 ﻿using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Souls;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using Luminance.Assets;
+using FargowiltasSouls.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.IO;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls.Assets.ExtraTextures;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -82,7 +75,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             var diagonalNoise = FargosTextureRegistry.WavyNoise;
             var maxOpacity = Projectile.Opacity * 0.2f;
 
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.RetinazerBackgroundShader");
+            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
             shader.TrySetParameter("isRetinazer", NPCType == NPCID.Retinazer);
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);

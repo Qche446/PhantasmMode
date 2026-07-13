@@ -1,11 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
-using Terraria.ModLoader;
 using Terraria.ID;
-using FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Sky
 {

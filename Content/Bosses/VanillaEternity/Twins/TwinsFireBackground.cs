@@ -1,19 +1,12 @@
-﻿using System;
-using System.IO;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Souls;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using Luminance.Assets;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls.Assets.ExtraTextures;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -65,13 +58,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 Projectile.timeLeft = 60 * 9999;
                 Projectile.Center = Main.LocalPlayer.Center;
-                float opacity = 10 * (1f - 0.3f * npc.GetLifePercent());
+                float opacity = (1f - 0.3f * npc.GetLifePercent());
                 Projectile.Opacity = MathHelper.Lerp(Projectile.Opacity, opacity, 0.001f);
             }
         }
         public void Deplete()
         {
-            Projectile.Opacity -= 0.05f;
+            Projectile.Opacity -= 0.01f;
             if (Projectile.Opacity <= 0f)
             {
                 Projectile.Kill();

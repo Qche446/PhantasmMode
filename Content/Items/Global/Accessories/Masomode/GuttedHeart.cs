@@ -1,15 +1,15 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Projectiles;
+using FargowiltasSouls;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
+using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Toggler.Content;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
-using FargowiltasSouls.Core.Toggler;
-using FargowiltasSouls;
-using FargosPhantasmMode.Content.Projectiles;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {
     public class GuttedHeartOverride : GlobalItem

@@ -1,14 +1,5 @@
-﻿using FargosPhantasmMode.Common.Particles;
-using FargowiltasSouls;
-using Luminance.Core.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FargowiltasSouls;
 using Terraria;
-using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu

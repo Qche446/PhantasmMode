@@ -1,35 +1,4 @@
-﻿using System;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
-using Terraria.ID;
-using Terraria;
-using FargowiltasSouls.Common.Utilities;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using FargowiltasSouls.Content.Projectiles;
-using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.Systems;
-using FargowiltasSouls;
-using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
-using Terraria.Audio;
-using Terraria.ModLoader;
-using System.Runtime.InteropServices;
-using Terraria.WorldBuilding;
-using Microsoft.Xna.Framework.Graphics;
-using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
-using Terraria.GameContent;
-using FargosPhantasmMode.Content.Bosses.EyeOfCthulhu;
-using FargowiltasSouls.Content.Projectiles.BossWeapons;
-using FargosPhantasmMode.Content.NPCs;
-using System.IO;
-using Terraria.ModLoader.IO;
-using System.Reflection;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
-using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls.Common.Graphics.Particles;
-using FargowiltasSouls.Content.Bosses.MutantBoss;
-namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
+﻿namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     /*
     internal class PHEyeOfCthulhu : EyeofCthulhu

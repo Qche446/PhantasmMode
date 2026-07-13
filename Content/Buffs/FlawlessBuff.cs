@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.ID;
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
-using Microsoft.Xna.Framework.Graphics;
-using Terraria.DataStructures;
-using Terraria.GameContent;
-using Microsoft.Xna.Framework;
-using Terraria.Graphics.Shaders;
-using ReLogic.Content;
 
 namespace FargosPhantasmMode.Content.Buffs
 {

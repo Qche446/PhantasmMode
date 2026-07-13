@@ -1,16 +1,15 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
+using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Toggler.Content;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
-using Terraria.ID;
-using FargowiltasSouls.Core.Toggler;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {
     public class MutantAntibodiesOverride : GlobalItem

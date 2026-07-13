@@ -1,16 +1,11 @@
-﻿using FargowiltasSouls.Core.ModPlayers;
-using FargowiltasSouls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
-using Terraria.ModLoader;
-using FargowiltasSouls.Core.Globals;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
+using FargowiltasSouls.Core.Globals;
+using FargowiltasSouls.Core.ModPlayers;
+using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Buffs.Global
 {

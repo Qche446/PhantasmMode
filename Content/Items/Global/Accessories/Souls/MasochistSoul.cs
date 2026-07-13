@@ -1,27 +1,16 @@
-﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
+using FargosPhantasmMode.Content.Render;
+using FargowiltasSouls;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Content.Items.Accessories.Souls;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
-using Terraria.ID;
-using FargowiltasSouls.Core.Toggler;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Core.ModPlayers;
-using MonoMod.Cil;
-using System.Reflection;
-using System;
-using Mono.Cecil.Cil;
-using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
-using FargowiltasSouls.Content.Items.Accessories.Souls;
-using FargowiltasSouls;
-using FargosPhantasmMode.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using FargosPhantasmMode.Content.Render;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
 {

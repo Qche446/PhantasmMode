@@ -1,24 +1,20 @@
 ﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
-using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.Localization;
-using Terraria.ModLoader;
-using System.Reflection;
+using FargowiltasSouls.Content.Projectiles.Minions;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
+using FargowiltasSouls.Core.Systems;
+using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Toggler.Content;
+using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using Mono.Cecil.Cil;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Content.Projectiles.BossWeapons;
-using FargowiltasSouls.Content.Projectiles.Minions;
+using System.Collections.Generic;
+using System.Reflection;
+using Terraria;
 using Terraria.ID;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
-using FargowiltasSouls.Core.Toggler;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {

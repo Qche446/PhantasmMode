@@ -1,40 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls.Common.Graphics.Particles;
-using FargowiltasSouls.Common.Utilities;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
-using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Content.Projectiles.Deathrays;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using FargowiltasSouls.Content.Projectiles;
-using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.NPCMatching;
-using FargowiltasSouls.Core.Systems;
-using Luminance.Assets;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using Terraria;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
-using MonoMod.Logs;
-using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
-
-namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
+﻿namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
     /*
     public class PHRetinazer : Retinazer
@@ -1200,7 +1164,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         }
                     }
                     */
-                }//粒子效果和领域展开
+}//粒子效果和领域展开
 /*
                 Player player = Main.player[npc.target];
                 npc.AddBuff(BuffID.CursedInferno,9999999);

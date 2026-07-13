@@ -1,15 +1,11 @@
-﻿using FargowiltasSouls.Content.Projectiles.Deathrays;
-using FargowiltasSouls.Core.Systems;
-using Microsoft.Xna.Framework.Graphics;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Projectiles.Deathrays;
 using Microsoft.Xna.Framework;
 using System;
+using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria;
-using Luminance.Core.Graphics;
-using FargowiltasSouls.Content.Bosses.Champions.Will;
-using Terraria.Audio;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

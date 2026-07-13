@@ -1,6 +1,6 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Terraria;
 using Microsoft.Xna.Framework;
+using Terraria;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

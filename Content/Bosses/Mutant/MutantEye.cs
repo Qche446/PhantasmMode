@@ -1,13 +1,13 @@
-﻿using Terraria.ModLoader;
-using Terraria;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using FargowiltasSouls;
-using System;
-using Terraria.ID;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using System.Linq;
 using Microsoft.Xna.Framework;
+using System;
+using System.Linq;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

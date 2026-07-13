@@ -1,10 +1,9 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Projectiles;
-using FargowiltasSouls.Content.Projectiles.Masomode;
 using Microsoft.Xna.Framework;
-using Terraria.ID;
-using Terraria;
 using System;
+using Terraria;
+using Terraria.ID;
 
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins

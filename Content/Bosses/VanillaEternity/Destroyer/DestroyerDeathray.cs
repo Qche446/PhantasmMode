@@ -1,16 +1,16 @@
-﻿using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.Sounds;
+using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
+using FargowiltasSouls.Core.Systems;
+using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria;
-using FargowiltasSouls.Core.Systems;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using FargowiltasSouls.Content.Buffs.Masomode;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {
     public class DestroyerDeathray : BaseDeathray

@@ -1,12 +1,7 @@
 ﻿using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
-using System;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
-using static Terraria.ModLoader.BackupIO;
 
 namespace FargosPhantasmMode.Content.Buffs.Global
 {

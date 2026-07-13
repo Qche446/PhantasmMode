@@ -3,9 +3,7 @@ using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Terraria;
-using static Terraria.GameContent.Animations.IL_Actions.NPCs;
 
 namespace FargosPhantasmMode.Common.Particles
 {

@@ -1,14 +1,12 @@
+using FargosPhantasmMode.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
-using FargosPhantasmMode.Assets.ExtraTextures;
-using Terraria.GameContent;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Sky
 {

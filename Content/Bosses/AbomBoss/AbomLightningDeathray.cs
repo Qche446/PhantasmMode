@@ -1,13 +1,13 @@
-﻿using FargowiltasSouls.Content.Projectiles.Deathrays;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Microsoft.Xna.Framework.Graphics;
+using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria;
-using Luminance.Core.Graphics;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

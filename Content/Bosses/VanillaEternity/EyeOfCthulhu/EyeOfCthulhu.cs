@@ -1,29 +1,29 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargosPhantasmMode.Content.Bossbar;
 using FargosPhantasmMode.Global;
-using FargowiltasSouls.Content.Projectiles.Masomode;
-using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls;
-using FargowiltasSouls.Core.NPCMatching;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Common.Graphics.Particles;
-using FargowiltasSouls.Content.Bosses.MutantBoss;
-using FargowiltasSouls.Content.Projectiles;
-using System.IO;
-using System;
-using Terraria.Audio;
-using Terraria.ModLoader.IO;
-using Luminance.Core.Graphics;
-using FargowiltasSouls.Core.Systems;
 using FargowiltasSouls.Common.Utilities;
-using FargowiltasSouls.Core;
-using Luminance.Common.Utilities;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
+using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Bosses.VanillaEternity;
 using FargowiltasSouls.Content.Buffs.Masomode;
-using FargosPhantasmMode.Content.Bossbar;
+using FargowiltasSouls.Content.Projectiles;
+using FargowiltasSouls.Content.Projectiles.Masomode;
+using FargowiltasSouls.Core;
+using FargowiltasSouls.Core.Globals;
+using FargowiltasSouls.Core.NPCMatching;
+using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
+using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
+using System;
+using System.IO;
+using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
@@ -2152,11 +2152,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
         {
             base.SendExtraAI(npc, bitWriter, binaryWriter);
-
-            binaryWriter.Write(npc.localAI[0]);
-            binaryWriter.Write(npc.localAI[1]);
-            binaryWriter.Write(npc.localAI[2]);
-            binaryWriter.Write(npc.localAI[3]);
             binaryWriter.Write7BitEncodedInt(TeleportDirection);
             binaryWriter.Write7BitEncodedInt(LastAIState);
             binaryWriter.Write7BitEncodedInt(Last2AIState);
@@ -2167,10 +2162,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
         {
             base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            npc.localAI[0] = binaryReader.ReadSingle();
-            npc.localAI[1] = binaryReader.ReadSingle();
-            npc.localAI[2] = binaryReader.ReadSingle();
-            npc.localAI[3] = binaryReader.ReadSingle();
             TeleportDirection = binaryReader.Read7BitEncodedInt();
             LastAIState = binaryReader.Read7BitEncodedInt();
             Last2AIState = binaryReader.Read7BitEncodedInt();

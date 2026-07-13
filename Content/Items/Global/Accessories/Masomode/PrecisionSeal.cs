@@ -1,17 +1,16 @@
 ﻿using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using FargowiltasSouls.Content.PlayerDrawLayers;
+using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.ModPlayers;
-using System.Reflection;
-using MonoMod.Cil;
-using System;
-using Mono.Cecil.Cil;
-using FargowiltasSouls.Content.PlayerDrawLayers;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {

@@ -1,12 +1,10 @@
 ﻿using FargowiltasSouls;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.ID;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu

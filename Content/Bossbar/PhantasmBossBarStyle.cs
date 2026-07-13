@@ -1,19 +1,4 @@
-﻿using FargosPhantasmMode.Content.Render;
-using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
-using Terraria.GameContent;
-using Terraria.GameContent.UI.BigProgressBar;
-using Terraria.ModLoader;
-
-namespace FargosPhantasmMode.Content.Bossbar
+﻿namespace FargosPhantasmMode.Content.Bossbar
 {
     /*
     public class PhantasmBossBarStyle : ModBossBarStyle

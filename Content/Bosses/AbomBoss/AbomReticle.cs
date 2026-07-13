@@ -1,3 +1,4 @@
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Core.Globals;
 using Microsoft.Xna.Framework;
@@ -6,7 +7,6 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

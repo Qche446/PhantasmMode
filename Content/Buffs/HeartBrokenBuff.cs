@@ -1,9 +1,6 @@
-﻿using Terraria.ID;
-using Terraria;
+﻿using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls.Core.ModPlayers;
-using Microsoft.Xna.Framework;
-using Terraria.DataStructures;
 
 namespace FargosPhantasmMode.Content.Buffs
 {

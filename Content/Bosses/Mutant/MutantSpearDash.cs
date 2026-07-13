@@ -1,16 +1,12 @@
-﻿using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
-using Terraria;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

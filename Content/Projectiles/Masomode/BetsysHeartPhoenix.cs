@@ -1,10 +1,7 @@
-﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Boss;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
-using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;

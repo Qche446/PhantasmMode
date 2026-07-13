@@ -130,6 +130,15 @@ Projectiles: {
 	CursedFireWheel.DisplayName: Cursed Fire Wheel
 	TwinFakeLaser.DisplayName: Twin Fake Laser
 	TwinCurvedLaser.DisplayName: Twin Curved Laser
+	DarkStar.DisplayName: Dark Star
+	DarkStarTwins.DisplayName: Dark Star Twins
+	ShadowFlame.DisplayName: Shadow Flame
+	DarkStarAcc.DisplayName: Dark Star Acc
+	DarkStarPolyline.DisplayName: Dark Star Polyline
+	DarkStarSplit.DisplayName: Dark Star Split
+	MechElectricOrbSplit.DisplayName: Mech Electric Orb Split
+	DarkStarSpaz.DisplayName: Dark Star Spaz
+	FusedLensDarkStar.DisplayName: Fused Lens Dark Star
 }
 
 NPCs: {
@@ -165,13 +174,29 @@ Enchantments: {
 }
 
 Masomode: {
-	AgitatingLens: Phantasm : 111
-	SlimyShield: Phantasm : 222
-	DarkenedHeart: Phantasm : 333
-	GuttedHeart: Phantasm : 444
-	QueenStinger: Phantasm : 555
-	NecromanticBrew: Phantasm : 666
-	Deerclawps: Phantasm : 999
+	AgitatingLens:
+		'''
+		境妄 : 移动速度增加10%，生命值降低至一半以下时效果提升至30%。
+		血镰刀能对敌人造成月之诅咒和狂暴减益
+		'''
+	SlimyShield:
+		'''
+		境妄 : 平台直穿效果在背包中即可生效
+		粘液球能对敌人造成宇宙之焰减益
+		'''
+	DarkenedHeart: 境妄 : 迷你噬魂者现在将额外造成固定0.1%的百分比伤害
+	GuttedHeart:
+		'''
+		境妄 : 周期性生成伤害性震荡，对大部分敌怪附加[c/FF0000:碎心]
+		[c/FF0000:碎心] : 最大生命值减少15%
+		'''
+	QueenStinger: 境妄 : 给予蜂蜜增益效果，背包中即可生效
+	NecromanticBrew:
+		'''
+		境妄 : 骷髅手臂能对敌人造成暗影焰减益
+		冲刺加速效果可以进一步提升至50%
+		'''
+	Deerclawps: 境妄 : 冰刺生成条件优化且伤害更高，体积更大，能对敌人造成霜冻减益
 
 	SupremeDeathbringerFairy: {
 		Base:
@@ -195,7 +220,11 @@ Masomode: {
 		境妄 : 对伤害你的敌人造成纳米侵蚀
 		[c/FF0000:纳米侵蚀] : 受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
 		'''
-	FusedLens: 境妄 : 生成双色电球围绕玩家，周围有敌人时自动追击
+	FusedLens:
+		'''
+		境妄 : 生成友好的双色机械电球围绕着你，周围有敌人时自动追击
+		受到灵液或咒焰时生成暗星，额外造成浸油减益
+		'''
 	GroundStick: 境妄 : 对激光类弹幕的减伤提升至80%
 
 	DubiousCircuitry: {
@@ -204,10 +233,10 @@ Masomode: {
 			境妄 : 继承下位额外效果
 			[i:FargowiltasSouls/ReinforcedPlating]对伤害你的敌人造成[c/FF0000:纳米侵蚀]
 			[c/FF0000:纳米侵蚀]:受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
-			[i:FargowiltasSouls/FusedLens]生成友好的双色电球围绕着你，周围有敌人时自动追击
+			[i:FargowiltasSouls/FusedLens]生成友好的双色电球围绕着你，周围有敌人时自动追击，受到灵液或咒焰时生成暗星
 			[i:FargowiltasSouls/GroundStick]对激光类弹幕的减伤提升至80%
 			'''
-		Extra: “系统在自指的悖论中获得力量——它必须部分地摧毁自身，才能部分地超越自身。”
+		Extra: “总之，是很硬的东西!”
 	}
 
 	PureHeart: {
@@ -220,7 +249,7 @@ Masomode: {
 			[i:FargowiltasSouls/GuttedHeart]更高的频率生成范围更大的碎心震荡
 			[i:FargowiltasSouls/GelicWings]凝胶尖刺造成宇宙之焰和浸油减益
 			'''
-		Extra: “净魂绝垢，羽化登仙...”
+		Extra: “净魂绝垢，羽化登仙”
 	}
 
 	WyvernFeather: 境妄 : 攻击附加折翼，光球生成间隔减半
@@ -251,7 +280,7 @@ Masomode: {
 			[i:FargowiltasSouls/TimsConcoction]魔力值消耗减少5%
 			[i:FargowiltasSouls/MysticSkull]魔法伤害增加5%
 			'''
-		Extra: “方舟，骸骨，墓志铭，摇篮...”
+		Extra: “简单粗暴，但很有效”
 	}
 
 	DreadShell: 境妄 : 增加5点防御，5%减伤，举盾不再减速
@@ -266,7 +295,7 @@ Masomode: {
 			[i:FargowiltasSouls/DreadShell]增加4点防御，4%减伤
 			[i:FargowiltasSouls/Deerclawps]冰刺生成条件优化且伤害更高，体积更大，能对敌人造成霜冻减益
 			'''
-		Extra: “断罪”
+		Extra: “这样...真的好吗...”
 	}
 
 	MagicalBulb:
@@ -287,7 +316,7 @@ Masomode: {
 			[i:FargowiltasSouls/CelestialRune]召唤一个拜月教徒保护你
 			转换召唤物增伤调整为3%
 			'''
-		Extra: “我仍能触及世界的边界...”
+		Extra: “世界的边界...! 怎么是个面具？”
 	}
 
 	PumpkingsCape: 境妄 : 腐败区域的范围增大，举盾不再减速
@@ -326,7 +355,7 @@ Masomode: {
 
 	MasochistSoul: {
 		Base: 境妄 : 继承下位额外效果
-		Extra: “碎境于心，拥苍于妄”
+		Extra: “？！强强！？”
 	}
 }
 

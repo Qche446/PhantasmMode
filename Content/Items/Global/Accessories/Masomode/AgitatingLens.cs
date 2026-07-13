@@ -1,19 +1,17 @@
-﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.Systems;
-using System;
-using System.Collections.Generic;
-using Terraria;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Content.Projectiles.Masomode;
 using FargowiltasSouls;
-using Microsoft.Xna.Framework;
-using System.Reflection;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
-using Terraria.Localization;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Core.ModPlayers;
-using FargosPhantasmMode.Content.Projectiles.Masomode;
+using FargowiltasSouls.Core.Systems;
+using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Terraria;
+using Terraria.Localization;
+using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
 {
     public class AgitatingLensOverride : GlobalItem

@@ -1,4 +1,7 @@
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -7,9 +10,6 @@ using Terraria.Audio;
 using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
-using FargowiltasSouls;
-using Luminance.Common.Utilities;
-using FargowiltasSouls.Core.Systems;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

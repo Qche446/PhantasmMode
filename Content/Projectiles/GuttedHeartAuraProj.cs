@@ -1,15 +1,11 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Projectiles

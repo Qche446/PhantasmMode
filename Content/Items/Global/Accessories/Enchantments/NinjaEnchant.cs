@@ -1,19 +1,14 @@
-﻿using Terraria;
-using Terraria.ModLoader;
-using FargowiltasSouls;
-using Microsoft.Xna.Framework;
-using System.Reflection;
-using MonoMod.Cil;
-using System;
-using Mono.Cecil.Cil;
-using FargowiltasSouls.Core.Systems;
-using System.Collections.Generic;
-using Terraria.Localization;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Toggler.Content;
+using FargowiltasSouls.Core.Systems;
 using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Toggler.Content;
+using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using Terraria;
+using Terraria.Localization;
+using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments
 {
     public class NinjaEnchantOverride : GlobalItem

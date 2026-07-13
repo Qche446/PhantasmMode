@@ -1,16 +1,14 @@
-﻿using Terraria.ID;
-using Terraria;
-using Terraria.ModLoader;
-using System.Reflection;
-using FargowiltasSouls.Core.Globals;
-using MonoMod.Cil;
-using FargowiltasSouls.Core.ModPlayers;
-using System;
-using Mono.Cecil.Cil;
+﻿using FargosPhantasmMode.Content.Buffs.Global;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls;
-using FargosPhantasmMode.Content.Buffs.Global;
+using FargowiltasSouls.Core.Globals;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using System.Reflection;
+using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Buffs
 {

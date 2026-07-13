@@ -1,17 +1,17 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Render;
+using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.Utilities;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
+using System;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.GameContent.UI.BigProgressBar;
 using Terraria.GameContent;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
+using Terraria.GameContent.UI.BigProgressBar;
 using Terraria.ID;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
-using System;
-using ReLogic.Graphics;
-using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bossbar
 {
@@ -125,9 +125,18 @@ namespace FargosPhantasmMode.Content.Bossbar
             Vector2 iconOffset = new(4f, 20f);
             Vector2 iconSize = new(26f, 28f);
             Vector2 iconPosition = iconOffset + iconSize * 0.5f;
-            if (npc.type == NPCID.EyeofCthulhu)
+
+            switch (npc.type)
             {
-                BossBarRender.DrawDoubleColorPulse(barTexture, barTopLeft, barFrame, scale, lifeRatio, Color.Teal, Color.Teal, 0);
+                case NPCID.EyeofCthulhu: 
+                    BossBarRender.DrawDoubleColorPulse(barTexture, barTopLeft, barFrame, scale, lifeRatio, Color.Teal, Color.Teal, 0);
+                    break;
+                case NPCID.Retinazer:
+                    BossBarRender.DrawDoubleColorPulse(barTexture, barTopLeft, barFrame, scale, lifeRatio, PhanUtil.MechColor(), PhanUtil.MechColor(), 8);
+                    break;
+                case NPCID.Spazmatism:
+                    BossBarRender.DrawDoubleColorPulse(barTexture, barTopLeft, barFrame, scale, lifeRatio, PhanUtil.MechColor(), PhanUtil.MechColor(), 8);
+                    break;
             }
             if (npc.type == ModContent.NPCType<MutantBoss>())//突
             {

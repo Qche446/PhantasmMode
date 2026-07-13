@@ -1,18 +1,16 @@
-﻿using Fargowiltas.Common.Configs;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using FargowiltasSouls.Content.Items.Accessories.Masomode;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Projectiles;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using Terraria.GameContent;
-using Terraria.ModLoader;
-using Terraria;
-using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
+using FargowiltasSouls.Content.Projectiles;
+using Luminance.Common.Utilities;
+using Luminance.Core.Graphics;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

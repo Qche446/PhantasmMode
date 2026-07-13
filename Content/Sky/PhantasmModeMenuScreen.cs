@@ -1,9 +1,6 @@
-﻿using FargowiltasSouls.Content.Sky;
-using Terraria.ID;
+﻿using Terraria;
 using Terraria.Localization;
-using Terraria;
 using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
 
 namespace FargosPhantasmMode.Content.Sky
 {

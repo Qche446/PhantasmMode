@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FargowiltasSouls;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using FargowiltasSouls;
 
 namespace FargosPhantasmMode.Content.Bosses.AbomBoss
 {

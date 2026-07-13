@@ -1,5 +1,5 @@
-﻿using FargowiltasSouls.Assets.Sounds;
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;

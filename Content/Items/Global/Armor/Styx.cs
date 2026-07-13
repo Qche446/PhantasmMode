@@ -1,18 +1,17 @@
-﻿using Terraria;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Content.Projectiles;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Armor;
 using FargowiltasSouls.Core.ModPlayers;
+using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
-using System.Reflection;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using Mono.Cecil.Cil;
-using static Terraria.Player;
-using FargosPhantasmMode.Content.Projectiles;
-using FargowiltasSouls.Core.Systems;
 using System.Collections.Generic;
+using System.Reflection;
+using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Global.Armor
 {
     public class StyxCrownOverride : GlobalItem

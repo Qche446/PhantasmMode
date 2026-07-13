@@ -1,8 +1,8 @@
 ﻿using FargowiltasSouls.Content.Projectiles.Masomode;
 using Microsoft.Xna.Framework;
-using Terraria.ModLoader;
-using Terraria;
 using System;
+using Terraria;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {

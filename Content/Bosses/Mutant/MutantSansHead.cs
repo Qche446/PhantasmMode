@@ -2,9 +2,9 @@
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using Microsoft.Xna.Framework;
 using System;
-using Terraria.ModLoader;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {

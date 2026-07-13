@@ -1,5 +1,4 @@
 ﻿using FargosPhantasmMode.Assets.ExtraTextures;
-using FargowiltasSouls.Common.Graphics.Metaballs;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,9 +12,9 @@ namespace FargosPhantasmMode.Common.MetaBalls
         public override bool ShouldRender => ActiveParticleCount >= 1;
         public override Func<Texture2D>[] LayerTextures => new Func<Texture2D>[1] 
         {
-            () => ModContent.Request<Texture2D>("FargowiltasSouls/Assets/Textures/Metaballs/LimeGreenPixel").Value 
+            () => ModContent.Request<Texture2D>("FargowiltasSouls/Assets/Textures/Metaballs/DarkBluePixel").Value 
         };
-        public override Color EdgeColor => Color.Transparent;
+        public override Color EdgeColor => Color.Purple;
         public override bool DrawnManually => true;
         public override string MetaballAtlasTextureToUse => "FargowiltasSouls.MetaballBase";
         public override bool LayerIsFixedToScreen(int layerIndex) => false;
@@ -23,10 +22,11 @@ namespace FargosPhantasmMode.Common.MetaBalls
         public override void UpdateParticle(MetaballInstance particle)
         {
             particle.Velocity *= 0.99f;
-            particle.Size *= 0.96f;
+            particle.Size *= 0.97f;
         }
         public override void PrepareShaderForTarget(int layerIndex)
         {
+            
             ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.BigTentacle");
             Texture2D texture2D = PhantasmTextureRegistry.UniverseNoise.Value;
             shader.TrySetParameter("color", new Color(102, 26, 179));//102, 26, 179（紫）  54，255，236(青)
@@ -34,6 +34,7 @@ namespace FargosPhantasmMode.Common.MetaBalls
             shader.TrySetParameter("n", 0.01f);
             shader.SetTexture(texture2D, 1, SamplerState.LinearWrap);
             shader.Apply("Tentacle");
+            
             //shader.Apply();
         }
     }
