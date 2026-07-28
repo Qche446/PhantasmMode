@@ -1,0 +1,14 @@
+MainMenu: Phantasm
+Phantasm: 境妄模式
+OpenPhanState: 境妄模式已开启
+PhantasmOption: "[c/00CCCC:一个非官方的特殊难度，建议熟悉原版法狗后再来挑战。]"
+ExpandedFeatures:
+	'''
+	会将世界的难度设置为大师模式
+	- 保留原本受虐特点
+	- 在受虐模式的基础上重置部分Boss，使其更加困难
+	- 对部分永恒模式掉落，魔石，魂，力等进行调整以适应新难度
+	'''
+PhantasmOn: "[c/2FD6FF:受虐模式已然颤动，境妄模式已开启。]"
+PhantasmOff: "[c/2FD6FF:境妄模式已关闭。]"
+PhantasmFTWWarning: "[c/2FD6FF:传奇受虐再绽新华，传奇境妄已开启，祝好运^ ^]"

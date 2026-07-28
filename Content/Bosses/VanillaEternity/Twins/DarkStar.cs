@@ -1,4 +1,5 @@
-﻿using FargowiltasSouls;
+﻿using FargosPhantasmMode.Content.Buffs;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Buffs.Masomode;
@@ -129,9 +130,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (FargoSoulsUtil.BossIsAlive(ref EModeGlobalNPC.destroyBoss, NPCID.TheDestroyer))
                 target.AddBuff(BuffID.Electrified, 60);
             if (FargoSoulsUtil.BossIsAlive(ref EModeGlobalNPC.retiBoss, NPCID.Retinazer))
-                target.AddBuff(BuffID.Ichor, 300);
+                target.AddBuff(ModContent.BuffType<PhSublimationBuff>(), 180);
             if (FargoSoulsUtil.BossIsAlive(ref EModeGlobalNPC.spazBoss, NPCID.Spazmatism))
-                target.AddBuff(BuffID.CursedInferno, 180);
+                target.AddBuff(ModContent.BuffType<PhSublimationBuff>(), 180);
             target.AddBuff(ModContent.BuffType<OiledBuff>(), 300);
         }
 

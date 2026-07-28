@@ -13,7 +13,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(Player player, ref int buffIndex)
         {
-            player.lifeRegen += 2;
+            player.lifeRegen += 10;
             player.GetArmorPenetration(DamageClass.Generic) += 10;
             player.GetCritChance(DamageClass.Generic) += 10;
             player.statDefense += 10;

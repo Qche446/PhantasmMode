@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Common.MetaBalls
 {
-    public class CosmicFireMetaBall : FixedMetaball<CosmicFireMetaBall> 
+    public class CosmicFireMetaBall : FixedMetaball 
     {
         public override bool ShouldRender => ActiveParticleCount >= 1;
         public override Func<Texture2D>[] LayerTextures => new Func<Texture2D>[1] 

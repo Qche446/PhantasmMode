@@ -14,7 +14,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
-            npc.GetGlobalNPC<GlobalBuffNPC>().Hypothermia = true;
+            npc.GetGlobalNPC<PModeGlobalBuffNPC>().Hypothermia = true;
         }
     }
     

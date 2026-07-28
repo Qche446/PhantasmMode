@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Content.Projectiles;
+using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Armor;
 using FargowiltasSouls.Core.ModPlayers;
@@ -19,7 +20,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             int damage = FargoSoulsUtil.HighestDamageTypeScaling(Main.LocalPlayer, 666);
-            if ((item.type == ModContent.ItemType<StyxChestplate>() || item.type == ModContent.ItemType<StyxCrown>() || item.type == ModContent.ItemType<StyxLeggings>()) && WorldSavingSystem.masochistModeReal)
+            if ((item.type == ModContent.ItemType<StyxChestplate>() || item.type == ModContent.ItemType<StyxCrown>() || item.type == ModContent.ItemType<StyxLeggings>()) && PModeWorldSavingSystem.PhantasmMode)
             {
                 var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Styx") + damage + "(" + 666 + ")")
                 {
@@ -72,7 +73,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                         bool flip = speed.X < 0;
                         speed = speed.RotatedBy(MathHelper.PiOver2 * (flip ? 1 : -1));
                         Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, speed, ModContent.ProjectileType<StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
-                        if (WorldSavingSystem.masochistModeReal)
+                        if (PModeWorldSavingSystem.PhantasmMode)
                         {
                             Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, -speed, ModContent.ProjectileType<StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
                         }

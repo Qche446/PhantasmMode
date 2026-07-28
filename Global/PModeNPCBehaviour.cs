@@ -1,4 +1,5 @@
-﻿using FargowiltasSouls.Core.NPCMatching;
+﻿using FargosPhantasmMode.Core.Systems;
+using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
 using System.IO;
 using Terraria;
@@ -40,7 +41,7 @@ namespace FargosPhantasmMode.Global
             {
                 return null;
             }
-            return WorldSavingSystem.EternityMode && Matcher.Satisfies(target.type) ? base.NewInstance(target) : null;
+            return PModeWorldSavingSystem.PhantasmMode && Matcher.Satisfies(target.type) ? base.NewInstance(target) : null;
         }
 
         public bool FirstTick = true; 

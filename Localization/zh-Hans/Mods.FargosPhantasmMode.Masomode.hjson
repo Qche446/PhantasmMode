@@ -1,0 +1,191 @@
+﻿AgitatingLens:
+	'''
+	增加10%移动速度，生命值低于最大生命值一半时提升至30%
+	鲜血镰刀将造成月之诅咒和狂暴减益
+	'''
+SlimyShield:
+	'''
+	平台直穿效果在背包中即可生效
+	粘液球将造成宇宙之焰减益
+	'''
+DarkenedHeart: 迷你噬魂者额外造成敌人最大生命值0.1%的伤害
+GuttedHeart:
+	'''
+	每隔一段时间生成碎心震荡
+	[c/FF0000:碎心] : 最大生命值减少15%
+	'''
+QueenStinger:
+	'''
+	获得蜂蜜增益，背包中即可生效
+	蜜蜂冲刺期间进入精确模式，若该冲刺期间未收到伤害，则在冲刺结束后减少一半冷却
+	'''
+NecromanticBrew:
+	'''
+	骷髅王手臂能造成暗影焰减益
+	添加额外能力：冲刺速度可进一步提升至50%
+	'''
+Deerclawps: 弱化冰刺生成条件，进一步提升冰刺的伤害
+
+SupremeDeathbringerFairy: {
+	Base:
+		'''
+		继承下位额外效果
+		[i:FargowiltasSouls/SlimyShield]平台直穿效果在背包中即可生效
+		[i:FargowiltasSouls/SlimyShield]粘液球将造成宇宙之焰减益
+		[i:FargowiltasSouls/AgitatingLens]增加10%移动速度，生命值低于最大生命值一半时提升至30%
+		[i:FargowiltasSouls/AgitatingLens]鲜血镰刀将造成[c/0BFFE8:月之诅咒]和[c/FF0000:狂暴]减益
+		[i:FargowiltasSouls/QueenStinger]获得[c/CCCC00:蜂蜜]增益，背包中即可生效
+		[i:FargowiltasSouls/QueenStinger]蜜蜂冲刺期间进入精确模式，若该冲刺期间未收到伤害，则在冲刺结束后减少一半冷却
+		[i:FargowiltasSouls/NecromanticBrew]骷髅王手臂能造成暗影焰减益
+		[i:FargowiltasSouls/NecromanticBrew]添加额外能力：冲刺速度可进一步提升至50%
+		'''
+	Extra: “永恒的启程，为邪恶敲响死亡”
+}
+
+PungentEyeball: "[c/FF0000:尖刻注视]积累速度提升"
+GelicWings: 凝胶尖刺将造成宇宙之焰和浸油减益
+ReinforcedPlating:
+	'''
+	对伤害你的敌人施加[c/FF0000:纳米侵蚀]
+	[c/FF0000:纳米侵蚀]:受到的减益伤害乘1.2，破晓减益受到的减益伤害提升不再减半，魔法诅咒对减益伤害的提升改为乘算
+	'''
+FusedLens:
+	'''
+	生成友好的双色机械电球围绕着你，周围有敌人时自动追击
+	收到灵液或诅咒焰影响时，将生成暗星替代机械电球，额外造成浸油减益
+	'''
+GroundStick: 对激光类弹幕的减伤效果提升至80%
+
+DubiousCircuitry: {
+	Base:
+		'''
+		继承下位额外效果
+		[i:FargowiltasSouls/ReinforcedPlating]对伤害你的敌人施加[c/FF0000:纳米侵蚀]
+		[i:FargowiltasSouls/FusedLens]生成友好的四色机械电球围绕着你，周围有敌人时自动追击，受到灵液或诅咒焰影响时替换为暗星
+		[i:FargowiltasSouls/GroundStick]对激光类弹幕的减伤效果提升至80%
+		'''
+	Extra: “看上去就很强！”
+}
+
+PureHeart: {
+	Base:
+		'''
+		[i:FargowiltasSouls/PureHeart]15秒内不受到伤害则获得[c/00FFAB:无暇]增益
+		[c/00FFAB:无暇]：提升各项能力
+		[i:FargowiltasSouls/DarkenedHeart]迷你噬魂者额外造成敌人最大生命值0.1%的伤害
+		[i:FargowiltasSouls/GuttedHeart]每隔一段时间生成范围更大的碎心震荡
+		[i:FargowiltasSouls/GelicWings]凝胶尖刺将造成宇宙之焰和浸油减益
+		'''
+	Extra: “净魂绝垢，羽化登仙”
+}
+
+WyvernFeather:
+	'''
+	光球生成频率提升
+	飞行时间增加60
+	'''
+ConcentratedRainbowMatter: 无
+FrigidGemstone: 添加额外能力：攻击造成霜冻减益
+SandsofTime:
+	'''
+	添加额外能力：能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
+	“赐福于伪人”
+	'''
+SqueakyToy: 无
+TribalCharm: 无
+MysticSkull: 魔法伤害提升15%
+SecurityWallet: 无
+WretchedPouch: 添加额外能力：攻击造成暗影焰
+NymphsPerfume: 生成心的频率提升
+TimsConcoction: 魔力消耗减少15%
+
+BionomicCluster: {
+	Base:
+		'''
+		继承下位额外效果
+		[i:FargowiltasSouls/WyvernFeather]飞行时间增加30
+		[i:FargowiltasSouls/WyvernFeather]更快频率生成光球
+		[i:FargowiltasSouls/FrigidGemstone]添加额外能力：攻击造成霜冻减益
+		[i:FargowiltasSouls/WretchedPouch]添加额外能力：攻击造成暗影焰
+		[i:FargowiltasSouls/SandsofTime]添加额外能力：能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
+		[i:FargowiltasSouls/NymphsPerfume]生成心的频率提升
+		[i:FargowiltasSouls/TimsConcoction]魔力消耗减少5%
+		[i:FargowiltasSouls/MysticSkull]魔法伤害提升5%
+		'''
+	Extra: “调谐”
+}
+
+DreadShell: 提升5点防御和5%减伤
+SkullCharm: 暗晶弹能造成暗影焰减益
+
+LumpOfFlesh: {
+	Base:
+		'''
+		继承下位额外能力
+		[i:FargowiltasSouls/SkullCharm]幻影死光额外造成[c/FFF489:惩戒]和狱炎减益
+		[i:FargowiltasSouls/PungentEyeball][c/FF0000:尖刻注视]积累速度提升且最大伤害增幅提升至20%
+		[i:FargowiltasSouls/DreadShell]提升5点防御和5%减伤
+		[i:FargowiltasSouls/Deerclawps]弱化冰刺生成条件，进一步提升冰刺的伤害
+		'''
+	Extra: “看起来不像是好吃的”
+}
+
+MagicalBulb:
+	'''
+	以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
+	[c/1CB631:常春藤毒素]:流失生命值，时间可重复累计，时长到达20秒后转化为[c/303F32:神经毒素]
+	[c/303F32:神经毒素]:剧烈流失生命值
+	'''
+LihzahrdTreasureBox: 增加5点防御
+CelestialRune: 添加额外能力：召唤一个拜月教徒保护你
+
+ChaliceoftheMoon: {
+	Base:
+		'''
+		继承下位额外效果
+		[i:FargowiltasSouls/MagicalBulb]以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
+		[i:FargowiltasSouls/LihzahrdTreasureBox]增加5点防御
+		[i:FargowiltasSouls/CelestialRune]添加额外能力：召唤一个拜月教徒保护你
+		转换召唤物增伤提升至3%
+		'''
+	Extra: “哦哦！居然是四柱时期的装备，一定很强吧！”
+}
+
+PumpkingsCape: 格挡时不再减速，腐败光环范围扩大
+IceQueensCrown:
+	'''
+	使用炸弹时赋予敌怪[c/427994:失温症]
+	[c/427994:失温症]:收到的伤害提升至1.05被，剧烈流失生命值，破晓减益的减益伤害增幅不再减半，魔法诅咒对减益伤害的提升改为乘算
+	'''
+SaucerControlConsole: 背包中即可免疫[c/FF33FF:扭曲]
+BetsysHeart: 冲刺时发射一大片追踪烈焰凤凰
+MutantAntibodies:
+	'''
+	以部分生存能力为代价，攻击附带[c/0000CC:海洋重击]和[c/087575:突变啃啄]
+	[c/0000CC:海洋重击:]高速流失生命值，防御减少40
+	'''
+PrecisionSeal: 判定点进一步缩小
+GalacticGlobe: 飞行时间提升666倍
+
+HeartoftheMasochist: {
+	Base:
+		'''
+		继承下位额外效果
+		[i:FargowiltasSouls/PumpkingsCape]格挡时不再减速，腐败光环范围提升
+		[i:FargowiltasSouls/IceQueensCrown]使用炸弹时赋予敌人[c/427994:失温症֢]
+		[i:FargowiltasSouls/SaucerControlConsole]背包中即可免疫[c/FF33FF:扭曲]
+		[i:FargowiltasSouls/BetsysHeart]冲刺时发射一大片追踪烈焰凤凰
+		[i:FargowiltasSouls/MutantAntibodies]能以一部分生存能力为代价，攻击附带[c/0000CC:海洋重击]和[c/087575:突变啃啄]
+		[i:FargowiltasSouls/PrecisionSeal]判定点进一步缩小
+		[i:FargowiltasSouls/GalacticGlobe]无限飞行
+		转换召唤物增伤提升至3%
+		'''
+	Extra: “燃烧吧，我所积淀的一切”
+}
+
+SinisterIcon: 无
+
+MasochistSoul: {
+	Base: 继承下位额外效果
+	Extra: “此刻，言语的重量早已失去，是时候给这荒诞的试炼画上句号了”
+}

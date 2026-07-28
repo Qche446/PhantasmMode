@@ -1,11 +1,22 @@
+using Terraria;
+using Microsoft.Xna.Framework;
 using FargosPhantasmMode.Assets.ExtraTextures;
 using FargosPhantasmMode.Content.Render;
 using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using System.IO;
+using System;
+using FargowiltasSouls;
+using FargowiltasSouls.Core.Systems;
+using Terraria.Audio;
+using Terraria.GameContent.Creative;
+using Terraria.ID;
+using static Terraria.GameContent.Creative.CreativePowers;
+using Luminance.Common.Utilities;
+using Terraria.ModLoader.Default.Patreon;
+using FargosPhantasmMode.Core.Systems;
 
 
 namespace FargosPhantasmMode
@@ -14,8 +25,10 @@ namespace FargosPhantasmMode
     {
         internal static FargosPhantasmMode Instance;
         public static ManagedRenderTarget Rt;
+        public static Mod FargoMod;
         public override void Load()
         {
+            ModLoader.TryGetMod("FargowiltasSouls", out FargoMod);
             On_FilterManager.EndCapture += FilterManager_EndCapture;
             Rt = new ManagedRenderTarget(true,
                 (width, heigth) => new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight));
@@ -24,49 +37,6 @@ namespace FargosPhantasmMode
         }
         public override void Unload()
         {
-            /*
-            #region Sprites
-            static void RestoreSprites(Dictionary<int, Asset<Texture2D>> buffer, Asset<Texture2D>[] original)
-            {
-                foreach (KeyValuePair<int, Asset<Texture2D>> pair in buffer)
-                    original[pair.Key] = pair.Value;
-
-                buffer.Clear();
-            }
-
-            RestoreSprites(TextureBuffer.NPC, TextureAssets.Npc);
-            RestoreSprites(TextureBuffer.NPCHeadBoss, TextureAssets.NpcHeadBoss);
-            RestoreSprites(TextureBuffer.Gore, TextureAssets.Gore);
-            RestoreSprites(TextureBuffer.Golem, TextureAssets.Golem);
-            RestoreSprites(TextureBuffer.Dest, TextureAssets.Dest);
-            RestoreSprites(TextureBuffer.GlowMask, TextureAssets.GlowMask);
-            RestoreSprites(TextureBuffer.Extra, TextureAssets.Extra);
-            RestoreSprites(TextureBuffer.Projectile, TextureAssets.Projectile);
-
-            if (TextureBuffer.Ninja != null)
-                TextureAssets.Ninja = TextureBuffer.Ninja;
-            if (TextureBuffer.Probe != null)
-                TextureAssets.Probe = TextureBuffer.Probe;
-            if (TextureBuffer.BoneArm != null)
-                TextureAssets.BoneArm = TextureBuffer.BoneArm;
-            if (TextureBuffer.BoneArm2 != null)
-                TextureAssets.BoneArm2 = TextureBuffer.BoneArm2;
-            if (TextureBuffer.BoneLaser != null)
-                TextureAssets.BoneLaser = TextureBuffer.BoneLaser;
-            if (TextureBuffer.BoneEyes != null)
-                TextureAssets.BoneEyes = TextureBuffer.BoneEyes;
-            if (TextureBuffer.Chain12 != null)
-                TextureAssets.Chain12 = TextureBuffer.Chain12;
-            if (TextureBuffer.Chain26 != null)
-                TextureAssets.Chain26 = TextureBuffer.Chain26;
-            if (TextureBuffer.Chain27 != null)
-                TextureAssets.Chain27 = TextureBuffer.Chain27;
-            if (TextureBuffer.Wof != null)
-                TextureAssets.Wof = TextureBuffer.Wof;
-
-            ToggleLoader.Unload();
-            #endregion
-            */
             On_FilterManager.EndCapture -= FilterManager_EndCapture;
         }
         private void FilterManager_EndCapture(On_FilterManager.orig_EndCapture orig, FilterManager self, RenderTarget2D finalTexture, RenderTarget2D screenTarget1, RenderTarget2D screenTarget2, Color clearColor)
@@ -109,6 +79,105 @@ namespace FargosPhantasmMode
             #endregion
 
             orig(self, finalTexture, screenTarget1, screenTarget2, clearColor);
+        }
+        internal enum PacketID : byte
+        {
+            ActivePhamtasmMode,
+        }
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        {
+            byte data = reader.ReadByte();
+            if (Enum.IsDefined(typeof(PacketID), data))
+            {
+                switch ((PacketID)data)
+                {
+                    case PacketID.ActivePhamtasmMode:
+                        {
+                            Player player = FargoSoulsUtil.PlayerExists(reader.ReadByte());
+                            int diff = reader.ReadByte();
+                            if (Main.netMode == NetmodeID.Server)
+                            {
+                                string toggle = diff switch
+                                {
+                                    3 => "Phantasm",
+                                    2 => "Master",
+                                    1 => "Expert",
+                                    0 => "None",
+                                    _ => "None"
+                                };
+                                if (diff != 0)
+                                {
+                                    bool changed = false;
+                                    if (Main.GameModeInfo.IsJourneyMode)
+                                    {
+                                        float value = diff >= 2 ? 1f : 0.66f;
+                                        var slider = CreativePowerManager.Instance.GetPower<DifficultySliderPower>();
+                                        typeof(CreativePowers.DifficultySliderPower).GetMethod("SetValueKeyboardForced", Utilities.UniversalBindingFlags).Invoke(slider, [value]);
+                                    }
+                                    else
+                                    {
+                                        switch (diff)
+                                        {
+                                            case 1:
+                                                if (Main.GameMode != GameModeID.Expert)
+                                                    changed = true;
+                                                Main.GameMode = GameModeID.Expert;
+                                                break;
+                                            case 2:
+                                                if (Main.GameMode != GameModeID.Master)
+                                                    changed = true;
+                                                Main.GameMode = GameModeID.Master;
+                                                break;
+                                            case 3:
+                                                if (Main.GameMode != GameModeID.Master)
+                                                    changed = true;
+                                                Main.GameMode = GameModeID.Master;
+                                                break;
+                                        }
+                                    }
+                                    if (changed)
+                                        FargoSoulsUtil.PrintLocalization($"Mods.Fargowiltas.Items.ModeToggle.{toggle}", new Color(175, 75, 255));
+                                }
+
+                                WorldSavingSystem.ShouldBeEternityMode = diff != 0;
+                                PModeWorldSavingSystem.CanPlayPhantasm = diff == 3;
+                                if (diff != 0)
+                                {
+                                    WorldSavingSystem.SpawnedDevi = true;
+                                }
+
+                                NetMessage.SendData(MessageID.WorldData); //sync world
+                            }
+                            else
+                            {
+                                string mode;
+                                float volume = 0.5f;
+
+                                switch (diff)
+                                {
+                                    case 1:
+                                        mode = "Emode";
+                                        break;
+                                    case 2:
+                                        mode = "Maso";
+                                        break;
+                                    case 3:
+                                        mode = "Phantasm";
+                                        break;
+                                    default:
+                                        mode = "Deactivate";
+                                        volume = 1;
+                                        break;
+                                }
+                                if (diff != 3)
+                                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + mode) with { Volume = volume });
+                                else
+                                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Maso") with { Volume = volume });
+                            }
+                        }
+                        break;
+                }
+            }
         }
     }
 }

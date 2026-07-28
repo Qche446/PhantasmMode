@@ -6,11 +6,12 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Common.MetaBalls
 {
-    public abstract class FixedMetaball<T> : MetaballType where T : FixedMetaball<T>
+    public abstract class FixedMetaball : MetaballType
     {
         public override bool ShouldRender => ActiveParticleCount >= 1;
         public override bool DrawnManually => true;
         public override bool LayerIsFixedToScreen(int layerIndex) => true;
+        /*
         public override void Load()
         {
             LuMetaBallDrawfixed.NewMetaBallRtEvent += FixedDraw;
@@ -19,6 +20,7 @@ namespace FargosPhantasmMode.Common.MetaBalls
         {
             LuMetaBallDrawfixed.NewMetaBallRtEvent -= FixedDraw;
         }
+        
         public virtual void FixedDraw()
         {
             T instance = ModContent.GetInstance<T>();
@@ -33,5 +35,6 @@ namespace FargosPhantasmMode.Common.MetaBalls
                 Main.spriteBatch.End();
             }
         }
+        */
     }
 }

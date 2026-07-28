@@ -204,7 +204,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             if (++npc.ai[1] >= 60)
             {
                 SoundEngine.PlaySound(SoundID.Roar, npc.HasValidTarget ? Main.player[npc.target].Center : npc.Center);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
+                if (FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
                 ChooseNext(npc);
                 npc.defense -= 30;
                 npc.dontTakeDamage = false;
@@ -310,10 +311,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             Movement(npc, targetCenter, speed, accel);
             if (npc.ai[1] % 60 == 0)
             {
-                NPC.NewNPC(npc.GetSource_FromAI(), (int)npc.Center.X, (int)npc.Center.Y, NPCID.ServantofCthulhu);
+                int n = NPC.NewNPC(npc.GetSource_FromAI(), (int)npc.Center.X, (int)npc.Center.Y, NPCID.ServantofCthulhu);
+                if (n != Main.maxNPCs)
+                {
+                    if (Main.netMode == NetmodeID.Server)
+                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n);
+                }
                 for (float i = 1; i < 5; i += 1.5f)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, i * direct, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+                    if (FargoSoulsUtil.HostCheck)
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, i * direct, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
                 }
                 npc.netUpdate = true;
             }
@@ -335,7 +342,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.netUpdate = true;
                 if (npc.netSpam > 10)
                     npc.netSpam = 10;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 60);
+                if (Main.netMode != 1)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 60);
             }
             if (npc.ai[1] > 40)
             {
@@ -350,7 +358,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             else // 冲刺方向跟随速度
             {
                 Vector2 vel = 1.5f * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
-                if (npc.ai[1] <= 70 && npc.ai[1] % 8 == 0)
+                if (npc.ai[1] <= 70 && npc.ai[1] % 8 == 0 && FargoSoulsUtil.HostCheck)
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
             }
             if (++npc.ai[1] > 85)
@@ -382,7 +390,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Vector2 EllipseVel = new (150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
                     EllipseVel *= (j + 2f) / 2f;
                     Vector2 vel = EllipseVel.RotatedBy(npc.rotation + MathHelper.PiOver2) / 10f;
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
                 }
             }
             if (++npc.ai[1] > 90)
@@ -517,17 +526,20 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 6 + Main.rand.Next(1, 4);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
-                FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
-                for (int i = 0; i < 8; i++)
+                if (Main.netMode != 1)
                 {
-                    for (float j = -1; j <= 1; j += 2)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                    FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
+                    for (int i = 0; i < 8; i++)
                     {
-                        double angle = i * MathHelper.TwoPi / 8 * j;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= (j + 2f) / 2f;
-                        Vector2 vel = EllipseVel / 15f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        for (float j = -1; j <= 1; j += 2)
+                        {
+                            double angle = i * MathHelper.TwoPi / 8 * j;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= (j + 2f) / 2f;
+                            Vector2 vel = EllipseVel / 15f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        }
                     }
                 }
                 npc.netUpdate = true;
@@ -596,7 +608,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 distance.Y += Main.rand.NextFloat(-200, 200); //randomness otherwise pattern basically becomes static
                 npc.localAI[0] = distance.X + player.Center.X;
                 npc.localAI[1] = distance.Y + player.Center.Y;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(), 0, 0, Main.myPlayer, 120, npc.whoAmI);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(), 0, 0, Main.myPlayer, 120, npc.whoAmI);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] < 120)
@@ -647,8 +662,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.localAI[2] = (player.Center - new Vector2(npc.localAI[0], npc.localAI[1])).ToRotation();
                 npc.rotation = npc.localAI[2] - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -1, (float)FalseEoC.MoveType.Straight, 60);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -1, (float)FalseEoC.MoveType.Straight, 60);
+                }
             }
             if (npc.ai[1] == 120)
             {
@@ -658,7 +676,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                if (FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
                 npc.netUpdate = true;
             }
             if (npc.ai[1]> 120)
@@ -673,7 +692,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Main.dust[d].noLight = true;
                     Main.dust[d].velocity *= 4f;
                 }
-                if (npc.ai[1] % 3 == 0)
+                if (npc.ai[1] % 3 == 0 && FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
                     //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 2 * Main.rand.NextVector2Unit(), ModContent.ProjectileType<MoonFireProj>(), 0, 0, Main.myPlayer);
@@ -756,30 +775,33 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 8 + Main.rand.Next(1, 7);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
-                FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
-                for (int i = 0; i < 8; i++)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    for (float j = -1; j <= 1; j += 2)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                    FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
+                    for (int i = 0; i < 8; i++)
                     {
-                        double angle = i * MathHelper.TwoPi / 8 * j;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= (j + 3f) / 2f;
-                        Vector2 vel = EllipseVel / 30f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, player.Center.X, player.Center.Y, 40);
-                        j += 2;
+                        for (float j = -1; j <= 1; j += 2)
+                        {
+                            double angle = i * MathHelper.TwoPi / 8 * j;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= (j + 3f) / 2f;
+                            Vector2 vel = EllipseVel / 30f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, player.Center.X, player.Center.Y, 40);
+                            j += 2;
+                        }
                     }
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    for (float j = -1; j <= 1; j += 2)
+                    for (int i = 0; i < 8; i++)
                     {
-                        j += 2;
-                        double angle = i * MathHelper.TwoPi / 8 * j;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= (j + 2f) / 3f;
-                        Vector2 vel = EllipseVel / 10f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        for (float j = -1; j <= 1; j += 2)
+                        {
+                            j += 2;
+                            double angle = i * MathHelper.TwoPi / 8 * j;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= (j + 2f) / 3f;
+                            Vector2 vel = EllipseVel / 10f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        }
                     }
                 }
                 npc.netUpdate = true;
@@ -826,8 +848,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
                 npc.localAI[0] = distance.X + player.Center.X;
                 npc.localAI[1] = distance.Y + player.Center.Y;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(),
-                    -1, 0, Main.myPlayer, intervel, npc.whoAmI);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(),
+                        -1, 0, Main.myPlayer, intervel, npc.whoAmI);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] < intervel && npc.ai[1] > 0.75f * (float)intervel)
@@ -888,7 +913,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                         Main.dust[d].velocity *= 4f;
                     }
                 }
-                if (npc.ai[1] % 2 == 0)
+                if (npc.ai[1] % 2 == 0 && FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
                     
@@ -906,8 +931,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.localAI[2] = (player.Center - new Vector2(npc.localAI[0], npc.localAI[1])).ToRotation();
                 npc.rotation = npc.localAI[2] - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -1, (float)FalseEoC.MoveType.Straight, 60);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -1, (float)FalseEoC.MoveType.Straight, 60);
+                }
             }
             if (npc.ai[1] == intervel)
             {
@@ -918,30 +946,33 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
                 SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
-                for (int i = 0; i < 8; i++)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    Vector2 dir = npc.SafeDirectionTo(player.Center).RotatedBy(MathHelper.PiOver2);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Vector2 dir = npc.SafeDirectionTo(player.Center).RotatedBy(MathHelper.PiOver2);
 
-                    for (float j = -1; j <= 1; j += 1)
-                    {
-                        Vector2 target = player.Center + j * 600* dir;
-                        double angle = i * MathHelper.TwoPi / 8;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= 2f;
-                        Vector2 vel = EllipseVel.RotatedBy(npc.rotation + MathHelper.PiOver2) / 20f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, target.X, target.Y, 40);
+                        for (float j = -1; j <= 1; j += 1)
+                        {
+                            Vector2 target = player.Center + j * 600 * dir;
+                            double angle = i * MathHelper.TwoPi / 8;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= 2f;
+                            Vector2 vel = EllipseVel.RotatedBy(npc.rotation + MathHelper.PiOver2) / 20f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, target.X, target.Y, 40);
+                        }
                     }
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    for (float j = -1; j <= 1; j += 2)
+                    for (int i = 0; i < 8; i++)
                     {
-                        double angle = i * MathHelper.TwoPi / 8 * j;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= (j + 2f) / 4f;
-                        Vector2 vel = EllipseVel.RotatedBy(npc.rotation + MathHelper.PiOver2) / 10f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        for (float j = -1; j <= 1; j += 2)
+                        {
+                            double angle = i * MathHelper.TwoPi / 8 * j;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= (j + 2f) / 4f;
+                            Vector2 vel = EllipseVel.RotatedBy(npc.rotation + MathHelper.PiOver2) / 10f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        }
                     }
                 }
                 npc.netUpdate = true;
@@ -999,23 +1030,30 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.localAI[2] = dir.ToRotation();
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 150 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 6 * 15);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 6 * 15);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] % 15 == 0 && npc.ai[1] <= 5 * 15 && npc.ai[1] > 0)
             {
                 npc.localAI[2] += 120 * MathF.PI / 180f;
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                }
                 npc.netUpdate = true;
             }
             if ((npc.ai[1] - 80) % 15 == 0 && npc.ai[1] >= 80 && npc.ai[1] <= 80 + 15 * 6)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                if(FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                 ReleaseDust(npc, 100);
                 SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
                 npc.alpha = 0;
@@ -1032,7 +1070,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
                 }
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.05f * npc.velocity.RotatedBy(-MathHelper.PiOver2), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer);
+                if(FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.05f * npc.velocity.RotatedBy(-MathHelper.PiOver2), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer);
             }
             if (npc.ai[1] > 80 + 6 * 15)
             {
@@ -1074,24 +1113,33 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.localAI[2] = dir.ToRotation();
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 707 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 135 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 135 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 66.67f * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 8 * 15);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 135 * MathF.PI / 180f);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 66.67f * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 8 * 15);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] % 15 == 0 && npc.ai[1] <= 8 * 15 && npc.ai[1] > 0)
             {
                 npc.localAI[2] += 90 * MathF.PI / 180f;
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 707 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 135 * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 135 * MathF.PI / 180f);
+                }
                 npc.netUpdate = true;
             }
             if ((npc.ai[1] - 80) % 15 == 1 && npc.ai[1] >= 80 + 1 && npc.ai[1] <= 80 + 15 * 8 + 1)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
-                ReleaseDust(npc, 100);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    ReleaseDust(npc, 100);
+                }
                 SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
                 npc.alpha = 0;
                 float speed = npc.velocity.Length();
@@ -1102,7 +1150,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     ScreenShakeSystem.StartShake(5);
                 npc.netUpdate = true;
             }
-            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 8 * 15)
+            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 8 * 15 && FargoSoulsUtil.HostCheck)
             {
                 if (npc.ai[1] % 3 == 0)
                 {
@@ -1153,10 +1201,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.localAI[2] = dir.ToRotation();
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 150 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 3 * 15);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 3 * 15);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] % 15 == 0 && npc.ai[1] <= 5 * 15 && npc.ai[1] > 0)
@@ -1170,22 +1221,28 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 150 * MathF.PI / 180f);
                     Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
                     -50, (int)movetype, 3 * 15);
-                }    
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                }
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 150 * MathF.PI / 180f);
+                }
                 npc.netUpdate = true;
             }
             if ((npc.ai[1] - 80) % 15 == 0 && npc.ai[1] >= 80 && npc.ai[1] <= 80 + 15 * 6)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
-                ReleaseDust(npc, 100);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    ReleaseDust(npc, 100);
+                }
                 SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
                 npc.netUpdate = true;
             }
-            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15)
+            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15 && FargoSoulsUtil.HostCheck)
             {
                 if (npc.ai[1] % 3 == 0)
                 {
@@ -1237,32 +1294,41 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.localAI[2] = dir.ToRotation();
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 157.5f * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 157.5f * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 157.5f * MathF.PI / 180f);
 
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 15 * 8);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 15 * 8);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] % 15 == 0 && npc.ai[1] <= 7 * 15 && npc.ai[1] > 0)
             {
                 npc.localAI[2] += 135 * MathF.PI / 180f;
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 157.5f * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 157.5f * MathF.PI / 180f);
+                }
                 npc.netUpdate = true;
             }
             if ((npc.ai[1] - 80) % 15 == 0 && npc.ai[1] >= 80 && npc.ai[1] <= 80 + 8 * 15)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
-                ReleaseDust(npc, 100);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    ReleaseDust(npc, 100);
+                }
                 SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
                 npc.netUpdate = true;
             }
-            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 15 * 8)
+            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 15 * 8 && FargoSoulsUtil.HostCheck)
             {
                 if (npc.ai[1] % 3 == 0)
                 {
@@ -1315,25 +1381,34 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.localAI[2] = dir.ToRotation();
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + r * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 90f * MathF.PI / 180f);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 90 * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 90 * MathF.PI / 180f);
 
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 50 * 2);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 50 * 2);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] % 10 == 0 && npc.ai[1] <= 50 * 2 && npc.ai[1] > 0)
             {
                 npc.localAI[2] += 15f * 0.1f;
                 Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + r * Vector2.UnitX.RotatedBy(npc.localAI[2]);
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, npc.localAI[2] + 90 * MathF.PI / 180f);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, npc.localAI[2] + 90 * MathF.PI / 180f);
+                }
                 npc.netUpdate = true;
             }
             if ((npc.ai[1] - 80) % 10 == 0 && npc.ai[1] >= 80 && npc.ai[1] <= 80 + 50 * 2)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
-                ReleaseDust(npc, 100);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    ReleaseDust(npc, 100);
+                }
                 if ((npc.ai[1] - 80) % 20 == 0)
                     SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
                 npc.alpha = 0;
@@ -1341,7 +1416,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     ScreenShakeSystem.StartShake(5);
                 npc.netUpdate = true;
             }
-            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 50 * 2)
+            if (npc.ai[1] > 80 && npc.ai[1] < 80 + 50 * 2 && FargoSoulsUtil.HostCheck)
             {
                 if (npc.ai[1] % 3 == 0)
                 {
@@ -1409,10 +1484,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     float angle = i * MathHelper.PiOver2 + MathHelper.PiOver4 + npc.localAI[2];
                     Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 1000 * Vector2.UnitX.RotatedBy(angle);
                     Vector2 vel = Vector2.UnitX.RotatedBy(angle + 135 * MathF.PI / 180f);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, vel.ToRotation());
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 25);
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, vel.ToRotation());
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 25);
+                    }
                 }
                 
                 //Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
@@ -1433,9 +1511,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     float angle = i * MathHelper.PiOver2 + MathHelper.PiOver4 + npc.localAI[2];
                     Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 1000 * Vector2.UnitX.RotatedBy(angle);
                     Vector2 vel = Vector2.UnitX.RotatedBy(angle + 135 * MathF.PI / 180f);
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -1, (int)movetype, 15);
-                    Main.projectile[p].localAI[2] = 1;//启用发射弹幕
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        int p = Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -1, (int)movetype, 15);
+                        Main.projectile[p].localAI[2] = 1;//启用发射弹幕
+                    }
                 }
                 npc.rotation = npc.velocity.ToRotation() + MathHelper.PiOver2;
                 npc.netUpdate = true;
@@ -1494,10 +1575,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     float angle = i * MathHelper.PiOver2 + MathHelper.PiOver4 + npc.localAI[2];
                     Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 600 * Vector2.UnitX.RotatedBy(angle);
                     Vector2 vel = Vector2.UnitX.RotatedBy(angle + 90 * MathF.PI / 180f);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
-                    80, npc.whoAmI, vel.ToRotation());
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 24);//一半
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, Vector2.Zero, ModContent.ProjectileType<SuperEoCTpTelegraph>(), 0, 0, Main.myPlayer,
+                        80, npc.whoAmI, vel.ToRotation());
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 24);//一半
+                    }
                 }
                 npc.netUpdate = true;
             }
@@ -1513,9 +1597,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     float angle = i * MathHelper.PiOver2 + MathHelper.PiOver4 + npc.localAI[2];
                     Vector2 spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 600 * Vector2.UnitX.RotatedBy(angle);
                     Vector2 vel = Vector2.UnitX.RotatedBy(angle + 90 * MathF.PI / 180f);
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -1, (int)movetype, 24);
-                    Main.projectile[p].localAI[2] = 1;//启用发射弹幕
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        int p = Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                            -1, (int)movetype, 24);
+                        Main.projectile[p].localAI[2] = 1;//启用发射弹幕
+                    }
                 }
                 npc.rotation = npc.velocity.ToRotation() + MathHelper.PiOver2;
                 npc.netUpdate = true;
@@ -1576,7 +1663,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 distance.Y += Main.rand.NextFloat(-200, 200); //randomness otherwise pattern basically becomes static
                 npc.localAI[0] = distance.X;
                 npc.localAI[1] = distance.Y;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(), 0, 0, Main.myPlayer, 120, npc.whoAmI);
+                if (FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), Vector2.Zero, ModContent.ProjectileType<EoCTpTelegraph>(), 0, 0, Main.myPlayer, 120, npc.whoAmI);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] < 120)
@@ -1627,8 +1715,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.localAI[2] = (player.Center - new Vector2(npc.localAI[0], npc.localAI[1])).ToRotation();
                 npc.rotation = npc.localAI[2] - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -1, (float)FalseEoC.MoveType.Straight, 60);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), new Vector2(npc.localAI[0], npc.localAI[1]), 48 * npc.localAI[2].ToRotationVector2(), ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -1, (float)FalseEoC.MoveType.Straight, 60);
+                }
             }
             if (npc.ai[1] == 120)
             {
@@ -1639,7 +1730,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                }
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 120)
@@ -1654,7 +1748,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Main.dust[d].noLight = true;
                     Main.dust[d].velocity *= 4f;
                 }
-                if (npc.ai[1] % 3 == 0)
+                if (npc.ai[1] % 3 == 0 && FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
                     //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 2 * Main.rand.NextVector2Unit(), ModContent.ProjectileType<MoonFireProj>(), 0, 0, Main.myPlayer);
@@ -1736,21 +1830,24 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 5 + Main.rand.Next(0, 3);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
-                FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
-                /*
-                for (int i = 0; i < 8; i++)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    for (float j = -1; j <= 1; j += 2)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
+                    FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
+                    /*
+                    for (int i = 0; i < 8; i++)
                     {
-                        double angle = i * MathHelper.TwoPi / 8 * j;
-                        Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                        EllipseVel *= (j + 2f) / 2f;
-                        Vector2 vel = EllipseVel / 10f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        for (float j = -1; j <= 1; j += 2)
+                        {
+                            double angle = i * MathHelper.TwoPi / 8 * j;
+                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            EllipseVel *= (j + 2f) / 2f;
+                            Vector2 vel = EllipseVel / 10f;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        }
                     }
+                    */
                 }
-                */
                 npc.netUpdate = true;
                 if (npc.netSpam > 10)
                     npc.netSpam = 10;
@@ -1780,13 +1877,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.velocity.Y = 0f;
                 npc.rotation += npc.localAI[1];
                 float i = npc.ai[1] - 60f;
-                for (float j = -1; j <= 1; j += 2)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    double angle = i * MathHelper.TwoPi / 20 * j;
-                    Vector2 EllipseVel = new(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
-                    EllipseVel *= (j + 2f) / 2f;
-                    Vector2 vel = EllipseVel.RotatedBy(npc.localAI[2]) / 10f;
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                    for (float j = -1; j <= 1; j += 2)
+                    {
+                        double angle = i * MathHelper.TwoPi / 20 * j;
+                        Vector2 EllipseVel = new(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
+                        EllipseVel *= (j + 2f) / 2f;
+                        Vector2 vel = EllipseVel.RotatedBy(npc.localAI[2]) / 10f;
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                    }
                 }
             }
             if (++npc.ai[1] > 30 + 40)
@@ -1821,7 +1921,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             npc.velocity *= 0.92f; // 水平减速
             npc.rotation = npc.velocity.ToRotation() + MathHelper.PiOver2;
             Vector2 mutantEyePos = npc.Center + new Vector2(-5f, -12f); // Mutant眼睛位置
-            if (DeathTimer == 1)
+            if (DeathTimer == 1 && FargoSoulsUtil.HostCheck)
             {
                 FargoSoulsUtil.ClearHostileProjectiles(2, npc.whoAmI);
                 if (FargoSoulsUtil.HostCheck)
@@ -1932,43 +2032,49 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         
         private static void FancyFireballs(NPC npc, int repeats)
         {
-            float modifier = 0;
-            for (int i = 0; i < repeats; i++)
-                modifier = MathHelper.Lerp(modifier, 1f, 0.08f);
-
-            float distance = 1400 * (1f - modifier);
-            float rotation = MathHelper.TwoPi * modifier;
-            const int max = 6;
-            for (int i = 0; i < max; i++)
+            if (FargoSoulsUtil.HostCheck)
             {
-                int d = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.SnowSpray, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
-                int p = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(-rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.Vortex, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
-                Main.dust[d].noGravity = true;
-                Main.dust[d].scale = 1.5f - 0.8f * modifier;
-                Main.dust[p].noGravity = true;
-                Main.dust[p].scale = 1.5f - 0.8f * modifier;
+                float modifier = 0;
+                for (int i = 0; i < repeats; i++)
+                    modifier = MathHelper.Lerp(modifier, 1f, 0.08f);
+
+                float distance = 1400 * (1f - modifier);
+                float rotation = MathHelper.TwoPi * modifier;
+                const int max = 6;
+                for (int i = 0; i < max; i++)
+                {
+                    int d = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.SnowSpray, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
+                    int p = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(-rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.Vortex, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
+                    Main.dust[d].noGravity = true;
+                    Main.dust[d].scale = 1.5f - 0.8f * modifier;
+                    Main.dust[p].noGravity = true;
+                    Main.dust[p].scale = 1.5f - 0.8f * modifier;
+                }
             }
         }
         private static void ReleaseDust(NPC npc, int num = 2)
         {
-            for (int i = 0; i < num; i++)
+            if (FargoSoulsUtil.HostCheck)
             {
-                int randdistance = Main.rand.Next(200, 600);
-                float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
-                Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
-                int d = Dust.NewDust(npc.Center, 0, 0, DustID.SnowSpray, vel.X, vel.Y, 150);
-                Main.dust[d].noGravity = true;
-                Main.dust[d].scale = Main.rand.NextFloat(1.2f, 1.5f);
-            }
-            for (int i = 0; i < num; i++)
-            {
-                int randdistance = Main.rand.Next(50, 600);
-                float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
-                Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 5;
-                Vector2 spawnPos = npc.Center + vel / 10;
-                int p = Dust.NewDust(spawnPos, 0, 0, DustID.Vortex, vel.X, vel.Y, 150);
-                Main.dust[p].noGravity = true;
-                Main.dust[p].scale = Main.rand.NextFloat(1.2f, 1.5f);
+                for (int i = 0; i < num; i++)
+                {
+                    int randdistance = Main.rand.Next(200, 600);
+                    float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
+                    Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
+                    int d = Dust.NewDust(npc.Center, 0, 0, DustID.SnowSpray, vel.X, vel.Y, 150);
+                    Main.dust[d].noGravity = true;
+                    Main.dust[d].scale = Main.rand.NextFloat(1.2f, 1.5f);
+                }
+                for (int i = 0; i < num; i++)
+                {
+                    int randdistance = Main.rand.Next(50, 600);
+                    float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
+                    Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 5;
+                    Vector2 spawnPos = npc.Center + vel / 10;
+                    int p = Dust.NewDust(spawnPos, 0, 0, DustID.Vortex, vel.X, vel.Y, 150);
+                    Main.dust[p].noGravity = true;
+                    Main.dust[p].scale = Main.rand.NextFloat(1.2f, 1.5f);
+                }
             }
         }
         private static void ShootBackMoonBolt(NPC npc, int num)
@@ -1978,7 +2084,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 float angle = Main.rand.NextFloat(-MathHelper.PiOver4, MathHelper.PiOver4);
                 Vector2 vel = npc.velocity.RotatedBy(angle);
                 Vector2 targetPos = npc.Center - 10 * npc.velocity;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, targetPos.X, targetPos.Y, 40);
+                if (FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, targetPos.X, targetPos.Y, 40);
             }
         }
         private void RecordLast()
@@ -2184,6 +2291,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             return false;
             */
             return true;
+        }
+        public override void SafeModifyHitByProjectile(NPC npc, Projectile projectile, ref NPC.HitModifiers modifiers)
+        {
+            if (projectile.type == ProjectileID.ThornChakram)
+                modifiers.FinalDamage *= 0.75f;
+            base.SafeModifyHitByProjectile(npc, projectile, ref modifiers);
         }
     }
 }

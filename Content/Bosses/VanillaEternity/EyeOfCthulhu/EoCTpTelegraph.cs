@@ -147,7 +147,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             NPC parent = FargoSoulsUtil.NPCExists(ParentIndex);
             if (parent == null || parent.active == false)
+            {
                 Projectile.Kill();
+                return;
+            }
             
             // Ramp up the scale and rotation over time
             float ratio = 1f - Math.Abs(Timer) / Projectile.localAI[0];
@@ -164,6 +167,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 parent.velocity = 80 * Vector2.UnitX.RotatedBy(Projectile.ai[2]);
                 parent.rotation = parent.velocity.ToRotation() - MathHelper.PiOver2;
                 Projectile.Kill();
+                return;
             }
             Timer--;
 

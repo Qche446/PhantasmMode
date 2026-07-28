@@ -1,4 +1,5 @@
-﻿using FargowiltasSouls;
+﻿using FargosPhantasmMode.Core.Systems;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Armor;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Content.Projectiles.Minions;
@@ -24,7 +25,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
             int baseDamage = FargoSoulsUtil.HighestDamageTypeScaling(Main.LocalPlayer, 666);
             if (!Main.hardMode)
                 baseDamage /= 2;
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 if (NPC.downedMechBoss1 || NPC.downedMechBoss2 || NPC.downedMechBoss3) baseDamage *= 2;
                 if (NPC.downedPlantBoss) baseDamage = (int)(2f * baseDamage);
@@ -32,7 +33,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                 if (NPC.downedMoonlord) baseDamage = (int)(2.5f * baseDamage);
                 if (WorldSavingSystem.downedAbom) baseDamage = (int)(1f * baseDamage);
             }
-            if (WorldSavingSystem.masochistModeReal && (item.type == ModContent.ItemType<NekomiHood>() || item.type == ModContent.ItemType<NekomiHoodie>() || item.type == ModContent.ItemType<NekomiLeggings>()))
+            if (PModeWorldSavingSystem.PhantasmMode && (item.type == ModContent.ItemType<NekomiHood>() || item.type == ModContent.ItemType<NekomiHoodie>() || item.type == ModContent.ItemType<NekomiLeggings>()))
             {
                 var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Nekomi") + baseDamage + "(" + 666 + ")")
                 {
@@ -69,7 +70,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                         int baseDamage = FargoSoulsUtil.HighestDamageTypeScaling(player, 666);
                         if (!Main.hardMode)
                             baseDamage /= 2;
-                        if (WorldSavingSystem.masochistModeReal)
+                        if (PModeWorldSavingSystem.PhantasmMode)
                         {
                             if (NPC.downedMechBoss1 || NPC.downedMechBoss2 || NPC.downedMechBoss3) baseDamage *= 2;
                             if (NPC.downedPlantBoss) baseDamage = (int)(2f * baseDamage);
@@ -78,7 +79,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                             if (WorldSavingSystem.downedAbom) baseDamage = (int)(1f * baseDamage);
                         }
                         int p = FargoSoulsUtil.NewSummonProjectile(player.GetSource_Misc(""), player.Center, Vector2.Zero, ModContent.ProjectileType<NekomiDevi>(), baseDamage, 16f, player.whoAmI);
-                        if (NPC.downedMoonlord && WorldSavingSystem.masochistModeReal) Main.projectile[p].scale *= 2;
+                        if (NPC.downedMoonlord && PModeWorldSavingSystem.PhantasmMode) Main.projectile[p].scale *= 2;
                         SoundEngine.PlaySound(SoundID.Item43, player.Center);
                         modPlayer.NekomiMeter = 0;
                         modPlayer.NekomiAttackReadyTimer = 0;

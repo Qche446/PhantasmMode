@@ -1,0 +1,8 @@
+TimeTrickKeyEffect: {
+	DisplayName: 时神把戏
+	Tooltip:
+		'''
+		一段时间内，所有技能启动高速自充能
+		加速技能冷却，加速减益类冷却消耗
+		'''
+}

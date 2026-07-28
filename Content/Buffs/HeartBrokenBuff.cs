@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using FargosPhantasmMode.Content.Buffs.Global;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -15,7 +16,12 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
+            npc.GetGlobalNPC<PModeGlobalBuffNPC>().HeartBroken = true;
             base.Update(npc, ref buffIndex);
+        }
+        public override void Update(Player player, ref int buffIndex)
+        {
+            player.statLifeMax2 -= (int)(player.statLifeMax * 0.5f);
         }
     }
     
@@ -27,7 +33,7 @@ namespace FargosPhantasmMode.Content.Buffs
         private float healthPrecentage = 0;
         public override void ResetEffects(NPC npc)
         {
-            bool hasBuff = npc.HasBuff(ModContent.BuffType<HeartBrokenBuff>());
+            bool hasBuff = npc.GetGlobalNPC<PModeGlobalBuffNPC>().HeartBroken;
             healthPrecentage = npc.GetLifePercent();
             if (hasBuff)
             {

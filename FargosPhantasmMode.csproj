@@ -44,6 +44,22 @@
 	  <None Remove="Content\Sky\MutantSky2.png" />
 	  <None Remove="Content\Sky\MutantSky_April.png" />
 	  <None Remove="Content\Sky\MutantStatic.png" />
+	  <None Remove="Content\UI\PhantasmIcon.png" />
+	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Buffs.hjson" />
+	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Projectiles.hjson" />
+	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.SpecialEnhance.hjson" />
+	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Toggler.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\ActiveSkills.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Armor.hjson" />
+	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Buffs.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Enchantments.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Items.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Masomode.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\NPCs.hjson" />
+	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Projectiles.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\SpecialEnhance.hjson" />
+	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Toggler.hjson" />
+	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\UI.hjson" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -81,6 +97,7 @@
 	  <Folder Include="Content\Bosses\VanillaEternity\KingSlime\" />
 	  <Folder Include="Content\Projectiles\Souls\" />
 	  <Folder Include="Content\Dusts\" />
+	  <Folder Include="Core\PModeBalance\" />
 	</ItemGroup>
 
 	<ItemGroup>

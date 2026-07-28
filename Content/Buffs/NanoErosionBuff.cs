@@ -21,9 +21,11 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
+            npc.GetGlobalNPC<PModeGlobalBuffNPC>().NanoErosion = true;
             base.Update(npc, ref buffIndex);
         }
     }
+    /*
     public class NanoErosionDotEnhance : ModSystem
     {
         public override void Load()
@@ -71,4 +73,5 @@ namespace FargosPhantasmMode.Content.Buffs
             c.Emit(OpCodes.Ret);
         }
     }
+    */
 }

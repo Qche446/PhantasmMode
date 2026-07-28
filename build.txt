@@ -1,5 +1,5 @@
 displayName = Fargo's Phantasm Mode
 author = Qche
 version = 0.22
-modReferences = FargowiltasSouls@1.7.3.9
+modReferences = FargowiltasSouls@1.7.3.9,Fargowiltas@3.3.6, Luminance@1.0.3
 sortAfter = FargowiltasSouls

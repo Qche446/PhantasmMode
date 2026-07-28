@@ -1,5 +1,11 @@
-﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Bionomic;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Chalice;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.HeartMasochist;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.SupremeDeath;
 using FargosPhantasmMode.Content.Render;
+using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Content.Items.Accessories.Souls;
@@ -20,7 +26,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
             => entity.type == ModContent.ItemType<MasochistSoul>();
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Masomode.MasochistSoul.Base"))
                 {
@@ -34,7 +40,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
         }
         public override bool PreDrawTooltipLine(Item item, DrawableTooltipLine line, ref int yOffset)
         {
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 if (line.Name == "PHAddTooltipsExtra")
                 {
@@ -46,12 +52,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
         }
         public override void UpdateAccessory(Item item, Player player, bool hideVisual)
         {
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 //告死
                 player.AddEffect<NecroSpinSpeedEffect>(item);
-                if (ModContent.GetInstance<NecroSpinSpeedEffect>().speed == 0.5f)
-                    ModContent.GetInstance<NecroSpinSpeedEffect>().speed = 0.3f;
+
                 //电路
                 player.AddEffect<FusedLensMechElectricOrbEffect>(item);
                 player.AddEffect<ReinforcedPlatingNanoErosionEffect>(item);
@@ -83,7 +88,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
         }
         public override void UpdateInventory(Item item, Player player)
         {
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 //告死
                 player.AddEffect<PlatformFallthroughEffect>(item);
@@ -94,7 +99,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
 
         public override void UpdateVanity(Item item, Player player)
         {
-            if (WorldSavingSystem.masochistModeReal)
+            if (PModeWorldSavingSystem.PhantasmMode)
             {
                 //告死
                 player.AddEffect<PlatformFallthroughEffect>(item);

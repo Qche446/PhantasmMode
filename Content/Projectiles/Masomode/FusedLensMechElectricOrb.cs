@@ -1,5 +1,6 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry;
+using Fargowiltas.Common.Configs;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Common.Graphics.Particles;
@@ -56,14 +57,14 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
 
         public override void SetDefaults()
         {
-            base.Projectile.width = 24;
-            base.Projectile.height = 24;
-            base.Projectile.aiStyle = -1;
-            base.Projectile.alpha = 50;
-            base.Projectile.tileCollide = false;
-            base.Projectile.ignoreWater = true;
-            base.Projectile.timeLeft = 18000;
-            base.Projectile.friendly = true;
+            Projectile.width = 24;
+            Projectile.height = 24;
+            Projectile.aiStyle = -1;
+            Projectile.alpha = 50;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+            Projectile.timeLeft = 18000;
+            Projectile.friendly = true;
             Projectile.penetrate = 2;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 10;
@@ -123,6 +124,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
                     MechElectricMovement(Projectile, player.Center, 0.01f, 30);
                 }
             }
+            Projectile.Opacity = ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
             #region 原AI部分
             if (++base.Projectile.frameCounter > 6)
             {

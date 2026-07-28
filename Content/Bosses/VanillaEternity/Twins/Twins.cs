@@ -190,7 +190,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     {
                         int orbColor = (j - 1.5f) > 0 ? MechElectricOrb.Yellow : MechElectricOrb.Green;
                         double interangle = i * (1 + Math.Sin(npc.ai[1] * MathHelper.Pi / 90 + j * Minister)) * MathHelper.Pi / 2f;
-                        if (Math.Abs(interangle) > inter * MathF.PI / 180f)
+                        if (Math.Abs(interangle) > inter * MathF.PI / 180f && FargoSoulsUtil.HostCheck)
                         {
                             Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
                                 maxspeed * vel.RotatedBy(interangle), projType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
@@ -244,10 +244,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 Vector2 spawnPos = ShootPos(npc);
                 for (int i = -spread; i <= spread; i++)
                 {
-                    Vector2 shotVel2 = vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer
-                        );
-                    SpawnElectricSpark(npc, vel);
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Vector2 shotVel2 = vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
+                        SpawnElectricSpark(npc, vel);
+                    }
                 }
                 npc.velocity -= 0.5f * vel;
             }
@@ -280,6 +282,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                     float chargeSpeed = MathHelper.Lerp(21, 16, modifier);
                     npc.velocity = chargeSpeed * npc.SafeDirectionTo(player.Center);
+                    npc.netUpdate = true;
                 }
                 npc.rotation = npc.velocity.ToRotation() - 1.57f;
                 if (npc.HasValidTarget && ++npc.ai[3] > 2) //cursed flamethrower when dashing
@@ -430,6 +433,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     float chargeSpeed = MathHelper.SmoothStep(30, 40f, progress);
                     npc.velocity = chargeSpeed * npc.SafeDirectionTo(player.Center);
                     npc.rotation = npc.velocity.ToRotation() - 1.57f;
+                    ScreenShakeSystem.StartShake(3f);
+                    npc.netUpdate = true;
                 }
 
                 if (npc.HasValidTarget && ++npc.ai[3] > 2) //cursed flamethrower when dashing
@@ -475,7 +480,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             }
 
             // 弹幕发射计时器
-            if (FargoSoulsUtil.HostCheck && npc.ai[2] > 20)
+            if (npc.ai[2] > 20)
             {
                 //float prece = npc.GetLifePercent();
                 npc.localAI[1] += 1f;
@@ -485,11 +490,14 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     float projectileSpeed = MathHelper.SmoothStep(2, 30, (npc.ai[2] - 20) / 40f);
                     int projectileDamage = FargoSoulsUtil.ScaledProjectileDamage(npc.damage);
                     Vector2 vel = projectileSpeed * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
-                    for (int i = 0; i < 3; i++)
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(soi * MathHelper.Pi / 3f), ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(soi * MathHelper.Pi / 1.5f), ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        for (int i = 0; i < 3; i++)
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(soi * MathHelper.Pi / 3f), ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
+                        //Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(soi * MathHelper.Pi / 1.5f), ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
+                    }
                 }
             }
 
@@ -513,7 +521,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 float AngOff = MathHelper.Pi / 16f;
                 if (npc.ai[1] >= 150)
                     AngOff *= MathHelper.SmoothStep(2, 0.5f, (npc.ai[1] - 150f) / 180f);
-                if (timeLeft > 60)
+                if (timeLeft > 60 && FargoSoulsUtil.HostCheck)
                 {
                     IPTwins pTwins = GetIPTwins(npc);
                     int projType = ModContent.ProjectileType<DarkStarSplit>();
@@ -666,30 +674,33 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 float omiga = MathHelper.Pi * (npc.ai[1] - 120) / (60 * scycletime);
                 omiga = Math.Clamp(omiga, 0, MathHelper.Pi / scycletime);
                 npc.rotation += omiga * npc.localAI[1];
-                for (int i = 0; i < 6; i++)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
-                        30 * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(Main.rand.NextFloat(-(npc.ai[1] - 120) / 24f, (npc.ai[1] - 120) / 24f))),
-                        ModContent.ProjectileType<ShadowFlame>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
-                }
-                for (int i = 0; i < 6; i++)
-                {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center,
-                        30 * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(Main.rand.NextFloat(-(npc.ai[1] - 120) / 24f, (npc.ai[1] - 120) / 24f))),
-                        ProjectileID.EyeFire, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
-                }
-                if (npc.ai[1] >= 120 & npc.ai[1] % 10 == 0)
-                {
-                    for (int i = 3; i <= 9; i++)
+                    for (int i = 0; i < 6; i++)
                     {
-                        Vector2 target = 100 * i * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2) + npc.Center;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), target,
-                            Vector2.Normalize(player.Center - target), ModContent.ProjectileType<DarkStarSpaz>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
-                            Main.myPlayer, npc.target, ai2: MechElectricOrb.Green);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
+                            30 * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(Main.rand.NextFloat(-(npc.ai[1] - 120) / 24f, (npc.ai[1] - 120) / 24f))),
+                            ModContent.ProjectileType<ShadowFlame>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
+                    }
+                    for (int i = 0; i < 6; i++)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center,
+                            30 * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(Main.rand.NextFloat(-(npc.ai[1] - 120) / 24f, (npc.ai[1] - 120) / 24f))),
+                            ProjectileID.EyeFire, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
+                    }
+                    if (npc.ai[1] >= 120 & npc.ai[1] % 10 == 0)
+                    {
+                        for (int i = 3; i <= 9; i++)
+                        {
+                            Vector2 target = 100 * i * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2) + npc.Center;
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), target,
+                                Vector2.Normalize(player.Center - target), ModContent.ProjectileType<DarkStarSpaz>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
+                                Main.myPlayer, npc.target, ai2: MechElectricOrb.Green);
+                        }
                     }
                 }
                 ScreenShakeSystem.StartShake(3f);
-                npc.velocity -= 0.6f * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
+                npc.velocity -= 0.4f * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
             }
             if (++npc.ai[1] > 120 + 360)
             {
@@ -829,7 +840,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 npc.velocity = Vector2.Normalize(npc.velocity) * 28;
             }
-            if (npc.ai[1] % 2 == 0 && npc.ai[1] > 30)
+            if (npc.ai[1] % 2 == 0 && npc.ai[1] > 30 && FargoSoulsUtil.HostCheck)
             {
                 Vector2 vel = Vector2.Normalize(npc.velocity);
                 for (float i = -0.25f; i <= 0.25f; i += 0.25f)
@@ -881,19 +892,22 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 float spreadAngle = 0.45f;
                 int spread = 0;
                 Vector2 spawnPos = ShootPos(npc);
-                if (self.Ignite)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel, ModContent.ProjectileType<DarkStarTwins>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
-                }
-                else
-                {
-                    for (int i = -spread; i <= spread; i++)
+                    if (self.Ignite)
                     {
-                        if (i == 0 && spread != 0)
-                            continue;
-                        Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
-                        SpawnElectricSpark(npc, vel);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel, ModContent.ProjectileType<DarkStarTwins>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
+                    }
+                    else
+                    {
+                        for (int i = -spread; i <= spread; i++)
+                        {
+                            if (i == 0 && spread != 0)
+                                continue;
+                            Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
+                            SpawnElectricSpark(npc, vel);
+                        }
                     }
                 }
                 npc.velocity -= vel;
@@ -969,6 +983,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             int chaseDuration = 360;
             int waittime = 40;
+            //npc.dontTakeDamage = false;
             IPTwins self = GetIPTwins(npc);
             Vector2 desired = player.Center - 500 * Vector2.UnitY.RotatedBy(npc.ai[2] * MathHelper.Pi / 6);
             TwinMove(npc, desired, 40, 4f, 4);
@@ -976,26 +991,29 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (npc.ai[1] >= waittime)
             {
                 int inter = 15;
-                if (npc.ai[1] % inter == 0 && npc.ai[1] > waittime && FargoSoulsUtil.HostCheck)
+                if (npc.ai[1] % inter == 0 && npc.ai[1] > waittime)
                 {
                     Vector2 vel = -player.SafeDirectionTo(ShootPos(npc));
-                    for (int i = -2; i <= 2; i++)
+                    if (FargoSoulsUtil.HostCheck)
                     {
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
-                            20 * vel.RotatedBy(i * MathHelper.Pi / 6), ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
-                            Main.myPlayer, ai2: self.OrbColor);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
-                            30 * vel.RotatedBy(i * MathHelper.Pi / 6), ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
-                            Main.myPlayer, ai2: self.OrbColor);
-                        SpawnElectricSpark(npc, vel);
-                    }
-                    for (float i = 0.7f; i <= 1.6f; i += 0.2f)
-                    {
-                        for (int j = -1; j <= 1; j++)
+                        for (int i = -2; i <= 2; i++)
                         {
                             Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
-                            i * vel.RotatedBy(j * MathHelper.Pi / 3), ModContent.ProjectileType<MechElectricOrbAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
-                            Main.myPlayer, ai2: self.OrbColor);
+                                20 * vel.RotatedBy(i * MathHelper.Pi / 6), ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
+                                Main.myPlayer, ai2: self.OrbColor);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
+                                30 * vel.RotatedBy(i * MathHelper.Pi / 6), ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
+                                Main.myPlayer, ai2: self.OrbColor);
+                            SpawnElectricSpark(npc, vel);
+                        }
+                        for (float i = 0.7f; i <= 1.6f; i += 0.2f)
+                        {
+                            for (int j = -1; j <= 1; j++)
+                            {
+                                Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
+                                i * vel.RotatedBy(j * MathHelper.Pi / 3), ModContent.ProjectileType<MechElectricOrbAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
+                                Main.myPlayer, ai2: self.OrbColor);
+                            }
                         }
                     }
                     npc.ai[2]++;
@@ -1012,7 +1030,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             IPTwins self = GetIPTwins(npc);
             int chaseDuration = self.Phase == 1 ? 320 : 384;
-
+            //npc.dontTakeDamage = false;
             //int flagY = npc.Center.Y > player.Center.Y ? 1 : -1;
             TwinMove(npc, player.Center - 550 * Vector2.UnitY, 9, 0.17f, 1);
             RotateTowards(npc, player.Center);
@@ -1030,28 +1048,32 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (npc.ai[2] > (self.Ignite ? 100f : 170f))
             {
                 npc.ai[2] = 0f;
+                npc.ai[3]++;
                 Vector2 vel = -player.SafeDirectionTo(ShootPos(npc)) * (Main.getGoodWorld ? 1.1f : 1);
                 int laserType = ModContent.ProjectileType<MechElectricOrb>();
                 float spreadAngle = 0.5f;
-                int spread = Main.getGoodWorld ? 1 : 0;
+                int spread = Main.getGoodWorld && npc.ai[3] % 2 == 0 ? 1 : 0;
                 Vector2 spawnPos = ShootPos(npc);
-                if (self.Ignite)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    for (int i = -spread; i <= spread; i++)
+                    if (self.Ignite)
                     {
-                        Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
-                        SpawnElectricSpark(npc, vel);
+                        for (int i = -spread; i <= spread; i++)
+                        {
+                            Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
+                            SpawnElectricSpark(npc, vel);
+                        }
+                        //Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel, ModContent.ProjectileType<DarkStarTwins>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
                     }
-                    //Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel, ModContent.ProjectileType<DarkStarTwins>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
-                }
-                else
-                {
-                    for (int i = -spread; i <= spread; i++)
+                    else
                     {
-                        Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
-                        SpawnElectricSpark(npc, vel);
+                        for (int i = -spread; i <= spread; i++)
+                        {
+                            Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
+                            SpawnElectricSpark(npc, vel);
+                        }
                     }
                 }
                 npc.velocity -= vel;
@@ -1062,6 +1084,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public static void P1_BreathedFire(NPC npc, Player player)
         {
+            //npc.dontTakeDamage = false;
             IPTwins self = GetIPTwins(npc);
             int chaseDuration = 300;
             int flagX = npc.OnRightSideOf(player) ? 1 : -1;
@@ -1113,10 +1136,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     Vector2 spawnPos = self.Ignite ? ShootPos(npc) : npc.Center;
                     if (self.Ignite)
                     {
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
+                        if (FargoSoulsUtil.HostCheck)
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
                         npc.localAI[1] = 2;
                     }
-                    else
+                    else if (FargoSoulsUtil.HostCheck)
                         Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel * Main.rand.NextFloat(0.6f, 1f), projectileType, projectileDamage, 0f, Main.myPlayer);
                 }
             }
@@ -1130,7 +1154,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             IPTwins self = GetIPTwins(npc);
             int chaseDuration = 300;
-            if (npc.ai[2] == 0)
+            if (npc.ai[2] == 0 && FargoSoulsUtil.HostCheck)
             {
                 int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
                 Main.projectile[p].scale *= 1.5f;
@@ -1165,7 +1189,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             }
 
             // 弹幕发射计时器
-            if (FargoSoulsUtil.HostCheck && npc.ai[2] > 60)
+            if (npc.ai[2] > 60)
             {
                 float prece = npc.GetLifePercent();
                 npc.localAI[1] += 1f;
@@ -1178,17 +1202,20 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     float projectileSpeed = MathHelper.SmoothStep(0, 30, (npc.ai[2] - 60) / 60f);
                     int projectileDamage = FargoSoulsUtil.ScaledProjectileDamage(npc.damage);
                     Vector2 vel = projectileSpeed * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
-                    if (self.Ignite)
+                    if (FargoSoulsUtil.HostCheck)
                     {
-                        for (int i = 0; i < 3; i++)
-                            Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
-                    }
-                    else
-                    {
-                        for (int i = 0; i < 3; i++)
-                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel * Main.rand.NextFloat(0.6f, 1f), ProjectileID.EyeFire, projectileDamage, 0f, Main.myPlayer);
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<MechElectricOrbAcc>(), projectileDamage, 0f, Main.myPlayer, ai2: MechElectricOrb.Green);
+                        if (self.Ignite)
+                        {
+                            for (int i = 0; i < 3; i++)
+                                Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel * Main.rand.NextFloat(0.6f, 1f), ModContent.ProjectileType<ShadowFlame>(), projectileDamage, 0f, Main.myPlayer);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<DarkStarAcc>(), projectileDamage, 0f, Main.myPlayer);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < 3; i++)
+                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel * Main.rand.NextFloat(0.6f, 1f), ProjectileID.EyeFire, projectileDamage, 0f, Main.myPlayer);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel, ModContent.ProjectileType<MechElectricOrbAcc>(), projectileDamage, 0f, Main.myPlayer, ai2: MechElectricOrb.Green);
+                        }
                     }
                 }
             }
@@ -1202,7 +1229,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             npc.TryGetGlobalNPC<P_Retinazer>(out P_Retinazer reti);
             npc.velocity *= 0.98f;
-            npc.dontTakeDamage = true;
+            if (npc.ai[1] == 0)
+                npc.dontTakeDamage = true;
             if (npc.velocity.Length() < 0.1f)
                 npc.velocity = Vector2.Zero;
             if (npc.ai[1] < 60)
@@ -1252,7 +1280,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             //IPTwins self = GetIPTwins(npc);
             npc.velocity *= 0.95f;
-            npc.dontTakeDamage = true;
+            if (npc.ai[1] == 0)
+                npc.dontTakeDamage = true;
             if (npc.velocity.Length() < 0.1f)
                 npc.velocity = Vector2.Zero;
             int whoisbro = npc.type == NPCID.Retinazer ? EModeGlobalNPC.spazBoss : EModeGlobalNPC.retiBoss;
@@ -1277,10 +1306,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     npc.ai[2] = 0f;
                 if (npc.ai[1] == 60)
                 {
-                    if (npc.type == NPCID.Retinazer)
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
-                    else
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        if (npc.type == NPCID.Retinazer)
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
+                        else
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
+                    }
                     SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
                     for (int i = 0; i < 20; i++)
                         Dust.NewDust(npc.position, npc.width, npc.height, 5, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
@@ -1297,7 +1329,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         //
         public static void PhaseChange3rd(NPC npc)
         {
-            npc.dontTakeDamage = true;
+            if (npc.ai[1] == 0)
+                npc.dontTakeDamage = true;
             npc.velocity *= 0.95f;
             if (npc.ai[1] == 30 && FargoSoulsUtil.HostCheck)
             {
@@ -1319,8 +1352,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 ChooseAttack(npc);
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 ScreenShakeSystem.StartShake(20f);
-                Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, npc.type, 0, 20);
-                Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, npc.type, 0, 16);
+                if (FargoSoulsUtil.HostCheck)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, npc.type, 0, 20);
+                    Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, npc.type, 0, 16);
+                }
             }
         }
 
@@ -1329,7 +1365,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             int chaseDuration = 390;
             IPTwins re = GetIPTwins(npc);
             npc.velocity *= 0.80f;
-            if (npc.ai[1] == 0)
+            if (npc.ai[1] == 0 && FargoSoulsUtil.HostCheck)
                 Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
             if (npc.ai[1] % 10 == 0 && npc.ai[1] > 30 && npc.ai[1] < chaseDuration)
             {
@@ -1338,10 +1374,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 for (int i = 0; i < max; i++)
                 {
                     Vector2 vel = Vector2.UnitX.RotatedBy((i + max * npc.ai[2] / 120f) * MathHelper.TwoPi / max);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
                         10 * vel, projType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 1f, Main.myPlayer,
                         0, 1, MechElectricOrb.Yellow);
-                    SpawnElectricSpark(npc, vel);
+                        SpawnElectricSpark(npc, vel);
+                    }
                 }
                 npc.ai[2]++;
             }
@@ -1446,7 +1485,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 float baseRotation = -bro.localAI[0] * npc.ai[1] / 60f + npc.ai[2];
                 npc.ai[2] += 0;
 
-                if (timeLeft > 5)
+                if (timeLeft > 5 && FargoSoulsUtil.HostCheck)
                 {
                     IPTwins pTwins = GetIPTwins(npc);
                     int projType = pTwins.Ignite ? ModContent.ProjectileType<DarkStar>() : ModContent.ProjectileType<MechElectricOrb>();
@@ -2584,10 +2623,14 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 if (self.IgniteTimer > max || (self.IgniteTimer >= min && (self.IgniteTimer - min) % 30 == 0 && Main.rand.NextBool(3)))
                 {
-                    if (npc.type == NPCID.Retinazer)
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
-                    else
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        if (npc.type == NPCID.Retinazer)
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
+                        else
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
+                    }
+                    
                     self.Ignite = true;
                     self.IgniteTimer = Math.Max(max, self.IgniteTimer);
                     npc.netUpdate = true;
@@ -2639,13 +2682,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public static void SpawnElectricSpark(NPC npc, Vector2 vel)
         {
-            for (int j = -3; j <= 3; j++)
+            if (FargoSoulsUtil.HostCheck)
             {
-                Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
-                    .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                Particle p = new ElectricSpark(ShootPos(npc),
-                    particleVel, npc.type == NPCID.Retinazer ? Color.Yellow : Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
-                p.Spawn();
+                for (int j = -3; j <= 3; j++)
+                {
+                    Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
+                        .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
+                    Particle p = new ElectricSpark(ShootPos(npc),
+                        particleVel, npc.type == NPCID.Retinazer ? Color.Yellow : Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
+                    p.Spawn();
+                }
             }
         }
 
@@ -2755,6 +2801,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (AIState == TwinsAtt.LocatedShoot)
                 return false;
             return base.CanHitPlayer(npc, target, ref cooldownSlot);
+        }
+        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
+        {
+            if (AIState == TwinsAtt.CurvedDeathRay)
+                modifiers.FinalDamage /= 2;
+            base.ModifyIncomingHit(npc, ref modifiers);
         }
 
         public override bool CheckDead(NPC npc) => Checkdead(npc);
@@ -2958,6 +3010,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 return false;
             return base.CanHitPlayer(npc, target, ref cooldownSlot);
         }
+        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
+        {
+            if (AIState == TwinsAtt.RollingShoot)
+                modifiers.FinalDamage /= 2;
+            base.ModifyIncomingHit(npc, ref modifiers);
+        }
 
         public override bool CheckDead(NPC npc) => Checkdead(npc);
 
@@ -2973,7 +3031,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             base.ReceiveExtraAI(npc, bitReader, binaryReader);
             Phaseinit = binaryReader.Read7BitEncodedInt();
             Phase = binaryReader.Read7BitEncodedInt();
-            AIState = (TwinsAtt)binaryReader.ReadSingle();
+            AIState = (TwinsAtt)binaryReader.Read7BitEncodedInt();
             Ignite = bitReader.ReadBit();
             IgniteTimer = binaryReader.Read7BitEncodedInt();
             Ghost = bitReader.ReadBit();
@@ -2982,9 +3040,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
         {
             base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write(Phase);
-            binaryWriter.Write(Phaseinit);
-            binaryWriter.Write((int)AIState);
+            binaryWriter.Write7BitEncodedInt(Phaseinit);
+            binaryWriter.Write7BitEncodedInt(Phase);
+            binaryWriter.Write7BitEncodedInt((int)AIState);
             bitWriter.WriteBit(Ignite);
             binaryWriter.Write7BitEncodedInt(IgniteTimer);
             bitWriter.WriteBit(Ghost);

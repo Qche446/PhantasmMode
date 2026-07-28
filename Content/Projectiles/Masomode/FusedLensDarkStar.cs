@@ -1,6 +1,7 @@
 ﻿using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
 using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry;
+using Fargowiltas.Common.Configs;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
@@ -69,6 +70,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
                 }
             }
             base.AI();
+            Projectile.Opacity = ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
         }
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {

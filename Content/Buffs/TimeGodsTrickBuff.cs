@@ -1,4 +1,5 @@
-﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode;
+﻿using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;

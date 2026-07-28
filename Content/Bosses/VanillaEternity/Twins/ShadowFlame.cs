@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Common.MetaBalls;
+using FargosPhantasmMode.Content.Buffs;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using Microsoft.Xna.Framework;
@@ -29,19 +30,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 CosmicFireMetaBall cosmicFireMetaBall = ModContent.GetInstance<CosmicFireMetaBall>();
                 cosmicFireMetaBall.CreateParticle(Projectile.Center, num * vector, 60);
             }
-            for (int i = 0; i < 1; i++)
-            {
-                int d = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, DustID.GemAmethyst, 0f, 0f, 0, default, 1.8f);
-                Main.dust[d].noGravity = true;
-                Main.dust[d].velocity *= 0.98f;
-            }
             base.AI();
         }
         public override void OnHitPlayer(Player target, Player.HurtInfo info)
         {
-            target.AddBuff(BuffID.ShadowFlame, 180);
+            target.AddBuff(ModContent.BuffType<PhSublimationBuff>(), 180);
             //target.AddBuff(BuffID.CursedInferno, 180);
-            target.AddBuff(ModContent.BuffType<OiledBuff>(), 300);
+            target.AddBuff(ModContent.BuffType<OiledBuff>(), 360);
         }
     }
 }

@@ -1,0 +1,50 @@
+HeartBrokenBuff: {
+	DisplayName: 心碎
+	Description:
+		'''
+		最大生命值降低15%
+		“解裂之时...”
+		'''
+}
+
+FlawlessBuff: {
+	DisplayName: 无暇
+	Description:
+		'''
+		提升生命再生速度，增加10点盔甲穿透，10%暴击率，10点防御和10%的减伤
+		”献给值得的人...“
+		'''
+}
+
+NanoErosionBuff: {
+	DisplayName: 纳米侵蚀
+	Description:
+		'''
+		受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
+		“结构之外...”
+		'''
+}
+
+TimeGodsTrickBuff: {
+	DisplayName: 时神把戏
+	Description: “驾虚御实，彼者怀有时光...”
+}
+
+HypothermiaBuff: {
+	DisplayName: 失温症
+	Description:
+		'''
+		急剧流失生命值，收到的伤害提升至1.05倍,破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
+		“失衡...”
+		'''
+}
+
+PhSublimationBuff: {
+	DisplayName: 影灼之升华
+	Description: “你的灵魂正在挣脱你的肉体”
+}
+
+MadMoonBuff: {
+	DisplayName: Mad Moon Buff
+	Description: Mods.FargosPhantasmMode.Buffs.MadMoonBuff.Description
+}

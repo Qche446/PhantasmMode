@@ -1,8 +1,16 @@
-﻿using Luminance.Common.Utilities;
+﻿using FargowiltasSouls;
+using FargowiltasSouls.Content.Buffs.Souls;
+using FargowiltasSouls.Core.ModPlayers;
+using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
+using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Common
 {
@@ -126,7 +134,10 @@ namespace FargosPhantasmMode.Common
             return points;
         }
         static float ColorTimer;
-        public static Color MechColor()
+        /// <summary>
+        /// 80
+        /// </summary>
+        public static Color MechColor(float a = 0)
         {
             Color destColor = new(80, 174, 255);
             Color retiColor = new(255, 241, 38);
@@ -135,14 +146,88 @@ namespace FargosPhantasmMode.Common
             ColorTimer += 0.5f;
             if (ColorTimer > 320)
                 ColorTimer = 0;
-            if (ColorTimer < 80)
-                return Color.Lerp(destColor, retiColor, ColorTimer / 80);
-            else if (ColorTimer < 160)
-                return Color.Lerp(retiColor, spazColor, (ColorTimer - 80) / 80);
-            else if (ColorTimer < 240)
-                return Color.Lerp(spazColor, primColor, (ColorTimer - 160) / 80);
+            float colorTimer = ColorTimer + a;
+            if (colorTimer > 320)
+                colorTimer = 0;
+            if (colorTimer < 80)
+                return Color.Lerp(destColor, retiColor, colorTimer / 80f);
+            else if (colorTimer < 160)
+                return Color.Lerp(retiColor, spazColor, (colorTimer - 80) / 80f);
+            else if (colorTimer < 240)
+                return Color.Lerp(spazColor, primColor, (colorTimer - 160) / 80f);
             else
-                return Color.Lerp(primColor, destColor, (ColorTimer - 240) / 80);
+                return Color.Lerp(primColor, destColor, (colorTimer - 240) / 80f);
+        }
+        /// <summary>
+        /// 检查player是否有某个buff集合中的buff
+        /// </summary>
+        /// <returns>out一个索引,如果没有buff返回-1</returns>
+        public static bool HasBuffList(this Player player, List<int> buffList, out int FirstBuffIndex)
+        {
+            for (int i = 0; i < buffList.Count; i++)
+            {
+                if (player.HasBuff(buffList[i]))
+                {
+                    FirstBuffIndex = i;
+                    return true;
+                }
+            }
+            FirstBuffIndex = -1;
+            return false;
+        }
+        public static int FindBuffIndex(this Player py, int type)
+        {
+            for (int i = 0; i < py.buffType.Length; i++)
+            {
+                if (py.buffType[i] == type)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        public static int BuffTime(this Player player, int type)
+        {
+            int index = player.FindBuffIndex(type);
+            if (index < 0)
+                return -1;
+            return player.buffTime[index];
+        } 
+        public static int FindAccessorySlot(this Player player, params int[] ItemType)
+        {
+            int num = 5;
+            if (Main.expertMode)
+                num++;
+            if (player.extraAccessory)
+                num++;
+            if (player.FargoSouls().MutantsPactSlot)
+                num++;
+            for (int i = 0; i < num; i++)
+            {
+                if (ItemType.Contains(player.armor[3 + i].type))
+                    return i;
+            }
+            return -1;
+        }
+        public static void Push<T>(this T[] oldPos, T pos, int Maxnum)
+        {
+            for (int i = Maxnum - 1; i > 0; i--)
+            {
+                oldPos[i] = oldPos[i - 1];
+            }
+            oldPos[0] = pos;
+        }
+        public static MethodInfo GetMethodInfo<T>(T d) where T : Delegate
+        {
+            return d.Method;
+        }
+        public static void AddHooks<T, K>(T a, K b) where T : Delegate where K : Delegate
+        {
+            MonoModHooks.Add(a.Method, b);
+        }
+        public static void AddILHooks<T>(T a, ILContext.Manipulator b) where T : Delegate
+        {
+            MonoModHooks.Modify(a.Method, b);
         }
     }
 }

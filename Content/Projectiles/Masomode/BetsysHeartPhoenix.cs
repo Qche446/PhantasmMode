@@ -1,4 +1,5 @@
-﻿using FargowiltasSouls;
+﻿using Fargowiltas.Common.Configs;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
@@ -42,6 +43,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
         public override void AI()
         {
             Projectile.CritChance = (int)FargoSoulsUtil.HighestCritChance(Main.player[Projectile.owner]);
+            
             Player player = Main.player[Projectile.owner];
             FargoSoulsPlayer modPlayer = player.FargoSouls();
             Projectile.netUpdate = true;
@@ -146,7 +148,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
 
         public override Color? GetAlpha(Color lightColor)
         {
-            return Color.White * Projectile.Opacity;
+            return Color.White * Projectile.Opacity * ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -162,7 +164,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
 
             for (int i = 0; i < ProjectileID.Sets.TrailCacheLength[Projectile.type]; i++)
             {
-                Color color27 = Color.White * Projectile.Opacity * 0.75f * 0.5f;
+                Color color27 = Color.White * Projectile.Opacity * 0.75f * 0.5f * ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
                 color27 *= (float)(ProjectileID.Sets.TrailCacheLength[Projectile.type] - i) / ProjectileID.Sets.TrailCacheLength[Projectile.type];
                 Vector2 value4 = Projectile.oldPos[i];
                 float num165 = Projectile.oldRot[i];

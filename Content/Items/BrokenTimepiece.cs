@@ -13,7 +13,7 @@ namespace FargosPhantasmMode.Content.Items
 {
     public class BrokenTimepiece : SoulsItem
     {
-        public override bool Eternity => true;
+        //public override bool Eternity => true;
         
         public override List<AccessoryEffect> ActiveSkillTooltips =>
             [AccessoryEffectLoader.GetEffect<TimeTrickKeyEffect>()];
