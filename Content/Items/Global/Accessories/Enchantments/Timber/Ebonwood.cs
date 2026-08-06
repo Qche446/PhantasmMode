@@ -4,5 +4,6 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
 {
     public class Ebonwood : PModeGlobalEnchant<EbonwoodEnchant>
     {
+
     }
 }

@@ -150,7 +150,19 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
         {
             return Color.White * Projectile.Opacity * ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
         }
-
+        public override void OnKill(int timeLeft)
+        {
+            const int num226 = 12;
+            for (int i = 0; i < num226; i++)
+            {
+                Vector2 vector6 = Vector2.UnitX.RotatedBy(Projectile.rotation) * 6f;
+                vector6 = vector6.RotatedBy((i - (num226 / 2 - 1)) * 6.28318548f / num226, default) + Projectile.Center;
+                Vector2 vector7 = vector6 - Projectile.Center;
+                int num228 = Dust.NewDust(vector6 + vector7, 0, 0, DustID.FlameBurst, 0f, 0f, 0, default, 1.5f);
+                Main.dust[num228].noGravity = true;
+                Main.dust[num228].velocity = vector7;
+            }
+        }
         public override bool PreDraw(ref Color lightColor)
         {
             Texture2D texture2D13 = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;

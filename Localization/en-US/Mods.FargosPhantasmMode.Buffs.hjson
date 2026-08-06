@@ -48,3 +48,12 @@ MadMoonBuff: {
 	DisplayName: Mad Moon Buff
 	Description: Mods.FargosPhantasmMode.Buffs.MadMoonBuff.Description
 }
+
+HallowFlameBuff: {
+	DisplayName: 圣灼
+	Description:
+		'''
+		免疫药水疾病，全方面消减你的生存能力
+		“于圣炎之中重获新生...”
+		'''
+}

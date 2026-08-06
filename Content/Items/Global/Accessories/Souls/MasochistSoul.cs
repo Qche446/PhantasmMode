@@ -23,7 +23,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Souls
     public class MasochistSoulOverride : GlobalItem
     {
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
-            => entity.type == ModContent.ItemType<MasochistSoul>();
+            => entity.type == ModContent.ItemType<MasochistSoul>() && lateInstantiation;
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             if (PModeWorldSavingSystem.PhantasmMode)

@@ -37,16 +37,12 @@ namespace FargosPhantasmMode.Global
         {
             //材质替换交给原法的globalnpc
             //TryLoadSprites(target);材质替换交给原法的globalnpc
-            if (!WorldSavingSystem.EternityVanillaBehaviour && target.ModNPC == null)
-            {
-                return null;
-            }
             return PModeWorldSavingSystem.PhantasmMode && Matcher.Satisfies(target.type) ? base.NewInstance(target) : null;
         }
 
         public bool FirstTick = true; 
         public virtual void OnFirstTick(NPC npc) { }
-        public abstract void StopEmodeAI(NPC npc);//字面意思
+        public virtual void StopEmodeAI(NPC npc) { }//字面意思
         public virtual bool SafePreAI(NPC npc) => base.PreAI(npc);
         public sealed override bool PreAI(NPC npc)
         {

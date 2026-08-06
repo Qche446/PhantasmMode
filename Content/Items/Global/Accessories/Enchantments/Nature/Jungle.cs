@@ -52,10 +52,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             switch (item.type)
             {
                 case ItemID.BladeofGrass:
-                    Addtooltips(tooltips, "BladeofGrass", HasEnhance ? 3f : 1.2f, HasNature ? 24 : HasEnhance ? 2.4f : 1.1f);
+                    Addtooltips(tooltips, "BladeofGrass", HasEnhance ? 3f : 1.2f, HasNature ? 16 : HasEnhance ? 2.4f : 1.1f);
                     break;
                 case ItemID.ThornChakram:
-                    Addtooltips(tooltips, "ThornChakram", HasNature ? 26 : HasEnhance ? 2.6f : 1.1f);
+                    Addtooltips(tooltips, "ThornChakram", HasNature ? 20 : HasEnhance ? 2.6f : 1.1f);
                     break;
                 case ItemID.IvyWhip:
                     Addtooltips(tooltips, "IvyWhip"/*, HasEnhance ? 1.6f : 1.3f*/);
@@ -64,7 +64,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                     Addtooltips(tooltips, "JungleYoyo", HasEnhance ? 2.4f : 1.1f);
                     break;
                 case ItemID.ThornWhip:
-                    Addtooltips(tooltips, "ThornWhip", HasNature ? 22 : HasEnhance ? 2.2f : 1.1f, HasEnhance ? 2.5f : 1.5f);
+                    Addtooltips(tooltips, "ThornWhip", HasNature ? 18 : HasEnhance ? 2.2f : 1.1f, HasEnhance ? 2.5f : 1.5f);
                     break;
                 case ItemID.PoisonDart:
                     Addtooltips(tooltips, "PoisonDart", HasEnhance ? 1.8f : 1.2f, HasEnhance ? 2 : 1);
@@ -129,13 +129,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             if (JungleItem.Contains(item.type) && item.IsWeapon())
             {
                 if (item.type == ItemID.ThornWhip)
-                    damage *= HasNature ? 22 : HasEnhance ? 2.2f : 1.1f;
+                    damage *= HasNature ? 18 : HasEnhance ? 2.2f : 1.1f;
                 if (item.type == ItemID.PoisonDart)
                     damage *= HasEnhance ? 1.8f : 1.2f;
                 if (item.type == ItemID.BladeofGrass)
-                    damage *= HasNature ? 24 : HasEnhance ? 2.4f : 1.1f;
+                    damage *= HasNature ? 16 : HasEnhance ? 2.4f : 1.1f;
                 if (item.type == ItemID.ThornChakram)
-                    damage *= HasNature ? 26 : HasEnhance ? 2.6f : 1.1f;
+                    damage *= HasNature ? 20 : HasEnhance ? 2.6f : 1.1f;
             }
         }
         public override bool PreDrawInInventory(Item item, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)

@@ -229,5 +229,8 @@ namespace FargosPhantasmMode.Common
         {
             MonoModHooks.Modify(a.Method, b);
         }
+        public static bool FloatBool(float p) => Main.rand.NextFloat(0, 1) < p;
+        public static float ApplyVariance(float value, int percent) => value * (1f + Main.rand.Next(-percent, percent + 1) * 0.01f);
+        public static bool IsInRange(this float x, float min, float max, bool Canmin = true, bool Canmax = false) => (Canmin && x == min) || (x > min && x < max) || (Canmax && x == max);
     }
 }

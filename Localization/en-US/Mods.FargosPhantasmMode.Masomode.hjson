@@ -187,5 +187,5 @@ SinisterIcon: 无
 
 MasochistSoul: {
 	Base: 继承下位额外效果
-	Extra: “此刻，言语的重量早已失去，是时候给这荒诞的试炼画上句号了”
+	Extra: “此刻，言语的重量早已失去。”
 }

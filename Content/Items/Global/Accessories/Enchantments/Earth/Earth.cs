@@ -3,6 +3,7 @@ using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using Terraria;
+using Terraria.GameContent;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
 {
@@ -13,6 +14,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             player.AddEffect<AdamantiteProjSplit>(item);
             player.AddEffect<CobaltJumpEnhance>(item);
             player.AddEffect<TitaniumRitualEffect>(item);
+            ReduceEarthMyTimer(player);
+        }
+        public static void ReduceEarthMyTimer(Player player)
+        {
             var fp = player.FargoSouls();
             bool attacking = fp.WeaponUseTimer > 0;
             if (!player.HasEffect<MythrilEffect>())

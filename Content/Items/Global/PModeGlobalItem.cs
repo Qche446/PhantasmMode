@@ -1,9 +1,12 @@
 ﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
 using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
+using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Systems;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
@@ -11,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Items.Global
@@ -24,12 +28,6 @@ namespace FargosPhantasmMode.Content.Items.Global
         public bool OrdinaryAttributes;
         public override void Load()
         {
-            /*
-            MethodInfo eModePrefixChanges = typeof(EModeGlobalItem).GetMethod("EModePrefixChanges", BindingFlags.Static | BindingFlags.NonPublic);
-            MethodInfo modifyTooltips = typeof(EModeGlobalItem).GetMethod("ModifyTooltips", BindingFlags.Instance | BindingFlags.Public);
-            MonoModHooks.Modify(eModePrefixChanges, ILPrefixChanges);
-            MonoModHooks.Modify(modifyTooltips, ILPrefixChanges);
-            */
             PhanUtil.AddILHooks(EModeGlobalItem.EModePrefixChanges, ILPrefixChanges);
             PhanUtil.AddILHooks(ModContent.GetInstance<EModeGlobalItem>().ModifyTooltips, ILPrefixChanges);
         }
@@ -45,6 +43,21 @@ namespace FargosPhantasmMode.Content.Items.Global
             {
                 return PModeWorldSavingSystem.PhantasmMode ? PModeViolentBaseAttackSpeed : EModeGlobalItem.newViolentBaseAttackSpeed;
             });
+        }
+        public override void OnConsumeItem(Item item, Player player)
+        {
+            if (!PModeWorldSavingSystem.PhantasmMode)
+                return;
+            if (item.healLife > 0 && item.potion)
+            {
+                if (player.HasEffect<HallowFlameEffect>())
+                {
+                    //Main.NewText("HallowFlame true");
+                    player.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 30 * 60);
+                    if (player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel < 1)
+                        player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel = 1;
+                }
+            }
         }
         public override void ModifyHitNPC(Item item, Player player, NPC target, ref NPC.HitModifiers modifiers)
         {

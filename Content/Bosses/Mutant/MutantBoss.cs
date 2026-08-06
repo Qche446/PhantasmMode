@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Content.Bossbar;
+using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Assets.Sounds;
@@ -13,6 +14,7 @@ using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
+using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
@@ -33,12 +35,9 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantBossOverride : GlobalNPC
+    public class MutantBossOverride : PModeNPCBehaviour
     {
         public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(NPC npc, bool lateInstantiation) =>
-            npc.type == ModContent.NPCType<MutantBoss>();
 
         public bool playerInvulTriggered;
         public SlotId? TelegraphSound = null;
@@ -64,9 +63,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         public bool FirstSword = true;
         public Vector2 SansOldPos = Vector2.Zero;
         public Vector2 LieFlightPos = Vector2.Zero;//唐飞炸弹
+
+        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(ModContent.NPCType<MutantBoss>());
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax = Main.expertMode ? 9700000 : 5100000;//原版字段
+            npc.lifeMax = 12000000;
             npc.damage = 444 + 44;
             npc.defense = 255;
             npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
@@ -94,13 +95,15 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
 
-        public override bool PreAI(NPC npc)
+        public override bool SafePreAI(NPC npc)
         {
             if (WorldSavingSystem.MasochistModeReal && !Main.dedServ)
             {
                 if (!Main.LocalPlayer.ItemTimeIsZero && (Main.LocalPlayer.HeldItem.type == ItemID.RodofDiscord || Main.LocalPlayer.HeldItem.type == ItemID.RodOfHarmony))
                     Main.LocalPlayer.AddBuff(ModContent.BuffType<TimeFrozenBuff>(), 600);
             }
+            if (npc.target < 0 || npc.target == 255 || Main.player[npc.target].dead || !Main.player[npc.target].active)
+                npc.TargetClosest();
             Player player = Main.player[npc.target];
             MutantAI(npc, player);
             return false;
@@ -4595,5 +4598,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
         }
+
     }
 }

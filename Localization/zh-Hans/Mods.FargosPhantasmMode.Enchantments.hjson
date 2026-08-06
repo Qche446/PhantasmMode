@@ -41,38 +41,46 @@ SnowEnchant:
 	为你生成一个雪色尾迹，伤害尾迹上的敌人
 	'''
 AncientShadowEnchant: 无
-ApprenticeEnchant: 无
+ApprenticeEnchant: 获得暗黑艺术家魔石的效果，强化时爆炸烈焰召唤物增强
 CrystalAssassinEnchant: 提升冲刺速度，减少冲刺冷却，强化时冷却进一步减少
-DarkArtistEnchant: 无
+DarkArtistEnchant: 获得闪电光环召唤物，强化时增强
 HuntressEnchant: 无
-MonkEnchant: 无
+MonkEnchant: 冲刺期间若伤害到敌怪，则减少部分冲刺冷却
 NecroEnchant: 无
 NinjaEnchant: 大幅提升攻速和盔甲穿透，但是伤害减少，强化时该效果增强
 RedRidingEnchant: 无
 ShadowEnchant: 无
 ShinobiEnchant: 无
 SpookyEnchant: 无
-AncientHallowEnchant: 无
+AncientHallowEnchant: 神圣之剑的操控不再受范围限制
 ForbiddenEnchant: 无
 FossilEnchant: 无
-HallowEnchant: 无
-SpectreEnchant: 无
+HallowEnchant:
+	'''
+	使用治疗物品时为自身施加[c/FFF230:圣灼]，该效果能让你免疫药水疾病，但是会全方位消减你的生存能力
+	期间再次使用治疗物品会增加效果的持续时间和强度，最高10层，同时你的攻击也将附带[c/FFF230:圣灼]
+	'''
+SpectreEnchant: 攻击时能生成幽魂弹幕，能伤害敌人或治疗你
 TikiEnchant: 鞭子长度获得最小值，强化时该最小值提升
-CopperEnchant: 无
-IronEnchant: 无
-LeadEnchant: "[c/FF0000:减益减伤效果降低20%]"
-ObsidianEnchant: 无
+CopperEnchant: 闪电能攻击到的单位数量+1
+IronEnchant: 铁减伤期间额外增伤
+LeadEnchant: "[c/FF0000:减益减伤效果降低10%]"
+ObsidianEnchant: 爆炸的伤害提高
 PlatinumEnchant: 无
-SilverEnchant: 无
+SilverEnchant: 格挡时的减速效果大幅减少
 TinEnchant: 无
 TungstenEnchant: 大小增幅提升至75%，强化时该效果提升至150%
 AshWoodEnchant: 无
 BorealWoodEnchant: 提高雪球的伤害，雪球击中敌人时减少部分该技能冷却
-EbonwoodEnchant: 无
-PalmWoodEnchant: 无
-PearlwoodEnchant: 无
+EbonwoodEnchant: 乌木光环能将你受到的减益施加给敌人
+PalmWoodEnchant: 略微降低棕榈木召唤物的伤害，其最大数量和你的最大哨兵数量相同
+PearlwoodEnchant:
+	'''
+	基础伤害浮动也会获得额外计算次数
+	(也就是说，如果想让该效果生效，请确保伤害浮动已开启)
+	'''
 RichMahoganyEnchant: 无
-ShadewoodEnchant: 无
+ShadewoodEnchant: 血液基础伤害提升，冷却减少，造成伤害的频率提升
 WoodEnchant: 无
 GladiatorEnchant: 无
 GoldEnchant: 无
@@ -114,3 +122,48 @@ NatureForce:
 	[i:FargowiltasSouls/ShroomiteEnchant]发射的弹幕穿透次数提升，但是伤害降低
 	"葱茏之风，骤然吹起……"
 	'''
+ShadowForce:
+	'''
+	[i:FargowiltasSouls/AncientShadowEnchant]召唤5个远古暗影球，破坏时生成追踪弹幕
+	[i:FargowiltasSouls/ApprenticeEnchant]副武器使用频率保持在1/3
+	[i:FargowiltasSouls/DarkArtistEnchant]召唤更加强大的烈焰炮台和闪电光环保护你
+	[i:FargowiltasSouls/NinjaEnchant]大幅提升攻速，但是伤害降低
+	"黑夜之暗，愈深愈沉……"
+	'''
+SpiritForce:
+	'''
+	[i:FargowiltasSouls/AncientHallowEnchant]召唤一个可以手操的泰拉棱镜
+	[i:FargowiltasSouls/FossilEnchant]你会以幽魂姿态复活
+	[i:FargowiltasSouls/SpectreEnchant]攻击时能生成幽魂弹幕，能伤害敌人或治疗你
+	[i:FargowiltasSouls/HallowEnchant]使用治疗物品时为自身施加[c/FFF230:圣灼]，最大层数解放为15
+	[i:FargowiltasSouls/TikiEnchant]鞭子长度获得最小值
+	"瞿烁精神，振奋人心……"
+	'''
+TerraForce:
+	'''
+	[i:FargowiltasSouls/CopperEnchant]泰拉闪电冷却速度加快
+	[i:FargowiltasSouls/IronEnchant]铁减伤期间额外增伤并提升防御
+	[i:FargowiltasSouls/LeadEnchant]受到的减益伤害为原来的50%
+	[i:FargowiltasSouls/SilverEnchant]格挡时的减速效果大幅减少
+	[i:FargowiltasSouls/TungstenEnchant]大小增幅提升至150%
+	"磐石震动，四野颤抖……"
+	'''
+TimberForce:
+	'''
+	[i:FargowiltasSouls/BorealWoodEnchant]雪球命中时会减少部分冷却时间
+	[i:FargowiltasSouls/EbonwoodEnchant]乌木光环能将你受到的减益施加给敌人
+	[i:FargowiltasSouls/PearlwoodEnchant]基础伤害浮动也会获得额外计算次数
+	[i:FargowiltasSouls/ShadewoodEnchant]血液基础伤害提升，冷却减少，造成伤害的频率提升
+	"林叶沙沙，环绕四周……"
+	'''
+WillForce:
+	'''
+	[i:FargowiltasSouls/GladiatorEnchant]意志旗帜的速度提升，提供的减伤+15%，额外提供15防御
+	[i:FargowiltasSouls/RedRidingEnchant]向周围的敌怪身旁生成意志投矛，金身时效果更强
+	"金铁呜咽，回荡深渊……"
+	'''
+
+TerrariaSoul: {
+	Base: 继承下位部分额外效果
+	Extra: 那么，去将胜利攥在手中吧。
+}

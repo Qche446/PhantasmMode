@@ -77,7 +77,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 Spaz.Phase = Phase;
                 PhaseCheck(npc, bro);
             }
-
             if (npc.target < 0 || npc.target == 255 || Main.player[npc.target].dead || !Main.player[npc.target].active)
                 npc.TargetClosest();
             Player player = Main.player[npc.target];
@@ -2564,19 +2563,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             npc.ai[1] = npc.ai[2] = npc.ai[3] = npc.localAI[0] = npc.localAI[1] = npc.localAI[2] = npc.localAI[3] = 0;
             IPTwins pT = GetIPTwins(npc);
             List<List<TwinsAtt>> PhaseList = [pT.Phase1, pT.Phase2, pT.Phase3];
-            /*
-            if (pT.Phaseinit > PhaseList[pT.Phase - 1].Count - 1)
-                pT.Phaseinit = 0;
-            if (!Main.getGoodWorld && PhaseList[pT.Phase - 1][pT.Phaseinit] == TwinsAtt.SineShoot)
-            {
-                pT.Phaseinit++;
-            }
-            */
             if (pT.Phaseinit > PhaseList[pT.Phase - 1].Count - 1)
                 pT.Phaseinit = 0;
             pT.AIState = PhaseList[pT.Phase - 1][pT.Phaseinit];
-            //if (pT.AIState == TwinsAtt.SineShoot)//是正弦则跳过正弦的下一个
-                //pT.Phaseinit++;
             pT.Phaseinit++;
             npc.netUpdate = true;
         }

@@ -4,5 +4,6 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
 {
     public class AncientShadow : PModeGlobalEnchant<AncientShadowEnchant>
     {
+        
     }
 }

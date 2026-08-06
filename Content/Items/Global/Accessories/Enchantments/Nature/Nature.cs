@@ -29,22 +29,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             player.AddEffect<MoltenBombEffect>(item);
             player.AddEffect<ShroomiteEffect>(item);
             player.AddEffect<NatureTrailEffect>(item);
-            if (PModeChangeApply)
-            {
-                float timeLeft = 0;
-                if (player.HasBuff(ModContent.BuffType<CrimsonRegenBuff>()))
-                {
-                    for (int i = 0; i < player.buffType.Length; i++)
-                    {
-                        if (player.buffType[i] == ModContent.BuffType<CrimsonRegenBuff>())
-                        {
-                            timeLeft = player.buffTime[i];
-                        }
-                    }
-                }
-                player.GetDamage(DamageClass.Generic) += 0.3f * timeLeft / 900f;
-                player.endurance += 0.3f * timeLeft / 900f;
-            }
+            Crimson.CrimsonRevenge(player);
         }
     }
     public class NatureTrailEffect : AccessoryEffect
@@ -52,6 +37,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public override Header ToggleHeader => Header.GetHeader<NatureHeader>();
         public override int ToggleItemType => ModContent.ItemType<NatureForce>();
         public override bool ExtraAttackEffect => true;
+        public override bool MutantsPresenceAffects => true;
     }
     public class NatureTrailProj : ModProjectile, IPixelatedPrimitiveRenderer
     {
@@ -72,6 +58,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.timeLeft = 300;
+            Projectile.hostile = false;
             Projectile.friendly = true;
             Projectile.penetrate = -1;
             Projectile.usesLocalNPCImmunity = true;
@@ -147,7 +134,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public override bool? CanHitNPC(NPC target)
         {
             Projectile.GetGlobalProjectile<PModeGlobalProj>().IceAttribute = true;
-            return true;
+            return !target.townNPC;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {

@@ -27,10 +27,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.SupremeDe
         public int TrueDashTime = 0;
         public override void PostUpdateEquips()
         {
-            Player py = Main.LocalPlayer;
-            FargoSoulsPlayer fp = py.FargoSouls();
             if (CheckNohitTimer == 1 && PModeWorldSavingSystem.PhantasmMode)
-                fp.SpecialDashCD -= 3 * 60;
+                Player.FargoSouls().SpecialDashCD -= 3 * 60;
             if (CheckNohitTimer > 0)
                 CheckNohitTimer--;
             if (TrueDashTime > 0)

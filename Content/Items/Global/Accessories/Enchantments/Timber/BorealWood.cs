@@ -53,7 +53,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                 float snowballDamage = baseDamage / 2;
                 if (PModeChangeApply)
                 {
-                    snowballDamage = baseDamage * (forceEffect ? 0.9f : 0.8f);
+                    snowballDamage = baseDamage * (forceEffect ? 0.8f : 0.6f);
                 }
                 if (!player.HasEffect<TimberEffect>() && heldItem != null && heldItem.IsWeaponWithDamageClass())
                 {
@@ -62,7 +62,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                     if (PModeChangeApply)
                     {
                         if (snowballDamage > (50f * softcapMult)) // diminishing returns above 15 snowballDamage for non wiz, 100 for wiz (post-deflation numbers; current numbers are higher)
-                            snowballDamage = (float)Math.Round(((25f * softcapMult) + snowballDamage) / 1.5f);
+                            snowballDamage = (float)Math.Round(((100f * softcapMult) + snowballDamage) / 3f);
                     }
                     else
                     {
@@ -78,27 +78,6 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                 if (p != Main.maxProjectiles)
                     FargoSoulsGlobalProjectile.SplitProj(Main.projectile[p], numSnowballs, MathHelper.Pi / 10, 1);
             }
-        }
-    }
-    public class SnowBallFriendlyOverride : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-        //public Item item;
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation) => entity.type == ProjectileID.SnowBallFriendly;
-        public override void ModifyHitNPC(Projectile projectile, NPC target, ref NPC.HitModifiers modifiers)
-        {
-            Player player = Main.player[projectile.owner];
-            var modPlayer = player.FargoSouls();
-            //modPlayer.BorealCD -= 2;
-            if (player.HasEffect<BorealEffect>() && PModeWorldSavingSystem.PhantasmMode)
-            {
-                if (player.HasEffect<TimberEffect>())
-                    modPlayer.BorealCD -= 9;
-                else
-                    modPlayer.BorealCD -= modPlayer.ForceEffect(ModContent.ItemType<BorealWoodEnchant>()) ? (Main.rand.NextBool() ? 2 : 3) : 10;
-                
-            }
-            //Main.NewText(modPlayer.BorealCD);
         }
     }
 }

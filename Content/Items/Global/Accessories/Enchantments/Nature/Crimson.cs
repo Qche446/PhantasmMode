@@ -44,22 +44,23 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         }
         public override void SafeUpdateAccessory(Item item, Player player, bool hideVisual)
         {
-            if (PModeChangeApply)
+            CrimsonRevenge(player);
+        }
+        public static void CrimsonRevenge(Player player)
+        {
+            float timeLeft = 0;
+            if (player.HasBuff(ModContent.BuffType<CrimsonRegenBuff>()))
             {
-                float timeLeft = 0;
-                if (player.HasBuff(ModContent.BuffType<CrimsonRegenBuff>()))
+                for (int i = 0; i < player.buffType.Length; i++)
                 {
-                    for (int i = 0; i < player.buffType.Length; i++)
+                    if (player.buffType[i] == ModContent.BuffType<CrimsonRegenBuff>())
                     {
-                        if (player.buffType[i] == ModContent.BuffType<CrimsonRegenBuff>())
-                        {
-                            timeLeft = player.buffTime[i];
-                        }
+                        timeLeft = player.buffTime[i];
                     }
                 }
-                player.GetDamage(DamageClass.Generic) += 0.3f * timeLeft / 900f;
-                player.endurance += 0.3f * timeLeft / 900f;
             }
+            player.GetDamage(DamageClass.Generic) += 0.3f * timeLeft / 900f;
+            player.endurance += 0.3f * timeLeft / 900f;
         }
     }
 }

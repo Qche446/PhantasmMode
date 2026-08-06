@@ -41,7 +41,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             {
                 modplayer.TiChargeTime--;
                 if (modplayer.PrepareForTi)
-                    modplayer.TiEnergy += player.HasEffect<EarthForceEffect>() ? 2 : 1;
+                    modplayer.TiEnergy += player.HasEffect<EarthForceEffect>() ? 1 : 1;
             }
             //Main.NewText(modplayer.TiChargeTime);
             if (modplayer.TiEnergy >= modplayer.MaxTiEnergy)
@@ -87,8 +87,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = Main.projFrames[ProjectileID.TitaniumStormShard];
-            ProjectileID.Sets.TrailCacheLength[Projectile.type] = 8;
-            ProjectileID.Sets.TrailingMode[Projectile.type] = 2;
+            //ProjectileID.Sets.TrailCacheLength[Projectile.type] = 8;
+            //ProjectileID.Sets.TrailingMode[Projectile.type] = 2;
         }
         public override void SetDefaults()
         {

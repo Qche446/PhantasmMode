@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Core.Systems;
+using FargowiltasSouls.Content.Buffs;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using Terraria;
 using Terraria.ID;
@@ -21,10 +22,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 {
                     npc.AddBuff(ModContent.BuffType<NeurotoxinBuff>(), npc.buffTime[buffIndex]);
                     npc.buffTime[buffIndex] = 1;
-                    if (npc.whoAmI == Main.myPlayer)
-                    {
-                        Main.NewText(Language.GetTextValue("Mods." + base.Mod.Name + ".Buffs.IvyVenomBuff.Transform"), 175, 75);
-                    }
                 }
                 npc.GetGlobalNPC<PModeGlobalBuffNPC>().IvyVenom = true;
             }
@@ -34,10 +31,15 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 npc.GetGlobalNPC<PModeGlobalBuffNPC>().Neurotoxin = true;
             }
         }
-        public override void Update(int type, Terraria.Player player, ref int buffIndex)
+        public override void Update(int type, Player player, ref int buffIndex)
         {
             if (!PModeChangeApply)
                 return;
+            if (type == ModContent.BuffType<GladiatorSpiritBuff>())
+            {
+                player.statDefense += 15;
+                player.endurance += 0.15f;
+            }
             //尖刻注视
             if (type == ModContent.BuffType<PungentGazeBuff>())
             {
