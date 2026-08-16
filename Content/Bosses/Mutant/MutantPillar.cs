@@ -4,6 +4,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
@@ -15,7 +16,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantPillar : MutantPillar
+    public class PHMutantPillar : MutantPillar, IProjOwnedByBoss<MutantBoss>
     {
         public override void OnKill(int timeLeft)
         {
@@ -128,7 +129,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class PHMutantFragment : MutantFragment
+    public class PHMutantFragment : MutantFragment, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

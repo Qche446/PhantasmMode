@@ -51,9 +51,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
             if (VortexedCD <= 0 && !proj.hostile && proj.friendly && proj.damage != 0)
             {
                 float r = 1200f;
-                foreach (NPC npc in Main.npc.Where(n => n.active && n != null && n.Distance(py.Center) < r && !n.friendly && n.damage != 0 && n.Distance(proj.Center) < 400 && n.Distance(proj.Center) > 2))
+                foreach (NPC npc in Main.npc.Where(n => n.active && n != null && n.Distance(py.Center) < r && !n.friendly && n.Distance(proj.Center) < 400 && n.Distance(proj.Center) > 2))
                 {
-                    proj.velocity += 0.4f * proj.SafeDirectionTo(npc.Center);
+                    proj.velocity += 0.6f * proj.SafeDirectionTo(npc.Center);
                 }
             }
             else if (VortexedCD > 0)

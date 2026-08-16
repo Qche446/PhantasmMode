@@ -124,7 +124,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     // 次级橙色粒子 - 使用火焰粒子
                     if (Main.rand.NextBool(3))
                     {
-                        int smallDust = Dust.NewDust(position, 0, 0, 61, 0f, 0f, 0, default, 1.3f); // DustID.Flames = 61
+                        int smallDust = Dust.NewDust(position, 0, 0, DustID.GreenTorch, 0f, 0f, 0, default, 1.3f); // DustID.Flames = 61
                         Main.dust[smallDust].noGravity = true;
                         Main.dust[smallDust].velocity = Main.rand.NextVector2Circular(1.5f, 1.5f);
                     }

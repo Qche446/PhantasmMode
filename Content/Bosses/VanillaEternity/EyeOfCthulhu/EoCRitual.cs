@@ -12,7 +12,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace FargosPhantasmMode.Content.Bosses.EyeOfCthulhu
+namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     public class EoCRitual : BaseArena, IPixelatedPrimitiveRenderer
     {

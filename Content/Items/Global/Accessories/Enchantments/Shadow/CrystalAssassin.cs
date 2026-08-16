@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Core.Config;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.UI.Elements;
@@ -40,7 +41,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
             if (!player.HasEffectEnchant<CrystalAssassinDash>())
                 return;
             var modplayer = player.FargoSouls();
-            if (player.whoAmI == Main.myPlayer)
+            if (player.whoAmI == Main.myPlayer && BaseConfig.Instance.ExtraCoolDownBar)
                 CooldownBarManager.Activate("CrystalDashFirstStrikeCD", ModContent.Request<Texture2D>("FargowiltasSouls/Content/Items/Accessories/Enchantments/CrystalAssassinEnchant").Value, new(140, 38, 242),
                 () => 1 - (float)modplayer.CrystalDashFirstStrikeCD / (player.ForceEffect<CrystalDiagonalDash>() ? 300f : 600f), activeFunction: player.HasEffectEnchant<CrystalAssassinDash>, displayAtFull: true);
         }

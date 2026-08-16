@@ -1,12 +1,32 @@
-这是幻想，执念所凝结而成的挑战......
-本模组作为法狗附属，尝试结合历代受虐特色和一些奇思妙想，以带来“别样”的法狗体验。
-该模组目前只对部分boss进行修改，后续可能会加入其他的东西。
+*该模组目前内容仍不完善，有很多有待补完的实验性内容，可能会进行频繁改动，目前不推荐以体验完整流程的形式游玩
+
+本模组作为法狗魂石附属，在原本的受虐模式之上添加了一个新的难度: 境妄模式.
+你可以在原版法魂的难度选择界面找到开启这个模式的按钮
+
+该难度具有以下特点:
+会将世界的难度设置为大师模式
+- 保留原本受虐特点
+- 减益对你造成的伤害一般不会致死
+- 在受虐模式的基础上重置部分Boss，使其更加困难
+- 对部分永恒模式掉落，魔石，魂，力等进行调整以适应新难度
+目前进度:
+已完成绝大多数魔石，永恒掉落物品的修改，平衡性仍有待优化。
+已有的Boss修改: 克眼，双子，憎恶，突变体
 
 
 
+*This mod is still in active development and contains a lot of experimental content that is yet to be refined. Frequent changes are expected. It is not currently recommended for a full playthrough experience.
 
+This mod is an addon for Fargo's Souls Mod. On top of the existing Masochist Mode, it introduces a new difficulty: Phantasm Mode.
+You can find the button to enable this mode in the difficulty selection interface of the original Fargo's Souls Mod.
 
-This is an illusion, a challenge forged from obsession...
-As an add-on module for Fargo's Souls Mod, this mod attempts to blend the masochistic features of previous iterations with its whimsical ideas elements, aiming to deliver a "distinctive" experience.
-Currently, the mod only modifies some bosses though additional content may be introduced in the future.
+This difficulty features the following:
+Sets the world difficulty to Master Mode
+- Retains all original Masochist Mode characteristics
+- Debuff damage generally cannot kill you (leaves you at low health)
+- Revamps certain bosses on top of Masochist Mode, making them more challenging
+- Adjusts some Eternity Mode drops, Enchantments, Souls, Forces, etc., to better fit the new difficulty
+Current progress:
+The majority of Enchantments and Eternity Mode drop items have already been modified.However the balance still needs improvement
+Bosses currently revamped: EoC, Twins, Abom, Mutant.
 

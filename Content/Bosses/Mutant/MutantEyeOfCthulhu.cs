@@ -4,6 +4,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using System;
@@ -14,7 +15,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantEyeOfCthulhu : MutantEyeOfCthulhu
+    public class PHMutantEyeOfCthulhu : MutantEyeOfCthulhu, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

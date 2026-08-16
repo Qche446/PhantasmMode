@@ -1,16 +1,18 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
+using Terraria.ID;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantDeathraySmall : MutantDeathraySmall
+    public class PHMutantDeathraySmall : MutantDeathraySmall, IProjOwnedByBoss<MutantBoss>
     {
         //是预警线阿(由Mark1生成）
         public override void SetStaticDefaults()
         {
-            maxTime = 60;
+            maxTime = 90;
         }
         public override void AI()
         {
@@ -27,13 +29,15 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             float num = 0.3f;
             base.Projectile.localAI[0] += 1f;
+            if (Main.getGoodWorld)
+                maxTime = 60;
             if (base.Projectile.localAI[0] >= maxTime)
             {
                 base.Projectile.Kill();
                 return;
             }
 
-            base.Projectile.scale = (float)Math.Sin(base.Projectile.localAI[0] * MathF.PI / maxTime) * 0.6f * num;
+            base.Projectile.scale = (float)Math.Sin(base.Projectile.localAI[0] * MathF.PI / maxTime) * 0.8f * num;
             if (base.Projectile.scale > num)
             {
                 base.Projectile.scale = num;
@@ -68,7 +72,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 float num4 = base.Projectile.velocity.ToRotation() + (Main.rand.NextBool(2) ? (-1f) : 1f) * (MathF.PI / 2f);
                 float num5 = (float)Main.rand.NextDouble() * 2f + 2f;
                 Vector2 vector3 = new Vector2((float)Math.Cos(num4) * num5, (float)Math.Sin(num4) * num5);
-                int num6 = Dust.NewDust(vector2, 0, 0, 244, vector3.X, vector3.Y);
+                int num6 = Dust.NewDust(vector2, 0, 0, DustID.CopperCoin, vector3.X, vector3.Y);
                 Main.dust[num6].noGravity = true;
                 Main.dust[num6].scale = 1.7f;
             }
@@ -76,7 +80,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (Main.rand.NextBool(5))
             {
                 Vector2 vector4 = base.Projectile.velocity.RotatedBy(1.5707963705062866) * ((float)Main.rand.NextDouble() - 0.5f) * base.Projectile.width;
-                int num7 = Dust.NewDust(vector2 + vector4 - Vector2.One * 4f, 8, 8, 244, 0f, 0f, 100, default(Color), 1.5f);
+                int num7 = Dust.NewDust(vector2 + vector4 - Vector2.One * 4f, 8, 8, DustID.CopperCoin, 0f, 0f, 100, default, 1.5f);
                 Main.dust[num7].velocity *= 0.5f;
                 Main.dust[num7].velocity.Y = 0f - Math.Abs(Main.dust[num7].velocity.Y);
             }

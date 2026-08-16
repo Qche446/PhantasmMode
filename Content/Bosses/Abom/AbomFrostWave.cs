@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Projectile.width = 40;
             Projectile.height = 40;
             Projectile.tileCollide = false;
-            Projectile.aiStyle = 1;
+            Projectile.aiStyle = ProjAIStyleID.Arrow;
             AIType = ProjectileID.FrostWave;
             Projectile.hostile = true;
             Projectile.extraUpdates = 1;

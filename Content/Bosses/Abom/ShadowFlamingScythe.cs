@@ -68,7 +68,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     {
                         Vector2 vector = (Vector2.UnitX * 10f).RotatedBy((float)(j - 17) * (MathF.PI * 2f) / 36f) + base.Projectile.Center;
                         Vector2 vector2 = vector - base.Projectile.Center;
-                        int num = Dust.NewDust(vector + vector2, 0, 0, 6, 0f, 0f, 0, default(Color), 3f);
+                        int num = Dust.NewDust(vector + vector2, 0, 0, DustID.Torch, 0f, 0f, 0, default(Color), 3f);
                         Main.dust[num].noGravity = true;
                         Main.dust[num].velocity = vector2;
                     }
@@ -110,12 +110,12 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
         public override void OnHitPlayer(Player target, Player.HurtInfo info)
         {
-            target.AddBuff(22, 300);
+            target.AddBuff(BuffID.Darkness, 300);
             if (WorldSavingSystem.EternityMode)
             {
                 target.AddBuff(ModContent.BuffType<ShadowflameBuff>(), 300);
-                target.AddBuff(80, 300);
-                target.AddBuff(24, 900);
+                target.AddBuff(BuffID.Blackout, 300);
+                target.AddBuff(BuffID.OnFire, 900);
                 target.AddBuff(ModContent.BuffType<LivingWastelandBuff>(), 900);
             }
         }
@@ -130,7 +130,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Texture2D value = TextureAssets.Projectile[base.Projectile.type].Value;
             int num = TextureAssets.Projectile[base.Projectile.type].Value.Height / Main.projFrames[base.Projectile.type];
             int y = num * base.Projectile.frame;
-            Rectangle rectangle = new Rectangle(0, y, value.Width, num);
+            Rectangle rectangle = new(0, y, value.Width, num);
             Vector2 origin = rectangle.Size() / 2f;
             Color newColor = lightColor;
             newColor = base.Projectile.GetAlpha(newColor);

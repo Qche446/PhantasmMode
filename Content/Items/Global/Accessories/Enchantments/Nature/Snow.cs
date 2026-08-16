@@ -113,7 +113,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             radius = hasForce ? 128 : 64;
             radius *= hasNature ? 2 : 1;
             Projectile.localNPCHitCooldown = hasForce ? 10 : 20;
-            float damage = hasForce ? 80 : 10;
+            float damage = hasForce ? 45 : 10;
             damage *= hasNature ? 3 : 1;
             if (slot == -1)
                 damage = 0;
@@ -224,7 +224,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             radius = hasForce ? 128 : 64;
             radius *= hasNature ? 2 : 1;
             Projectile.localNPCHitCooldown = hasForce ? 10 : 20;
-            float damage = hasForce ? 80 : 10;
+            float damage = hasForce ? 45 : 10;
             damage *= hasNature ? 3 : 1;
             Projectile.damage = (int)(player.ActualClassDamage(DamageClass.Magic) * damage);
             if (!player.HasEffect<TimeFrozenRitualEffect>())
@@ -257,7 +257,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public override bool? CanHitNPC(NPC target)
         {
             Projectile.GetGlobalProjectile<PModeGlobalProj>().IceAttribute = true;
-            return true;
+            return !target.townNPC;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {

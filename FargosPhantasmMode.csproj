@@ -6,6 +6,12 @@
 		<ModsFolder>$(USERPROFILE)\Documents\My Games\Terraria\tModLoader\Mods</ModsFolder>
 	  <UserSecretsId>e7ff75d2-70e6-46ca-9358-e08ea683f1c6</UserSecretsId>
   </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <FileAlignment>8192</FileAlignment>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <FileAlignment>8192</FileAlignment>
+	</PropertyGroup>
 	<ItemGroup>
 	  <AdditionalFiles Remove="Content\Buffs\Global\新文件夹\**" />
 	  <AdditionalFiles Remove="Content\Buffs\新文件夹\**" />
@@ -22,19 +28,20 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <AdditionalFiles Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
+	  <AdditionalFiles Remove="Assets\AutoloadedEffects\Shaders\Items\ShadowveilHeart.fx" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Remove="assets\autoloadedeffects\shaders\AbomSkyEffect.fx" />
 	  <None Remove="Assets\AutoloadedEffects\Shaders\BigTentacle.fx" />
 	  <None Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
 	  <None Remove="assets\autoloadedeffects\shaders\BurnText.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\EoCFire.fx" />
 	  <None Remove="assets\autoloadedeffects\shaders\projectiles\BossBarShader.fx" />
 	  <None Remove="Assets\AutoloadedEffects\Shaders\Projectiles\MoonTrailShader.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\Projectiles\ShockWaveShader.fx" />
 	  <None Remove="assets\autoloadedeffects\shaders\PungentAuraProj.fx" />
+	  <None Remove="Assets\AutoloadedEffects\Shaders\ShadowFlame.fx" />
 	  <None Remove="Assets\ExtraTextures\Noise\Neurons2.png" />
 	  <None Remove="Assets\ExtraTextures\Noise\UniverseNoise.png" />
-	  <None Remove="Content\Bossbar\PhantasmBossBar.png" />
 	  <None Remove="Content\Bosses\VanillaEternity\Twins\DarkStar_Glow.png" />
 	  <None Remove="Content\Bosses\VanillaEternity\Twins\SpazmatismGlowLine.png" />
 	  <None Remove="Content\Buffs\NanoErosionBuff.png" />
@@ -98,6 +105,7 @@
 	  <Folder Include="Content\Projectiles\Souls\" />
 	  <Folder Include="Content\Dusts\" />
 	  <Folder Include="Core\PModeBalance\" />
+	  <Folder Include="lib\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -105,7 +113,10 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="tModLoader.CodeAssist" Version="0.1.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="**/*.csv" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -4,6 +4,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,7 +19,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// <summary>
     /// ai0决定偏角正弦内的相位·ai1 = whoami
     /// </summary>
-    public class MutantCoffinWaveShot : ModProjectile, IPixelatedPrimitiveRenderer
+    public class MutantCoffinWaveShot : ModProjectile, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Bosses/CursedCoffin/CoffinWaveShot";
         public Vector2 oldvel = Vector2.Zero;

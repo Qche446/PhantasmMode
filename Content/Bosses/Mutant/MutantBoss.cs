@@ -3,12 +3,14 @@ using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Assets.Sounds;
+using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
 using FargowiltasSouls.Content.Bosses.Lifelight;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Buffs.Souls;
+using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
@@ -16,6 +18,7 @@ using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
@@ -37,8 +40,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class MutantBossOverride : PModeNPCBehaviour
     {
-        public override bool InstancePerEntity => true;
-
+        #region 字段或属性等
         public bool playerInvulTriggered;
         public SlotId? TelegraphSound = null;
         public int ritualProj, spriteProj, ringProj;
@@ -59,18 +61,105 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         private string TownNPCName;
 
         public const int HyperMax = 5;
+        public override int NPCType => ModContent.NPCType<MutantBoss>();
         //后来用的
+        public NPC Npc { get; set; }
+        public MuAt AttackState { get => (MuAt)Npc.ai[0]; set => Npc.ai[0] = Convert.ToInt32(value); }
         public bool FirstSword = true;
         public Vector2 SansOldPos = Vector2.Zero;
         public Vector2 LieFlightPos = Vector2.Zero;//唐飞炸弹
 
-        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(ModContent.NPCType<MutantBoss>());
+        public Dictionary<MuAt, List<MuAt>> AttackTransition;
+        #endregion
+        private void InitializeList()
+        {
+            //键 = 原 AI 方法对应的 MuAt 状态；值 = 该方法中 ChooseNextAttack 调用所能切换到的全部状态。
+            //以 AttackTransition[key] = value 逐项赋值，保留三元表达式（MasochistModeReal 分支）和原始权重（重复即权重）。
+            AttackTransition = new()
+            {
+                // case 3 真眼俯冲（被 case 32 复用）
+                [MuAt.TrueEyeDive] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareNuke, MuAt.PrepareNuke, MuAt.PrepareNuke, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.IronVirgin],
+
+                // case 12 唐飞炸弹
+                [MuAt.LieFlightBomb] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.CoffinWave, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 14 蓝冲
+                [MuAt.SpearDashPredictiveP2] = [MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareOkuuSpheresP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.IronVirgin],
+
+                // case 17 P2波粒
+                [MuAt.BoundaryBulletHellP2] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareTrueEyeDiveP2 : MuAt.PrepareMechRayFan, MuAt.PrepareNuke, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.IronVirgin],
+
+                // case 18 P2虚无射线
+                [MuAt.VoidRaysP2] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 19 天界柱投掷
+                [MuAt.PillarDunk] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.EOCStarSickles, MuAt.PrepareSpearDashDirectP2, MuAt.PrepareMechRayFan, MuAt.PrepareNuke, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 20 克苏鲁星镰
+                [MuAt.EOCStarSickles] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PrepareSpearDashDirectP2, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 22 青冲（maso / 普通 两支出招）
+                [MuAt.SpearDashDirectP2] = WorldSavingSystem.MasochistModeReal
+                    ? [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareOkuuSpheresP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareSlimeRainFollowup, MuAt.IronVirgin]
+                    : [MuAt.ApproachForNextAttackP2, MuAt.ApproachForBulletHellP2, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareSlimeRainFollowup],
+
+                // case 25 蠕虫预判投矛（maso / 普通 两支出招表）
+                [MuAt.SpearTossPredictiveP2] = WorldSavingSystem.MasochistModeReal
+                    ? [MuAt.ApproachForNextAttackP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.IronVirgin]
+                    : [MuAt.ApproachForNextAttackP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareMechRayFan, MuAt.PrepareMechRayFan, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareSlimeRainFollowup],
+
+                // case 27 机械光扇
+                [MuAt.MechRayFan] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 28 棺材波动+意志金雷
+                [MuAt.CoffinWave] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.IronVirgin],
+
+                // case 30 生成猪鲨夹击
+                [MuAt.SpawnFishrons] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareSpearDashDirectP2, WorldSavingSystem.MasochistModeReal ? MuAt.EmpressSwordWave : MuAt.PrepareMechRayFan, MuAt.CoffinWave, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 34 核弹
+                [MuAt.Nuke] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.CoffinWave, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareMechRayFan : MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM],
+
+                // case 36 史莱姆雨
+                [MuAt.SlimeRain] = [MuAt.ApproachForNextAttackP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.CoffinWave, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareMechRayFan : MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.PrepareMutantSword],
+
+                // case 40 阿空圆环
+                [MuAt.OkuuSpheresP2] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.EOCStarSickles, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareSpearDashPredictiveP2 : MuAt.PrepareMechRayFan, MuAt.CoffinWave, WorldSavingSystem.MasochistModeReal ? MuAt.EmpressSwordWave : MuAt.PrepareNuke, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.SANSGOLEM],
+
+                // case 41 环绕投矛（ftw 因不能连段史莱姆雨而少一支）
+                [MuAt.SpearTossDirectP2] = Main.getGoodWorld
+                    ? [MuAt.ApproachForNextAttackP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, WorldSavingSystem.MasochistModeReal ? MuAt.EmpressSwordWave : MuAt.PrepareMechRayFan, MuAt.CoffinWave, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.IronVirgin]
+                    : [MuAt.ApproachForNextAttackP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, WorldSavingSystem.MasochistModeReal ? MuAt.EmpressSwordWave : MuAt.PrepareMechRayFan, MuAt.CoffinWave, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup],
+
+                // case 43 双子水晶
+                [MuAt.TwinRangsAndCrystals] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 44 女皇剑阵
+                [MuAt.EmpressSwordWave] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PrepareSpearDashDirectP2, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareMechRayFan : MuAt.SpawnDestroyersForPredictiveThrow, MuAt.CoffinWave, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareSlimeRain, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 46 突变剑
+                [MuAt.MutantSword] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareFishron2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.EmpressSwordWave, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin],
+
+                // case 48 皇后史莱姆雨
+                [MuAt.QueenSlimeRain] = [MuAt.ApproachForNextAttackP2, MuAt.ApproachForBulletHellP2, MuAt.PillarDunk, MuAt.EOCStarSickles, WorldSavingSystem.MasochistModeReal ? MuAt.PrepareMechRayFan : MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareFishron2, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.PrepareTwinRangsAndCrystals, MuAt.PrepareMutantSword],
+
+                // case 49 鳝丝石巨人
+                [MuAt.SANSGOLEM] = [MuAt.PrepareSpearDashPredictiveP2, MuAt.PillarDunk, MuAt.EOCStarSickles, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.IronVirgin],
+
+                // case 50 铁处女
+                [MuAt.IronVirgin] = [MuAt.ApproachForNextAttackP2, MuAt.PrepareSpearDashPredictiveP2, MuAt.ApproachForBulletHellP2, MuAt.PrepareSpearDashDirectP2, MuAt.SpawnDestroyersForPredictiveThrow, MuAt.PrepareMechRayFan, MuAt.PrepareFishron1, MuAt.PrepareTrueEyeDiveP2, MuAt.PrepareNuke, MuAt.PrepareSlimeRain, MuAt.PrepareOkuuSpheresP2, MuAt.SpearTossDirectP2, MuAt.EmpressSwordWave, MuAt.PrepareMutantSword, MuAt.PrepareSlimeRainFollowup, MuAt.SANSGOLEM, MuAt.IronVirgin]
+            };
+            //按调用 ChooseNextAttack 时刻的 ai[0] 查表：方法内部 ai[0] 可能已被推进（14→15、22→23），或经 goto case 复用同一方法（3→32、30→38）
+            AttackTransition[MuAt.WhileDashingP2] = new List<MuAt>(AttackTransition[MuAt.SpearDashPredictiveP2]);
+            AttackTransition[MuAt.WhileDashingDirectP2] = new List<MuAt>(AttackTransition[MuAt.SpearDashDirectP2]);
+            AttackTransition[MuAt.TrueEyeDiveFollowup] = new List<MuAt>(AttackTransition[MuAt.TrueEyeDive]);
+            AttackTransition[MuAt.SpawnFishronsFollowup] = new List<MuAt>(AttackTransition[MuAt.SpawnFishrons]);
+        }
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax = 12000000;
+            npc.lifeMax = 12600000;
             npc.damage = 444 + 44;
             npc.defense = 255;
-            npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
         }
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
@@ -89,12 +178,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
             AuraCenter = npc.Center;
+            Npc = npc;
+            InitializeList();
             if (npc.ModNPC is MutantBoss mutant)
             {
                 //mutant.Music = MusicLoader.GetMusicSlot("FargosPhantasmMode/Assets/Music/HeartofGuardian");
             }
         }
-
         public override bool SafePreAI(NPC npc)
         {
             if (WorldSavingSystem.MasochistModeReal && !Main.dedServ)
@@ -112,7 +202,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         public void MutantAI(NPC npc, Player player)
         {
             EModeGlobalNPC.mutantBoss = npc.whoAmI;
-            npc.dontTakeDamage = npc.ai[0] < 0;
+            npc.dontTakeDamage = (int)AttackState < 0;
             // Set this to false by default.
             ShouldDrawAura = false;
 
@@ -130,133 +220,133 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     s.Position = npc.Center;
                 }
             }
-            switch ((int)npc.ai[0])
+            switch (AttackState)
             {
                 #region phase 1
 
-                case 0: SpearTossDirectP1AndChecks(npc, player); break;
+                case MuAt.SpearTossDirectP1AndChecks: SpearTossDirectP1AndChecks(npc, player); break;
 
-                case 1: OkuuSpheresP1(npc); break;
+                case MuAt.OkuuSpheresP1: OkuuSpheresP1(npc); break;
 
-                case 2: PrepareTrueEyeDiveP1(npc, player); break;
-                case 3: TrueEyeDive(npc, player); break;
+                case MuAt.PrepareTrueEyeDiveP1: PrepareTrueEyeDiveP1(npc, player); break;
+                case MuAt.TrueEyeDive: TrueEyeDive(npc, player); break;
 
-                case 4: PrepareSpearDashDirectP1(npc, player); break;
-                case 5: SpearDashDirectP1(npc, player); break;
-                case 6: WhileDashingP1(npc, player); break;
+                case MuAt.PrepareSpearDashDirectP1: PrepareSpearDashDirectP1(npc, player); break;
+                case MuAt.SpearDashDirectP1: SpearDashDirectP1(npc, player); break;
+                case MuAt.WhileDashingP1: WhileDashingP1(npc, player); break;
 
-                case 7: ApproachForNextAttackP1(npc, player); break;
-                case 8: VoidRaysP1(npc, player); break;
+                case MuAt.ApproachForNextAttackP1: ApproachForNextAttackP1(npc, player); break;
+                case MuAt.VoidRaysP1: VoidRaysP1(npc, player); break;
 
-                case 9: BoundaryBulletHellAndSwordP1(npc, player); break;
+                case MuAt.BoundaryBulletHellAndSwordP1: BoundaryBulletHellAndSwordP1(npc, player); break;
 
                 #endregion phase 1
 
                 #region phase 2
 
-                case 10: Phase2Transition(npc, player); break;
+                case MuAt.Phase2Transition: Phase2Transition(npc, player); break;
 
-                case 11: ApproachForNextAttackP2(npc, player); break;
-                case 12: LieFlightBomb(npc, player); break;
+                case MuAt.ApproachForNextAttackP2: ApproachForNextAttackP2(npc, player); break;
+                case MuAt.LieFlightBomb: LieFlightBomb(npc, player); break;
 
-                case 13: PrepareSpearDashPredictiveP2(npc, player); break;
-                case 14: SpearDashPredictiveP2(npc, player); break;
-                case 15: WhileDashingP2(npc, player); break;
+                case MuAt.PrepareSpearDashPredictiveP2: PrepareSpearDashPredictiveP2(npc, player); break;
+                case MuAt.SpearDashPredictiveP2: SpearDashPredictiveP2(npc, player); break;
+                case MuAt.WhileDashingP2: WhileDashingP2(npc, player); break;
 
-                case 16: goto case 11; //approach for bullet hell
-                case 17: BoundaryBulletHellP2(npc, player); break;
+                case MuAt.ApproachForBulletHellP2: goto case MuAt.ApproachForNextAttackP2; //approach for bullet hell
+                case MuAt.BoundaryBulletHellP2: BoundaryBulletHellP2(npc, player); break;
 
-                case 18: VoidRaysP2(npc); break; //虚无射线//概率由唐飞炸弹置换
+                case MuAt.VoidRaysP2: VoidRaysP2(npc); break; //虚无射线//概率由唐飞炸弹置换
 
-                case 19: PillarDunk(npc, player); break;
+                case MuAt.PillarDunk: PillarDunk(npc, player); break;
 
-                case 20: EOCStarSickles(npc, player); break;
+                case MuAt.EOCStarSickles: EOCStarSickles(npc, player); break;
 
-                case 21: PrepareSpearDashDirectP2(npc, player); break;
-                case 22: SpearDashDirectP2(npc, player); break;
-                case 23: //while dashing
+                case MuAt.PrepareSpearDashDirectP2: PrepareSpearDashDirectP2(npc, player); break;
+                case MuAt.SpearDashDirectP2: SpearDashDirectP2(npc, player); break;
+                case MuAt.WhileDashingDirectP2: //while dashing
                     if (npc.ai[1] % 3 == 0)
                         npc.ai[1]++;
-                    goto case 15;
+                    goto case MuAt.WhileDashingP2;
 
-                case 24: SpawnDestroyersForPredictiveThrow(npc, player); break;
-                case 25: SpearTossPredictiveP2(npc, player); break;
+                case MuAt.SpawnDestroyersForPredictiveThrow: SpawnDestroyersForPredictiveThrow(npc, player); break;
+                case MuAt.SpearTossPredictiveP2: SpearTossPredictiveP2(npc, player); break;
 
-                case 26: PrepareMechRayFan(npc, player); break;
-                case 27: MechRayFan(npc, player); break;
+                case MuAt.PrepareMechRayFan: PrepareMechRayFan(npc, player); break;
+                case MuAt.MechRayFan: MechRayFan(npc, player); break;
 
-                case 28: CoffinWave(npc, player); break; //free slot for new attack//意志攻击
+                case MuAt.CoffinWave: CoffinWave(npc, player); break; //free slot for new attack//意志攻击
 
-                case 29: PrepareFishron1(npc, player); break;
-                case 30: SpawnFishrons(npc); break;
+                case MuAt.PrepareFishron1: PrepareFishron1(npc, player); break;
+                case MuAt.SpawnFishrons: SpawnFishrons(npc); break;
 
-                case 31: PrepareTrueEyeDiveP2(npc, player); break;
-                case 32: goto case 3; //spawn eyes
+                case MuAt.PrepareTrueEyeDiveP2: PrepareTrueEyeDiveP2(npc, player); break;
+                case MuAt.TrueEyeDiveFollowup: goto case MuAt.TrueEyeDive; //spawn eyes
 
-                case 33: PrepareNuke(npc, player); break;
-                case 34: Nuke(npc, player); break;
+                case MuAt.PrepareNuke: PrepareNuke(npc, player); break;
+                case MuAt.Nuke: Nuke(npc, player); break;
 
-                case 35: PrepareSlimeRain(npc, player); break;
-                case 36: SlimeRain(npc, player); break;
+                case MuAt.PrepareSlimeRain: PrepareSlimeRain(npc, player); break;
+                case MuAt.SlimeRain: SlimeRain(npc, player); break;
 
-                case 37: PrepareFishron2(npc, player); break;
-                case 38: goto case 30; //spawn fishrons
+                case MuAt.PrepareFishron2: PrepareFishron2(npc, player); break;
+                case MuAt.SpawnFishronsFollowup: goto case MuAt.SpawnFishrons; //spawn fishrons
 
-                case 39: PrepareOkuuSpheresP2(npc, player); break;
-                case 40: OkuuSpheresP2(npc); break;
+                case MuAt.PrepareOkuuSpheresP2: PrepareOkuuSpheresP2(npc, player); break;
+                case MuAt.OkuuSpheresP2: OkuuSpheresP2(npc); break;
 
-                case 41: SpearTossDirectP2(npc, player); break;
+                case MuAt.SpearTossDirectP2: SpearTossDirectP2(npc, player); break;
 
-                case 42: PrepareTwinRangsAndCrystals(npc, player); break;
-                case 43: TwinRangsAndCrystals(npc, player); break;
+                case MuAt.PrepareTwinRangsAndCrystals: PrepareTwinRangsAndCrystals(npc, player); break;
+                case MuAt.TwinRangsAndCrystals: TwinRangsAndCrystals(npc, player); break;
 
-                case 44: EmpressSwordWave(npc, player); break;
+                case MuAt.EmpressSwordWave: EmpressSwordWave(npc, player); break;
 
-                case 45: PrepareMutantSword(npc, player); break;
-                case 46: MutantSword(npc, player); break;
+                case MuAt.PrepareMutantSword: PrepareMutantSword(npc, player); break;
+                case MuAt.MutantSword: MutantSword(npc, player); break;
 
-                case 47: goto case 35;
-                case 48: QueenSlimeRain(npc, player); break;
+                case MuAt.PrepareSlimeRainFollowup: goto case MuAt.PrepareSlimeRain;
+                case MuAt.QueenSlimeRain: QueenSlimeRain(npc, player); break;
 
-                case 49: SANSGOLEM(npc, player); break;
+                case MuAt.SANSGOLEM: SANSGOLEM(npc, player); break;
 
-                case 50: IronVirgin(npc, player); break;
+                case MuAt.IronVirgin: IronVirgin(npc, player); break;
 
                 //gap in the numbers here so the ai loops right
                 //when adding a new attack, remember to make ChooseNextAttack() point to the right case!
 
-                case 52: P2NextAttackPause(npc, player); break;
+                case MuAt.P2NextAttackPause: P2NextAttackPause(npc, player); break;
 
                 #endregion phase 2
 
                 #region phase 3
 
-                case -1: drainLifeInP3 = Phase3Transition(npc, player); break;
+                case MuAt.Phase3Transition: drainLifeInP3 = Phase3Transition(npc, player); break;
 
-                case -2: VoidRaysP3(npc); break;
+                case MuAt.VoidRaysP3: VoidRaysP3(npc); break;
 
-                case -3: OkuuSpheresP3(npc, player); break;
+                case MuAt.OkuuSpheresP3: OkuuSpheresP3(npc, player); break;
 
-                case -4: BoundaryBulletHellP3(npc, player); break;
+                case MuAt.BoundaryBulletHellP3: BoundaryBulletHellP3(npc, player); break;
 
-                case -5: FinalSpark(npc, player); break;
+                case MuAt.FinalSpark: FinalSpark(npc, player); break;
 
-                case -6: DyingDramaticPause(npc, player); break;
-                case -7: DyingAnimationAndHandling(npc); break;
+                case MuAt.DyingDramaticPause: DyingDramaticPause(npc, player); break;
+                case MuAt.DyingAnimationAndHandling: DyingAnimationAndHandling(npc); break;
 
                 #endregion phase 3
 
-                default: npc.ai[0] = 11; goto case 11; //return to first phase 2 attack
+                default: AttackState = MuAt.ApproachForNextAttackP2; goto case MuAt.ApproachForNextAttackP2; //return to first phase 2 attack
             }
 
             #region 杂项
 
             //manage aura scale
-            if (npc.ai[0] == 1) //ooku spheres p1
+            if (AttackState == MuAt.OkuuSpheresP1) //ooku spheres p1
             {
                 AuraScale = MathHelper.Lerp(AuraScale, 0.7f, 0.02f);
             }
-            else if (npc.ai[0] == 5 || npc.ai[0] == 6)
+            else if (AttackState == MuAt.SpearDashDirectP1 || AttackState == MuAt.WhileDashingP1)
             {
                 AuraScale = MathHelper.Lerp(AuraScale, 1.25f, 0.1f);
             }
@@ -265,12 +355,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 AuraScale = MathHelper.Lerp(AuraScale, 1f, 0.1f);
             }
             //manage arena position
-            if (!WorldSavingSystem.MasochistModeReal || npc.ai[0] != 5 && npc.ai[0] != 6) //spear dash direct p1
+            if (!WorldSavingSystem.MasochistModeReal || AttackState != MuAt.SpearDashDirectP1 && AttackState != MuAt.WhileDashingP1) //spear dash direct p1
             {
                 AuraCenter = Vector2.Lerp(AuraCenter, npc.Center, 0.3f);
             }
             //in emode p2
-            if (WorldSavingSystem.EternityMode && (npc.ai[0] < 0 || npc.ai[0] > 10 || npc.ai[0] == 10 && npc.ai[1] > 150))
+            if (WorldSavingSystem.EternityMode && ((int)AttackState < 0 || (int)AttackState > 10 || AttackState == MuAt.Phase2Transition && npc.ai[1] > 150))
             {
                 Main.dayTime = false;
                 Main.time = 16200; //midnight, for empress visuals
@@ -282,7 +372,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Main.bloodMoon = false; //disable blood moon
             }
 
-            if (npc.ai[0] < 0 && npc.life > 1 && drainLifeInP3) //in desperation
+            if ((int)AttackState < 0 && npc.life > 1 && drainLifeInP3) //in desperation
             {
                 int time = 480 + 240 + 420 + 480 + 1020 - 60;
                 if (WorldSavingSystem.MasochistModeReal)
@@ -362,13 +452,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     }
                 }
                 //控制ph幻影球
-                for (int j = 0; j <= Main.maxProjectiles; j++)
-                {
-                    if (Main.projectile[j].type == ModContent.ProjectileType<PHMutantSphereSmall>() && Main.projectile[j].active && Main.projectile[j].ai[1] >= 30)
-                    {
-                        Main.projectile[j].ai[1] = 180;
-                    }
-                }
+                PHMutantSphereSmall.EnterSpecialPhase();
                 npc.localAI[0] = 0;
             }
             else if (npc.ai[1] == 61 && npc.ai[2] < npc.ai[3] && FargoSoulsUtil.HostCheck)
@@ -424,34 +508,54 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
 
-        private void OkuuSpheresP1(NPC NPC)//1P1阿空圆环
+        private void OkuuSpheresP1(NPC npc)//1P1阿空圆环
         {
-            if (Phase2Check(NPC))
+            if (Phase2Check(npc))
                 return;
 
-            if (WorldSavingSystem.MasochistModeReal)
-                NPC.velocity = Vector2.Zero;
-            if (--NPC.ai[1] < 0)
+            npc.velocity = Vector2.Zero;
+            if (--npc.ai[1] < 0)
             {
-                NPC.netUpdate = true;
-                float modifier = WorldSavingSystem.MasochistModeReal ? 6 : 2;
-                NPC.ai[1] = 90 / modifier;
-                if (++NPC.ai[2] > 4 * modifier)
+                npc.netUpdate = true;
+                float modifier = 4.5f;
+                npc.ai[1] = 90 / modifier;
+                if (npc.ai[2] == 0)
                 {
-                    if (!WorldSavingSystem.MasochistModeReal || NPC.ai[2] > 6 * modifier) //extra endtime in maso
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpear>(), 0, 0, Main.myPlayer,
+                            npc.whoAmI, 360 + 9 * npc.ai[1], 4);
+                }
+                if (++npc.ai[2] > 4 * modifier)
+                {
+                    for (int i = 0; i < 40; i++)
                     {
-                        P1NextAttackOrMasoOptions(NPC, NPC.ai[0]);
+                        Vector2 spawnPos = Main.rand.NextVector2Unit() * Main.rand.Next(250, 500) + npc.Center;
+                        Vector2 vel = -Main.rand.NextFloat(0.5f, 1) * (spawnPos - npc.Center) / 20f;
+                        Particle p = new AlphaSparkParticle (spawnPos, vel, Color.Teal, 0.5f, Main.rand.Next(40, 50));
+                        p.Spawn();
+                    }
+                    if (npc.ai[2] == 19 && FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantContractionRing>(), 0, 0, Main.myPlayer,
+                            8 * npc.ai[1], 1500);
+                    }
+                    if (npc.ai[2] > 6 * modifier)
+                    {
+                        P1NextAttackOrMasoOptions(npc, npc.ai[0]);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantShockWave>(), 0, 0, Main.myPlayer,
+                            80, 33);
+                        ScreenShakeSystem.StartShake(20f);
+                        PHMutantSphereRingP1.EnterSpecialPhase();
                     }
                 }
                 else
                 {
-                    EdgyBossText(NPC, RandomObnoxiousQuote());
+                    EdgyBossText(npc, RandomObnoxiousQuote());
 
-                    int max = WorldSavingSystem.MasochistModeReal ? 9 : 6;
-                    float speed = WorldSavingSystem.MasochistModeReal ? 10 : 9;
-                    int sign = WorldSavingSystem.MasochistModeReal ? NPC.ai[2] % 2 == 0 ? 1 : -1 : 1;
-                    SpawnSphereRing(NPC, max, speed, (int)(0.8 * FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage)), 1f * sign);
-                    SpawnSphereRing(NPC, max, speed, (int)(0.8 * FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage)), -0.5f * sign);
+                    int max = 15;
+                    float speed = 10;
+                    int sign = npc.ai[2] % 2 == 0 ? 1 : -1;
+                    SpawnSphereRing(npc, max, speed, (int)(0.8 * FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage)), 1f * sign);
+                    SpawnSphereRing(npc, max, speed, (int)(0.8 * FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage)), -0.5f * sign);
                 }
             }
         }
@@ -508,7 +612,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     if (NPC.ai[0] == 3)
                         P1NextAttackOrMasoOptions(NPC, 2);
                     else
-                        ChooseNextAttack(NPC, 13, 19, 21, 24, 33, 33, 33, 39, 41, 44, 50);
+                        ChooseNextAttack(NPC);
                 }
                 else if (NPC.ai[2] <= maxEyeThreshold)
                 {
@@ -524,7 +628,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                             type = ModContent.ProjectileType<MutantTrueEyeR>();
 
                         int p = Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, type, FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage, 0.8f), 0f, Main.myPlayer, NPC.target);
-                        Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, -6 * Vector2.UnitY, ModContent.ProjectileType<PHMutantEyeHoming>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage, 0.8f), 0f, Main.myPlayer, NPC.target, 150 + Main.rand.Next(75));
+                        //Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, -6 * Vector2.UnitY, ModContent.ProjectileType<PHMutantEyeHoming>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage, 0.8f), 0f, Main.myPlayer, NPC.target, 150 + Main.rand.Next(75));
                         if (p != Main.maxProjectiles) //inform them which side attack began on
                         {
                             Main.projectile[p].localAI[1] = NPC.ai[3]; //this is ok, they sync this
@@ -661,24 +765,23 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 if (FargoSoulsUtil.HostCheck)
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(9 - 0 * Math.Abs(NPC.ai[2]) / MathHelper.PiOver2, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
-                NPC.ai[1] = WorldSavingSystem.MasochistModeReal ? 3 : 5; //delay between projs
+                NPC.ai[1] = 3;
                 NPC.ai[2] += NPC.ai[3];
+                NPC.ai[2] -= NPC.ai[3] / 60f;
                 if (NPC.localAI[0]++ == 20 || NPC.localAI[0] == 40)
                 {
                     NPC.netUpdate = true;
-                    NPC.ai[2] -= NPC.ai[3] / (WorldSavingSystem.MasochistModeReal ? 3 : 2);
-
                     EdgyBossText(NPC, GFBQuote(6));
                 }
-                else if (NPC.localAI[0] >= (WorldSavingSystem.MasochistModeReal ? 60 : 40))
+                else if (NPC.localAI[0] >= 60)
                 {
                     P1NextAttackOrMasoOptions(NPC, 7);
                 }
             }
         }
 
-        private const int MUTANT_SWORD_SPACING = 100;
-        private const int MUTANT_SWORD_MAX = 16;
+        private const int MUTANT_SWORD_SPACING = 80;
+        private const int MUTANT_SWORD_MAX = 12;
 
         private void BoundaryBulletHellAndSwordP1(NPC NPC, Player player)
         {
@@ -704,42 +807,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         return;
 
                     NPC.velocity = Vector2.Zero;
-
-                    //if (WorldSavingSystem.MasochistModeReal && NPC.ai[3] >= 300) //spear barrage
-                    //{
-                    //    if (NPC.ai[3] == 0)
-                    //    {
-                    //        NPC.ai[1] = 0;
-                    //        NPC.ai[2] = Main.rand.NextFloat(MathHelper.TwoPi);
-                    //        NPC.localAI[0] = player.Center.X;
-                    //        NPC.localAI[1] = player.Center.Y;
-                    //    }
-
-                    //    const int spearsToMake = 18;
-                    //    const int timeToFullSpears = 180;
-                    //    const int timeGap = timeToFullSpears / spearsToMake;
-                    //    if (NPC.ai[3] % timeGap == 0 && NPC.ai[3] < 300 + timeToFullSpears)
-                    //    {
-                    //        NPC.ai[2] += MathHelper.TwoPi / spearsToMake * ++NPC.ai[1];
-
-                    //        Vector2 target = new Vector2(NPC.localAI[0], NPC.localAI[1]);
-                    //        Vector2 spawnpos = target + 600 * NPC.ai[2].ToRotationVector2();
-
-                    //        if (FargoSoulsUtil.HostCheck)
-                    //        {
-                    //        }
-                    //    }
-                    //}
-                    //else
                     if (++NPC.ai[1] > 2) //boundary
                     {
                         SoundEngine.PlaySound(SoundID.Item12, NPC.Center);
                         NPC.ai[1] = 0;
                         //ai3 - 300 so that when attack ends, the projs will behave like at start of attack normally (straight streams)
-                        NPC.ai[2] += WorldSavingSystem.MasochistModeReal //maso uses true boundary
-                                ? (float)Math.PI / 8 / 480 * (NPC.ai[3] - 300) * NPC.localAI[0]
-                                : MathHelper.Pi / 77f;
-
+                        NPC.ai[2] += (float)Math.PI / 8 / 480 * (NPC.ai[3] - 300) * NPC.localAI[0];
                         if (FargoSoulsUtil.HostCheck)
                         {
                             int max = WorldSavingSystem.MasochistModeReal ? 7 : 6;
@@ -752,7 +825,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         }
                     }
 
-                    if (++NPC.ai[3] > (WorldSavingSystem.MasochistModeReal ? 360 : 240))
+                    if (++NPC.ai[3] > 360)
                     {
                         P1NextAttackOrMasoOptions(NPC, NPC.ai[0]);
                     }
@@ -783,10 +856,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 if (!AliveCheck(NPC, player))
                     return;
-
+                /*
                 Vector2 targetPos = player.Center;
                 float shouldX = 420 * Math.Sign(NPC.Center.X - player.Center.X);
                 targetPos.X += (NPC.ai[0] == 9 || FirstSword) ? shouldX : -shouldX;//反向
+                targetPos.Y -= 210 * sign;
+                */
+                Vector2 targetPos = player.Center;
+                targetPos.X += 420 * Math.Sign(NPC.Center.X - player.Center.X);
                 targetPos.Y -= 210 * sign;
                 if (NPC.ai[0] == 9 || FirstSword)
                 {
@@ -837,10 +914,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.velocity = Vector2.Zero;
 
                 int endtime = 90;
-                if (NPC.ai[0] != 9 && !FirstSword)
-                {
-                    endtime = 15;
-                }
                 FancyFireballs(NPC, (int)(NPC.ai[1] / endtime * 60f));
 
                 if (++NPC.ai[1] > endtime)
@@ -912,6 +985,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     P1NextAttackOrMasoOptions(NPC, NPC.ai[0]);
                 }
+                /*
                 else if (WorldSavingSystem.MasochistModeReal && NPC.localAI[2] < 4 * 3 * (endTimeVariance + 0.5))//乘4为补偿间隔缩短
                 {
                     NPC.ai[0]--;
@@ -920,12 +994,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.ai[3] = 0;
                     NPC.localAI[1] = 0;
                     NPC.netUpdate = true;
-                    FirstSword = false;
                 }
+                */
                 else
                 {
-                    FirstSword = true;
-                    ChooseNextAttack(NPC, 13, 21, 24, 29, 31, 33, 37, 41, 42, 44, 47, 49, 50);
+                    ChooseNextAttack(NPC);
                 }
             }
         }
@@ -1087,7 +1160,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
                 else if (npc.localAI[0] >= 60)
                 {
-                    ChooseNextAttack(npc, 13, 19, 21, 24, 31, 39, 41, 42, 49, 50);
+                    ChooseNextAttack(npc);
                 }
             }
             int num = 0;
@@ -1205,7 +1278,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.ai[3] = 0;
                 if (++NPC.ai[2] > NPC.localAI[1])
                 {
-                    ChooseNextAttack(NPC, 16, 19, 20, 26, 29, 31, 33, 39, 42, 44, 45, 50);
+                    ChooseNextAttack(NPC);
                 }
                 else
                 {
@@ -1222,14 +1295,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     }
 
                     EdgyBossText(NPC, GFBQuote(10));
+                    PHMutantSphereSmall.EnterSpecialPhase();
                 }
-                for (int j = 0; j <= Main.maxProjectiles; j++)
-                {
-                    if (Main.projectile[j].type == ModContent.ProjectileType<PHMutantSphereSmall>() && Main.projectile[j].active && Main.projectile[j].ai[1] >= 30)
-                    {
-                        Main.projectile[j].ai[1] = 180;
-                    }
-                }
+
                 NPC.localAI[0] = 0;
             }
         }
@@ -1299,7 +1367,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             int endTime = 360 + 60 + (int)(300 * endTimeVariance);
             if (++NPC.ai[3] > endTime)
             {
-                ChooseNextAttack(NPC, 11, 13, 19, 20, 21, 24, WorldSavingSystem.MasochistModeReal ? 31 : 26, 33, 41, 44, 50);
+                ChooseNextAttack(NPC);
             }
         }//17波粒
 
@@ -1396,7 +1464,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (++NPC.ai[1] > endTime)
             {
-                ChooseNextAttack(NPC, 11, 13, 20, 21, 26, 33, 41, 44, 49, 50);
+                ChooseNextAttack(NPC);
             }
             else if (NPC.ai[1] == pillarAttackDelay)
             {
@@ -1472,7 +1540,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (++NPC.ai[1] > 450)
             {
-                ChooseNextAttack(NPC, 11, 13, 16, 21, 26, 29, 31, 33, 35, 37, 41, 44, 45, 47, 49, 50);
+                ChooseNextAttack(NPC);
             }
 
             /*if (Math.Abs(targetPos.X - player.Center.X) < 150) //avoid crossing up player
@@ -1562,9 +1630,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 if (++NPC.ai[2] > NPC.localAI[1])
                 {
                     if (WorldSavingSystem.MasochistModeReal)
-                        ChooseNextAttack(NPC, 11, 13, 16, 19, 20, 31, 33, 35, 39, 42, 44, 47, 50);
+                        ChooseNextAttack(NPC);
                     else
-                        ChooseNextAttack(NPC, 11, 16, 26, 29, 31, 35, 37, 39, 42, 44, 47);
+                        ChooseNextAttack(NPC);
                 }
                 else
                 {
@@ -1689,9 +1757,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     shouldAttack = false;
                     if (WorldSavingSystem.MasochistModeReal)
-                        ChooseNextAttack(NPC, 11, 19, 20, 29, 31, 33, 35, 37, 39, 42, 44, 45, 47, 50);
+                        ChooseNextAttack(NPC);
                     else
-                        ChooseNextAttack(NPC, 11, 19, 20, 26, 26, 26, 29, 31, 33, 35, 37, 39, 42, 44, 47);
+                        ChooseNextAttack(NPC);
                 }
 
                 if ((shouldAttack || WorldSavingSystem.MasochistModeReal) && FargoSoulsUtil.HostCheck)
@@ -1701,13 +1769,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, -Vector2.Normalize(vel), ModContent.ProjectileType<MutantDeathray2>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage, 0.8f), 0f, Main.myPlayer);
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, vel, ModContent.ProjectileType<PHMutantSpearThrown>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.target, 1f);
                 }
-                for (int j = 0; j <= Main.maxProjectiles; j++)
-                {
-                    if (Main.projectile[j].type == ModContent.ProjectileType<PHMutantSphereSmall>() && Main.projectile[j].active && Main.projectile[j].ai[1] >= 30)
-                    {
-                        Main.projectile[j].ai[1] = 180;
-                    }
-                }
+                PHMutantSphereSmall.EnterSpecialPhase();
             }
             else if (NPC.ai[1] == 1 && (NPC.ai[2] < NPC.localAI[1] || WorldSavingSystem.MasochistModeReal) && FargoSoulsUtil.HostCheck)
             {
@@ -1869,7 +1931,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
                 if (WorldSavingSystem.EternityMode) //use full moveset
                 {
-                    ChooseNextAttack(NPC, 11, 13, 16, 19, 21, 24, 29, 31, 33, 35, 37, 39, 41, 42, 45, 47, 49, 50);
+                    ChooseNextAttack(NPC);
                 }
                 else
                 {
@@ -1989,7 +2051,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (++NPC.ai[1] > (WorldSavingSystem.MasochistModeReal ? 200 : 120))
             {
-                ChooseNextAttack(NPC, 13, 19, 20, 21, WorldSavingSystem.MasochistModeReal ? 44 : 26, 28, 31, 31, 31, 33, 35, 39, 41, 42, 44, 47, 49, 50);
+                ChooseNextAttack(NPC);
             }
         }
 
@@ -2092,7 +2154,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (++NPC.ai[1] > 360 + 210 * endTimeVariance)
             {
-                ChooseNextAttack(NPC, 11, 13, 16, 19, 24, 28, WorldSavingSystem.MasochistModeReal ? 26 : 29, 31, 35, 37, 39, 41, 42, 47, 49);
+                ChooseNextAttack(NPC);
             }
 
             if (NPC.ai[1] > 45)
@@ -2289,7 +2351,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 endTime += timeToMove + (int)(300 * endTimeVariance) - 30;
             if (++NPC.ai[2] > endTime)
             {
-                ChooseNextAttack(NPC, 11, 16, 19, 20, 28, WorldSavingSystem.MasochistModeReal ? 26 : 29, 31, 33, 37, 39, 41, 42, 45);
+                ChooseNextAttack(NPC);
             }
         }
 
@@ -2407,7 +2469,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             int endTime = masoMovingRainAttackTime + timeToMove + (int)(300 * endTimeVariance);
             if (++NPC.ai[1] > endTime)
             {
-                ChooseNextAttack(NPC, 11, 16, 19, 20, WorldSavingSystem.MasochistModeReal ? 26 : 29, 31, 33, 37, 39, 41, 42, 45);
+                ChooseNextAttack(NPC);
             }
         }
 
@@ -2471,7 +2533,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 SpawnPHSphereRing(NPC, max, speed, FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), -0.9f, rotation);
 
             }
-
+            /*
+            //特殊阶段：技能中段一次性触发所有已存活环弹进入（保持原轨迹、先静止再加速）。ai[3] 每帧 +1，等式只命中一帧。
+            if (NPC.ai[3] == (60 + endTime) / 2)
+                PHMutantSphereRing.EnterSpecialPhase();
+            */
             if (NPC.ai[2] == 0)
             {
                 NPC.ai[2] = Main.rand.NextBool() ? -1 : 1;
@@ -2485,7 +2551,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (++NPC.ai[3] > endTime)
             {
-                ChooseNextAttack(NPC, 13, 19, 20, WorldSavingSystem.MasochistModeReal ? 13 : 26, 28, WorldSavingSystem.MasochistModeReal ? 44 : 33, 41, 44, 49);
+                ChooseNextAttack(NPC);
             }
 
             for (int i = 0; i < 5; i++)
@@ -2553,9 +2619,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 if (++NPC.ai[2] > NPC.localAI[1])
                 {
                     if (Main.getGoodWorld) // Can't combo into slime rain in ftw
-                        ChooseNextAttack(NPC, 11, 16, 19, 20, WorldSavingSystem.MasochistModeReal ? 44 : 26, 28, 31, 33, /*35,*/ 42, 44, 45, 47, 50);
+                        ChooseNextAttack(NPC);
                     else
-                        ChooseNextAttack(NPC, 11, 16, 19, 20, WorldSavingSystem.MasochistModeReal ? 44 : 26, 28, 31, 33, 35, 42, 44, 45, 47);
+                        ChooseNextAttack(NPC);
                     shouldAttack = false;
                 }
 
@@ -2670,7 +2736,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (++NPC.ai[3] > 450)
             {
-                ChooseNextAttack(NPC, 11, 13, 16, 21, 24, 26, 29, 31, 33, 35, 39, 41, 44, 45, 47, 49, 50);
+                ChooseNextAttack(NPC);
             }
         }
 
@@ -2822,7 +2888,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (++NPC.ai[1] > swordSwarmTime + (WorldSavingSystem.MasochistModeReal ? Main.getGoodWorld ? 60 : 60 : 30))
             {
-                ChooseNextAttack(NPC, 11, 13, 16, 21, WorldSavingSystem.MasochistModeReal ? 26 : 24, 28, 29, 31, 35, 37, 39, 41, 45, 47, 49, 50);
+                ChooseNextAttack(NPC);
             }
         }
 
@@ -2902,7 +2968,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (++NPC.ai[1] > endTime)
             {
                 SansOldPos = Vector2.Zero;
-                ChooseNextAttack(NPC, 13, 19, 20, 21, 24, 31, 33,/* 35,*/ 41, 44, 50);
+                ChooseNextAttack(NPC);
             }
         }
         /*
@@ -3135,7 +3201,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (++npc.ai[1] > starttime + 360 + 120)
             {
-                ChooseNextAttack(npc, 11, 13, 16, 21, 24, 26, 29, 31, 33, 35, 39, 41, 44, 45, 47, 49, 50);
+                ChooseNextAttack(npc);
                 npc.netUpdate = true;
             }
 
@@ -3207,7 +3273,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 npc.ai[1] = 0;
                 LieFlightPos = Vector2.Zero;
-                ChooseNextAttack(npc, 13, 19, 21, 24, 28, 31, 39, 41, 42, 49, 50);
+                ChooseNextAttack(npc);
                 npc.netUpdate = true;
             }
         }
@@ -3324,7 +3390,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (++npc.ai[1] > 420 + 120 + 120)
             {
-                ChooseNextAttack(npc, 13, 19, 20, 21, 24, 31, 33, /*35,*/ 41, 44, 50);
+                ChooseNextAttack(npc);
                 npc.netUpdate = true;
             }
             
@@ -4103,8 +4169,10 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return true;
         }
 
-        private void ChooseNextAttack(NPC NPC, params int[] args)
+        private void ChooseNextAttack(NPC NPC)
         {
+            MuAt source = (MuAt)NPC.ai[0]; //进入方法时 ai[0] 仍是本状态，缓存作字典索引（下面会改成52）
+            List<MuAt> options = AttackTransition[source]; //以 source 从字典取本状态出招表（含权重）
             float buffer = NPC.ai[0] + 1;
             NPC.ai[0] = 52;
             NPC.ai[1] = 0;
@@ -4120,7 +4188,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             if (WorldSavingSystem.EternityMode)
             {
-                //become more likely to use randoms as life decreases
                 bool useRandomizer = NPC.localAI[3] >= 3 && (WorldSavingSystem.MasochistModeReal || Main.rand.NextFloat(0.8f) + 0.2f > (float)Math.Pow((float)NPC.life / NPC.lifeMax, 2));
 
                 if (FargoSoulsUtil.HostCheck)
@@ -4129,7 +4196,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
                     //if randomizer, start with a random attack, else use the previous state + 1 as starting attempt BUT DO SOMETHING ELSE IF IT'S ALREADY USED
                     if (useRandomizer)
-                        NPC.ai[2] = Main.rand.Next(args);
+                        NPC.ai[2] = (int)options[Main.rand.Next(options.Count)];
 
                     //Main.NewText(useRandomizer ? "(Starting with random)" : "(Starting with regular next attack)");
 
@@ -4144,7 +4211,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                                 foundAttackToUse = true;
                                 break;
                             }
-                            NPC.ai[2] = Main.rand.Next(args);
+                            NPC.ai[2] = (int)options[Main.rand.Next(options.Count)];
                         }
 
                         if (foundAttackToUse)
@@ -4241,7 +4308,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             float rotation = 2f * (float)Math.PI / max;
-            int type = ModContent.ProjectileType<MutantSphereRing>();
+            int type = ModContent.ProjectileType<PHMutantSphereRingP1>();
             for (int i = 0; i < max; i++)
             {
                 Vector2 vel = speed * Vector2.UnitY.RotatedBy(rotation * i + offset);
@@ -4253,7 +4320,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             float rotation = 2f * (float)Math.PI / max;
-            int type = ModContent.ProjectileType<PHMutantSphereRing>();
+            int type = ModContent.ProjectileType<PHMutantSphereRingP2>();
             for (int i = 0; i < max; i++)
             {
                 Vector2 vel = speed * Vector2.UnitY.RotatedBy(rotation * i + offset);
@@ -4264,7 +4331,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         private bool Phase2Check(NPC NPC)
         {
-            if (Main.expertMode && NPC.life < NPC.lifeMax * (2f / 3))
+            if (NPC.life < NPC.lifeMax * (3f / 4))
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
@@ -4274,6 +4341,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.ai[3] = 0;
                     NPC.netUpdate = true;
                     FargoSoulsUtil.ClearHostileProjectiles(1, NPC.whoAmI);
+                    IProjOwnedByBoss<MutantBoss>.KillAll();
                     EdgyBossText(NPC, GFBQuote(3));
                 }
                 return true;

@@ -1,4 +1,5 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -7,7 +8,7 @@ using Terraria.ID;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantMark2 : MutantMark2
+    public class PHMutantMark2 : MutantMark2, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

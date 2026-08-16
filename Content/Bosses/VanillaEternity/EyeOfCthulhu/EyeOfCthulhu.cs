@@ -18,6 +18,7 @@ using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.Audio;
@@ -33,32 +34,30 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
     /// </summary>
     public class P_EyeOfCthulhu : PModeNPCBehaviour
     {
-        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(NPCID.EyeofCthulhu);
+        public override int NPCType => NPCID.EyeofCthulhu;
 
         public bool recolor = SoulConfig.Instance.BossRecolors && WorldSavingSystem.EternityMode;
         public bool DroppedSummon;
         public int TeleportDirection;
         public float AIState = 0;
         public int DeathTimer = -1;
-        public int LastAIState = 0;
-        public int Last2AIState = 0;
+        public Queue<int> oldAtk = new();
         public int HyperTime = 0;
         public int P3AttackChange = 0;
         public override void SetDefaults(NPC npc)
         {
-            npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
         }
-        public override void StopEmodeAI(NPC npc)
-        {
-            npc.GetGlobalNPC<EyeofCthulhu>().RunEmodeAI = false;
-        }
+        public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<EyeofCthulhu>().RunEmodeAI = false;
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot)
         {
             if (npc.alpha > 120)
                 return false;
             return base.CanHitPlayer(npc, target, ref cooldownSlot);
         }
-        
+        public override GlobalNPC NewInstance(NPC target)
+        {
+            return base.NewInstance(target);
+        }
         public override bool SafePreAI(NPC npc)
         {
             EModeGlobalNPC.eyeBoss = npc.whoAmI;
@@ -283,7 +282,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                         Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6);
                     }
                     for (int i = 0; i < 20; i++)
-                        Dust.NewDust(npc.position, npc.width, npc.height, 5, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
+                        Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
                     SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
             }
@@ -2090,8 +2089,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         }
         private void RecordLast()
         {
-            Last2AIState = LastAIState;
-            LastAIState = (int)AIState;
+            int memorylength = 3;
+            oldAtk.Enqueue(Convert.ToInt32(AIState));
+            while (oldAtk.Count > memorylength)
+                oldAtk.Dequeue();
         }
         private void ChooseNext(NPC npc)
         {
@@ -2099,7 +2100,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             if (npc.ai[3] == 3)
             {
                 int num = Main.rand.Next(9, 16);
-                while (num == LastAIState || num == Last2AIState)
+                while (oldAtk.Contains(num))
                     num = Main.rand.Next(9, 16);
                 AIState = num;
                 
@@ -2107,7 +2108,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             else
             {
                 int num = Main.rand.NextBool(2) ? 8 : Main.rand.Next(9, 16);
-                while (num == LastAIState || num == Last2AIState)
+                while (oldAtk.Contains(num))
                     num = Main.rand.NextBool(2) ? 8 : Main.rand.Next(9, 16);
                 AIState = num;
             }
@@ -2260,8 +2261,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         {
             base.SendExtraAI(npc, bitWriter, binaryWriter);
             binaryWriter.Write7BitEncodedInt(TeleportDirection);
-            binaryWriter.Write7BitEncodedInt(LastAIState);
-            binaryWriter.Write7BitEncodedInt(Last2AIState);
             binaryWriter.Write7BitEncodedInt(HyperTime);
             binaryWriter.Write7BitEncodedInt(P3AttackChange);
             binaryWriter.Write(AIState);
@@ -2270,8 +2269,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         {
             base.ReceiveExtraAI(npc, bitReader, binaryReader);
             TeleportDirection = binaryReader.Read7BitEncodedInt();
-            LastAIState = binaryReader.Read7BitEncodedInt();
-            Last2AIState = binaryReader.Read7BitEncodedInt();
             HyperTime = binaryReader.Read7BitEncodedInt();
             P3AttackChange = binaryReader.Read7BitEncodedInt();
             AIState = binaryReader.ReadSingle();

@@ -1,11 +1,12 @@
 ﻿using FargowiltasSouls;
-using FargowiltasSouls.Content.Buffs.Souls;
-using FargowiltasSouls.Core.ModPlayers;
+using Luminance.Common.StateMachines;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Terraria;
@@ -16,7 +17,7 @@ namespace FargosPhantasmMode.Common
 {
     public static class PhanUtil
     {
-        public static Vector2 VecLerp(Vector2 start, Vector2 end, float progress) => new Vector2(MathHelper.Lerp(start.X, end.X, progress), MathHelper.Lerp(start.Y, end.Y, progress));
+        public static Vector2 VecLerp(Vector2 start, Vector2 end, float progress) => new (MathHelper.Lerp(start.X, end.X, progress), MathHelper.Lerp(start.Y, end.Y, progress));
         public static float AngleDifference(this Vector2 start, Vector2 end) => MathHelper.WrapAngle(end.ToRotation() - start.ToRotation());
         public static Vector2 Axisymmetry(this Vector2 oldvel, Vector2 axis) => oldvel.RotatedBy(2 * oldvel.AngleDifference(axis));
         public static Vector2 Axisymmetry(this Vector2 oldp, Vector2 line1, Vector2 line2) => (oldp - line2).Axisymmetry(line1 - line2) + line2;
@@ -133,10 +134,12 @@ namespace FargosPhantasmMode.Common
             }
             return points;
         }
+        public static readonly FieldInfo _sbMatrixField = typeof(SpriteBatch).GetField("transformMatrix", BindingFlags.Instance | BindingFlags.NonPublic);
         static float ColorTimer;
         /// <summary>
         /// 80
         /// </summary>
+        public static Color MechColor() => MechColor(0); 
         public static Color MechColor(float a = 0)
         {
             Color destColor = new(80, 174, 255);
@@ -157,6 +160,39 @@ namespace FargosPhantasmMode.Common
                 return Color.Lerp(spazColor, primColor, (colorTimer - 160) / 80f);
             else
                 return Color.Lerp(primColor, destColor, (colorTimer - 240) / 80f);
+        }
+        public static Color CosmoColor() => CosmoColor(0);
+        public static Color CosmoColor(float a = 0)
+        {
+            Color solarColor = new(254, 158, 35);
+            Color vortexColor = new(0, 242, 170);
+            Color nebulaColor = new(254, 126, 229);
+            Color stardustColor = new(0, 174, 238);
+            ColorTimer += 0.5f;
+            if (ColorTimer > 320)
+                ColorTimer = 0;
+            float colorTimer = ColorTimer + a;
+            if (colorTimer > 320)
+                colorTimer = 0;
+            if (colorTimer < 80)
+                return Color.Lerp(solarColor, vortexColor, colorTimer / 80f);
+            else if (colorTimer < 160)
+                return Color.Lerp(vortexColor, nebulaColor, (colorTimer - 80) / 80f);
+            else if (colorTimer < 240)
+                return Color.Lerp(nebulaColor, stardustColor, (colorTimer - 160) / 80f);
+            else
+                return Color.Lerp(stardustColor, solarColor, (colorTimer - 240) / 80f);
+        }
+        public static void DrawItemGlow(Item item, Vector2 position, Color glowColor1, Color glowColor2, ref int drawTimer)
+        {
+            for (int j = 0; j < 12; j++)
+            {
+                Vector2 afterimageOffset = (MathHelper.TwoPi * j / 12f).ToRotationVector2() * 1f;
+                float modifier = 0.5f + ((float)Math.Sin(drawTimer / 30f) / 6);
+                Color glowColor = Color.Lerp(glowColor1 with { A = 0 }, glowColor2 with { A = 0 }, modifier) * 0.5f;
+                Texture2D texture = Terraria.GameContent.TextureAssets.Item[item.type].Value;
+                Main.EntitySpriteDraw(texture, position + afterimageOffset, null, glowColor, 0, texture.Size() * 0.5f, item.scale, SpriteEffects.None, 0f);
+            }
         }
         /// <summary>
         /// 检查player是否有某个buff集合中的buff
@@ -232,5 +268,87 @@ namespace FargosPhantasmMode.Common
         public static bool FloatBool(float p) => Main.rand.NextFloat(0, 1) < p;
         public static float ApplyVariance(float value, int percent) => value * (1f + Main.rand.Next(-percent, percent + 1) * 0.01f);
         public static bool IsInRange(this float x, float min, float max, bool Canmin = true, bool Canmax = false) => (Canmin && x == min) || (x > min && x < max) || (Canmax && x == max);
+        #region Luminance下推自动机扩展
+        // 服务器端：把整个状态栈 + 每个状态的 float[4] 写进包
+        public static void WriteStack<TId>(this BinaryWriter writer, PushdownAutomata<Pstate<TId>, TId> machine) where TId : struct
+        {
+            writer.Write((byte)machine.StateStack.Count);       // 1. 栈深
+            foreach (var state in machine.StateStack.Reverse())  // 2. 栈顶 → 栈底
+            {
+                writer.Write((byte)Convert.ToInt32(state.Identifier)); // 枚举 → byte
+                for (int i = 0; i < state.ai.Length; i++)
+                    writer.Write(state.ai[i]);               // float[4] 原样同步
+            }
+        }
+        // 客户端：读回并重建栈
+        public static void ReadStack<TId>(this BinaryReader reader, PushdownAutomata<Pstate<TId>, TId> machine) where TId : struct
+        {
+            machine.StateStack.Clear();
+            int depth = reader.ReadByte();
+            for (int i = 0; i < depth; i++)
+            {
+                var id = (TId)Enum.ToObject(typeof(TId), reader.ReadByte()); // byte → 枚举
+
+                // 从注册表取实例；客户端缺失就补建一个（只读镜像用）
+                if (!machine.StateRegistry.TryGetValue(id, out var state))
+                {
+                    state = new Pstate<TId>(id);
+                    machine.RegisterState(state);
+                }
+
+                for (int j = 0; j < state.ai.Length; j++)
+                    state.ai[j] = reader.ReadSingle();
+
+                machine.StateStack.Push(state);
+            }
+        }
+        /// <summary>
+        /// 给传统下推状态机转换注册添加权重比，实现随机转换
+        /// </summary>
+        public static void RegisterWeightedTransition<TState, E>(
+            this PushdownAutomata<TState, E> automata, E initialState, E?[] choices, float[] weights, Func<bool> condition, bool rememberPreviousState = false, Action transitioncallback = null) 
+            where TState : class, IState<E> where E : struct
+        {
+            automata.RegisterTransition(initialState, newState: null, rememberPreviousState, condition, 
+            transitionCallback: () => 
+            {
+                float roll = Main.rand.NextFloat(weights.Sum());
+                float acc = 0;
+                E? transitionTargetOverride = null;
+                for (int i = 0; i < choices.Length; i++)
+                {
+                    acc += weights[i];
+                    if (roll < acc) { transitionTargetOverride = choices[i]; break; }
+                }
+                if (transitionTargetOverride != null)
+                    automata.StateStack.Push(automata.StateRegistry[transitionTargetOverride.Value]);
+                transitioncallback?.Invoke();
+            });
+        }
+        public static void RegisterTimeTransition<E>(
+            this PushdownAutomata<Pstate<E>, E> automata, E initialState, E? choice, int frame, bool rememberPreviousState = false, Action transitioncallback = null) where E : struct
+        => automata.RegisterTransition(initialState, choice, rememberPreviousState, () => automata.StateRegistry[initialState].ai[0] > frame, transitioncallback);
+        public static void DrawPushdownAutomataState<E>(
+            this SpriteBatch spriteBatch, PushdownAutomata<Pstate<E>, E> automata) where E : struct
+        {
+            Vector2 drawcenter = new(0, -800);
+            Pstate<E> state = automata.CurrentState;
+            E? nowstate = state.Identifier;
+            string text1 = $"目前状态:{nowstate.Value}，";
+            if (automata.transitionTable.TryGetValue(nowstate.Value, out var valuelist))
+            {
+                foreach(var info in valuelist)
+                {
+                    if (info == null) continue;
+                    text1 += $"未来可能状态:{info.NewState}";
+                }
+            }
+            string text2 = $"目前状态方法: {automata.StateBehaviors[nowstate.Value].Method}";
+            string text3 = $"目前状态ai参数: ai[0] = {state.ai[0]}, ai[1] = {state.ai[1]}, ai[2] = {state.ai[2]}, ai[3] = {state.ai[3]}";
+            Utils.DrawBorderString(spriteBatch, text1, drawcenter, Color.Aqua, 1.5f);
+            Utils.DrawBorderString(spriteBatch, text2, drawcenter + new Vector2(0, 50), Color.Aqua, 1.5f);
+            Utils.DrawBorderString(spriteBatch, text3, drawcenter + new Vector2(0, 100), Color.Aqua, 1.5f);
+        }
+        #endregion
     }
 }

@@ -2,6 +2,7 @@
 using FargowiltasSouls.Content.Projectiles.Souls;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer;
@@ -40,11 +41,11 @@ public class LightningExplosion : CobaltExplosion
 
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
-        target.AddBuff(144, 120);
+        target.AddBuff(BuffID.Electrified, 120);
     }
 
     public override void OnHitPlayer(Player target, Player.HurtInfo info)
     {
-        target.AddBuff(144, 120);
+        target.AddBuff(BuffID.Electrified, 120);
     }
 }

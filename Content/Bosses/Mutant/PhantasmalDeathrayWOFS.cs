@@ -4,6 +4,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,7 +17,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantPhantasmalDeathrayWOFS : PhantasmalDeathrayWOFS
+    public class MutantPhantasmalDeathrayWOFS : PhantasmalDeathrayWOFS, IProjOwnedByBoss<MutantBoss>
     {
         float oldX = 0;
         float oldY = 0;
@@ -102,7 +103,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         }
     }
-    public class MutantPhantasmalDeathrayWOF : BaseDeathray, IPixelatedPrimitiveRenderer
+    public class MutantPhantasmalDeathrayWOF : BaseDeathray, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
     {
         float oldX = 0;
         float oldY = 0;

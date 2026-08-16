@@ -1,8 +1,10 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.Lifelight;
+using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using System;
@@ -13,7 +15,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantLifeNuke : LifeNuke
+    public class MutantLifeNuke : LifeNuke, IProjOwnedByBoss<MutantBoss>
     {
         public override void SetDefaults()
         {
@@ -121,7 +123,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class MutantLifeProjSmall : LifeProjSmall
+    public class MutantLifeProjSmall : LifeProjSmall, IProjOwnedByBoss<MutantBoss>
     {
         int ritualID = -1;
         public override string Texture => "FargowiltasSouls/Content/Bosses/Lifelight/LifeProjSmall";

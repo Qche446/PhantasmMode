@@ -5,6 +5,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,7 +17,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantTrueEyeL : MutantTrueEyeL
+    public class PHMutantTrueEyeL : MutantTrueEyeL, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {
@@ -143,7 +144,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class PHMutantTrueEyeDeathray : BaseDeathray, IPixelatedPrimitiveRenderer
+    public class PHMutantTrueEyeDeathray : BaseDeathray, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Deathrays/" + (FargoSoulsUtil.AprilFools ? "PhantasmalDeathray" : "PhantasmalDeathrayML");
 

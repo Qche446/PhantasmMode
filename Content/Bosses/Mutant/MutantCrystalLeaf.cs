@@ -1,5 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,10 +11,9 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantCrystalLeaf : MutantCrystalLeaf
+    public class PHMutantCrystalLeaf : MutantCrystalLeaf, IProjOwnedByBoss<MutantBoss>
     {
         //ai0传mark2参数,ai1传初始角度，ai2传旋转方向(大小)
-        bool start = true;
         float Length = 100f;
         int timer = 0;
         public override string Texture => FargoSoulsUtil.AprilFools ?
@@ -44,7 +44,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 for (int i = 0; i < 30; i++)
                 {
-                    int num = Dust.NewDust(base.Projectile.position, base.Projectile.width, base.Projectile.height, 157, 0f, 0f, 0, default(Color), 2f);
+                    int num = Dust.NewDust(base.Projectile.position, base.Projectile.width, base.Projectile.height, DustID.ChlorophyteWeapon, 0f, 0f, 0, default(Color), 2f);
                     Main.dust[num].noGravity = true;
                     Main.dust[num].velocity *= 5f;
                 }

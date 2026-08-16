@@ -1,6 +1,7 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -12,8 +13,9 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantMark1 : MutantMark1
+    public class PHMutantMark1 : MutantMark1, IProjOwnedByBoss<MutantBoss>
     {
+        bool IProjOwnedByBoss<MutantBoss>.SetActiveFalseInsteadOfKill => true;
         //会发射激光的幻影球
         public override void AI()
         {
@@ -57,16 +59,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Vector2 gloworigin2 = glowrectangle.Size() / 2f;
             Color glowcolor = Color.Lerp(FargoSoulsUtil.AprilFools ? Color.Red : new Color(255, 255, 255, 0), Color.Transparent, 0.85f);
 
-            if (WorldSavingSystem.MasochistModeReal)
-            {
-                Asset<Texture2D> line = TextureAssets.Extra[178];
-                float opacity = 1f;
-                Main.EntitySpriteDraw(line.Value, Projectile.Center - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), null, Color.Cyan * opacity, Projectile.velocity.ToRotation() + Projectile.ai[0], new Vector2(0, line.Height() * 0.5f),
-                    new Vector2(0.3f, Projectile.scale * 7), SpriteEffects.None);
-                Main.EntitySpriteDraw(line.Value, Projectile.Center - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), null, Color.Cyan * opacity, Projectile.velocity.ToRotation() + Projectile.ai[0] + MathHelper.Pi, new Vector2(0, line.Height() * 0.5f),
-                    new Vector2(0.3f, Projectile.scale * 7), SpriteEffects.None);
-            }
-
+            Asset<Texture2D> line = TextureAssets.Extra[ExtrasID.FairyQueenLance];
+            float opacity = 1f;
+            Main.EntitySpriteDraw(line.Value, Projectile.Center - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), null, Color.Cyan * opacity, Projectile.velocity.ToRotation() + Projectile.ai[0], new Vector2(0, line.Height() * 0.5f),
+                new Vector2(0.3f, Projectile.scale * 7), SpriteEffects.None);
+            Main.EntitySpriteDraw(line.Value, Projectile.Center - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), null, Color.Cyan * opacity, Projectile.velocity.ToRotation() + Projectile.ai[0] + MathHelper.Pi, new Vector2(0, line.Height() * 0.5f),
+                new Vector2(0.3f, Projectile.scale * 7), SpriteEffects.None);
             for (int i = 0; i < ProjectileID.Sets.TrailCacheLength[Projectile.type]; i++) //reused betsy fireball scaling trail thing
             {
 

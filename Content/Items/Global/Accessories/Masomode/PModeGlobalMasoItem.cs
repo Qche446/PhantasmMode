@@ -72,6 +72,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode
                 SafeUpdateInPack(item, player);
             }
         }
+        public sealed override void UpdateInfoAccessory(Item item, Player player)
+        {
+            if (PModeChangeApply)
+            {
+                SafeUpdateInPack(item, player);
+            }
+        }
         public sealed override void UpdateVanity(Item item, Player player)
         {
             if (PModeChangeApply)

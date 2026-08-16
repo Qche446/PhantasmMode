@@ -14,30 +14,20 @@ namespace FargosPhantasmMode.Global
     /// </summary>
     public abstract class PModeNPCBehaviour : GlobalNPC
     {
-        public NPCMatcher Matcher;
-
+        public abstract int NPCType { get; }
         public override bool InstancePerEntity => true;
         //public float AIState = 0;
         public bool RunPmodeAI = true;
 
         public sealed override bool AppliesToEntity(NPC entity, bool lateInstantiation)
         {
-            return lateInstantiation && Matcher.Satisfies(entity.type);
+            return lateInstantiation && entity.type == NPCType;
         }
-
-        public override void Load()
-        {
-            Matcher = CreateMatcher();
-            base.Load();
-        }
-
-        public abstract NPCMatcher CreateMatcher();
-
         public override GlobalNPC NewInstance(NPC target)
         {
             //材质替换交给原法的globalnpc
             //TryLoadSprites(target);材质替换交给原法的globalnpc
-            return PModeWorldSavingSystem.PhantasmMode && Matcher.Satisfies(target.type) ? base.NewInstance(target) : null;
+            return PModeWorldSavingSystem.PhantasmMode && target.type == NPCType ? base.NewInstance(target) : null;
         }
 
         public bool FirstTick = true; 

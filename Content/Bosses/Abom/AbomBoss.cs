@@ -33,14 +33,17 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
     {
         private string TownNPCName;
         private bool droppedSummon = false;
-
+        public bool HugeMove = false;
         public int ritualProj, ringProj, spriteProj, ritualProjMaso, ritualProjFTW;
-        public int PhaseIndex = 0;
-        public Vector2 targetPos;
-        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(ModContent.NPCType<AbomBoss>());
+        public override int NPCType => ModContent.NPCType<AbomBoss>();
         public AIMethod AIState { get; set; }
-        public List<List<AIMethod>> PhaseList => [[ThrowScythes], Phase1, Phase1, Phase3];
-        private List<AIMethod> Phase1 => [
+        public List<List<AIMethod>> PhaseList { get; set; }
+        private static List<AIMethod> Phase1;
+        private static List<AIMethod> Phase3;
+        public static List<AIMethod> RitualCanNotMove;
+        private void InitializeList()
+        {
+            Phase1 = [
             ThrowScythes,
             FlamingScytheSpread,
             PhoenixDash,
@@ -48,7 +51,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             SpecialAttackJump2nd,
             ChooseStrongAttack,//会自动判断是否在P2
             ];
-        private List<AIMethod> Phase3 => [
+            Phase3 = [
             Final_ThrowScythes,
             Final_LaevateinnSword,
             SaucerWindmill,
@@ -59,10 +62,12 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Final_TabooLaevateinn,
             ActuallyDead
             ];
-        public List<AIMethod> RitualCanNotMove => [
-            PreDeathRain1st, DeathraysDash1st, PreDeathRain2nd, DeathraysDash2nd, LaevateinnSword, LaevateinnDash, WaitScythesClear, PreVerticalDive, VerticalLaevateinn, WaitScythesClear2nd,
+            RitualCanNotMove = [
+            PreDeathRain1st, DeathraysDash1st, PreDeathRain2nd, DeathraysDash2nd, PauseToPre, LaevateinnSword, LaevateinnDash, WaitScythesClear, PreVerticalDive, VerticalLaevateinn, WaitScythesClear2nd,
             Final_LaevateinnSword,Final_PreHorizontalLaevateinn, Final_HorizontalLaevateinn, Final_TabooLaevateinn
             ];
+            PhaseList = [[ThrowScythes], Phase1, Phase1, Phase3];
+        }
         public override void SetDefaults(NPC npc)
         {
             npc.damage = 150;
@@ -107,6 +112,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                         NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n);
                 }
             }
+            InitializeList();
             NPC.localAI[0] = Main.rand.Next(0, 3);
             NPC.localAI[1] = Main.rand.Next(0, 2);
             NPC.netUpdate = true;
@@ -256,8 +262,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             if (!AliveCheck(npc, player))
                 return;
             Phase2Check(npc);
-            var theMethodShouldBeInvoke = AIState;
-            theMethodShouldBeInvoke?.Invoke(npc, player);
+            AIState?.Invoke(npc, player);
             //Main.NewText(AIState.Method);
             //Main.NewText(npc.ai[1]);
             
@@ -345,7 +350,6 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 CombatText.NewText(npc.Hitbox, CombatText.HealLife, heal);
                 if (npc.ai[1] > 210)
                 {
-                    PhaseIndex = 0;
                     npc.ai[0] = 0;
                     ChooseAttack(npc);
                 }
@@ -365,8 +369,16 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             npc.dontTakeDamage = false;
             if (npc.localAI[2] == 0) 
             {
+                int AngleLimit = 35;
+                float randAngle = 2 * AngleLimit * Main.rand.NextFloat(-1, 1);
+                if (HugeMove && Math.Abs(randAngle) > AngleLimit)
+                {
+                    randAngle = AngleLimit * Main.rand.NextFloat(-1, 1);
+                }
+                if (Math.Abs(randAngle) > AngleLimit)
+                    HugeMove = true;
                 npc.localAI[2] = player.SafeDirectionTo(npc.Center).ToRotation()
-                    + MathHelper.ToRadians(WorldSavingSystem.EternityMode ? 90 : 70) * Main.rand.NextFloat(-1, 1);
+                    + MathHelper.ToRadians(randAngle);
                 npc.netUpdate = true;
             }
             Vector2 targetPos = player.Center + 500 * npc.localAI[2].ToRotationVector2();
@@ -383,14 +395,11 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 if (npc.ai[3] == 0)
                 {
                     npc.ai[3] = 1;
-                    if (WorldSavingSystem.MasochistModeReal) //phase 2 saucers
+                    int max = npc.localAI[3] > 1 ? 5 : 2;
+                    for (int i = 0; i < max; i++)
                     {
-                        int max = npc.localAI[3] > 1 ? 5 : Main.zenithWorld ? 3 : 2;
-                        for (int i = 0; i < max; i++)
-                        {
-                            float ai2 = i * MathHelper.TwoPi / max; //rotation offset
-                            FargoSoulsUtil.NewNPCEasy(npc.GetSource_FromAI(), npc.Center, ModContent.NPCType<AbomSaucer>(), 0, npc.whoAmI, 0, ai2);
-                        }
+                        float ai2 = i * MathHelper.TwoPi / max; //rotation offset
+                        FargoSoulsUtil.NewNPCEasy(npc.GetSource_FromAI(), npc.Center, ModContent.NPCType<AbomSaucer>(), 0, npc.whoAmI, 0, ai2);
                     }
                 }
             }
@@ -482,13 +491,13 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         internal void PhoenixDash(NPC npc, Player player)
         {
             npc.velocity *= 0.9f;
-            if (WorldSavingSystem.MasochistModeReal && npc.localAI[3] <= 1)
+            if (npc.localAI[3] <= 1)
                 npc.velocity *= 0.8f;
 
             int windup = 30;
             if (npc.ai[2] == 0 && npc.localAI[3] <= 1) //first dash waits a bit for scythes to clear in p1
                 windup = 60;
-            if (WorldSavingSystem.MasochistModeReal && npc.localAI[3] <= 1)
+            if (npc.localAI[3] <= 1)
                 windup = npc.ai[2] == 0 ? 30 : 10;
             if (npc.ai[2] == 0 && npc.localAI[3] > 1 && WorldSavingSystem.EternityMode) //delay on first entry here
                 windup = 240;
@@ -497,8 +506,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             {
                 if (npc.localAI[3] > 1) //emode modified tells
                 {
-                    if (npc.ai[1] == 30 && WorldSavingSystem.EternityMode)
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<FargowiltasSouls.Content.Projectiles.GlowRingHollow>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, 3, npc.whoAmI);
+                    if (npc.ai[1] == 30)
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<FargowiltasSouls.Content.Projectiles.GlowRingHollow>(), 0, 0f, Main.myPlayer, 3, npc.whoAmI);
                 }
 
                 if (npc.ai[1] == windup - 25)
@@ -593,13 +602,6 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     {
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity).RotatedBy(Math.PI / 2), ModContent.ProjectileType<AbomPhoenix>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer);
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity).RotatedBy(-Math.PI / 2), ModContent.ProjectileType<AbomPhoenix>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer);
-                        if (Main.zenithWorld)
-                        {
-                            for (float i = -1.5f; i <= 1.5f; i += 3f)
-                            {
-                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, i * Vector2.Normalize(npc.velocity).RotatedBy(Math.PI / 2), ModContent.ProjectileType<AbomPhoenix>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer);
-                            }
-                        }
                     }
                 }
             }
@@ -990,7 +992,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     Main.dust[index2].velocity *= 5f;
                 }
             }
-            if (npc.localAI[3] == 2 && npc.ai[1] % (Main.zenithWorld ? 30 : 60) == 0 && npc.ai[1] >= 60)
+            if (npc.localAI[3] == 2 && npc.ai[1] % 45 == 0 && npc.ai[1] >= 60)
             {
                 for (int i = -2; i <= 2; i++)
                 {
@@ -1020,7 +1022,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
                 SoundEngine.PlaySound(SoundID.Roar, npc.Center);
             }
-            targetPos = player.Center + npc.localAI[2].ToRotationVector2() * npc.ai[3];
+            Vector2 targetPos = player.Center + npc.localAI[2].ToRotationVector2() * npc.ai[3];
 
             Movement(npc, targetPos, 0.5f);
 
@@ -1358,7 +1360,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 {
                     if (npc.localAI[2] != 0)
                         timeLeft = 0;
-                    if (++npc.localAI[2] > (Main.zenithWorld ? 1 : 2))
+                    if (++npc.localAI[2] > 2)
                         npc.localAI[2] = 0;
                 }
 
@@ -1417,7 +1419,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 {
                     if (npc.localAI[2] != 0)
                         timeLeft = 0;
-                    if (++npc.localAI[2] > (Main.zenithWorld ? 1 : 2))
+                    if (++npc.localAI[2] > 2)
                         npc.localAI[2] = 0;
                 }
 
@@ -1682,7 +1684,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         internal void WaitScythesClear2nd(NPC npc, Player player)
         {
             npc.localAI[2] = 0;
-            targetPos = player.Center;
+            Vector2 targetPos = player.Center;
             targetPos.X += 500 * (npc.Center.X < targetPos.X ? -1 : 1);
             if (npc.Distance(targetPos) > 50)
                 Movement(npc, targetPos, 0.7f);
@@ -1857,7 +1859,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Vector2 actualTargetPositionOffset = (float)Math.Sqrt(2 * 1200 * 1200) * npc.localAI[2].ToRotationVector2();
             actualTargetPositionOffset.X -= 450 * Math.Sign(actualTargetPositionOffset.X);
 
-            targetPos = new Vector2(npc.ai[2], npc.ai[3]) + actualTargetPositionOffset;
+            Vector2 targetPos = new Vector2(npc.ai[2], npc.ai[3]) + actualTargetPositionOffset;
             Movement(npc, targetPos, 1f);
 
             if (npc.ai[1] == 0 && FargoSoulsUtil.HostCheck)
@@ -2222,14 +2224,10 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
         {
             base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write7BitEncodedInt(PhaseIndex);
-            binaryWriter.WriteVector2(targetPos);
         }
         public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
         {
             base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            PhaseIndex = binaryReader.Read7BitEncodedInt();
-            targetPos = binaryReader.ReadVector2();
         }
         #endregion
         #region 贺贺

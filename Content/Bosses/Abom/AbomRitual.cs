@@ -52,7 +52,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         protected override void Movement(NPC npc)
         {
             npc.TryGetGlobalNPC<AbomBossOverride>(out AbomBossOverride abom);
-            if (!abom.RitualCanNotMove.Contains(abom.AIState))
+            if (!AbomBossOverride.RitualCanNotMove.Contains(abom.AIState))
             {
                 Projectile.velocity = npc.Center - Projectile.Center;
                 Projectile.velocity /= abom.AIState == abom.ChooseStrongAttack ? 10f : 40f; //snaps to abom faster when preparing for p2 attack

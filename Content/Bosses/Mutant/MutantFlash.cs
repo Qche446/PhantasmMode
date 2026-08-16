@@ -1,5 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,7 +18,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// <summary>
     /// ai0=whoami，ai1控制颜色(0 为红，1为蓝)
     /// </summary>
-    public class MutantFlash : ModProjectile
+    public class MutantFlash : ModProjectile, IProjOwnedByBoss<MutantBoss>
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
 
@@ -74,7 +75,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         {
             for (int i = 0; i < 5; i++)
             {
-                int num = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 8, 0f, 0f, 0, default(Color), 1.5f);
+                int num = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, DustID.Iron, 0f, 0f, 0, default(Color), 1.5f);
                 Main.dust[num].noGravity = true;
             }
         }

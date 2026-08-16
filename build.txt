@@ -1,5 +1,6 @@
-displayName = Fargo's Phantasm Mode
+displayName = Fargo's Souls Phantasm Mode
 author = Qche
 version = 0.2.5
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Cache\*, Folders to Port\*, FargowiltasSouls.dll, Fargowiltas.dll, Luminance.dll, Luminance.xml
 modReferences = FargowiltasSouls@1.7.3.9,Fargowiltas@3.3.6, Luminance@1.0.3
 sortAfter = FargowiltasSouls

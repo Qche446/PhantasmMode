@@ -1,9 +1,12 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
+using System.IO;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -12,11 +15,20 @@ using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     //PH投矛发射的会追踪的幻影球
-    public class PHMutantSphereSmall : MutantSphereSmall
+    public class PHMutantSphereSmall : MutantSphereSmall, IProjOwnedByBoss<MutantBoss>
     {
         float Angle = 0;
         public int waittime = 85;
+        bool SpecialPhase = false;
         int SpecialTimer = 0;
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(SpecialPhase);
+        }
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            SpecialPhase = reader.ReadBoolean();
+        }
         public override void AI()
         {
             if (Projectile.ai[0] > -1 && Projectile.ai[0] < Main.maxPlayers)
@@ -26,31 +38,38 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 const float amountOfFramesToLerpBy = 20; // minimum of 1, please keep in full numbers even though it's a float!
                 int foundTarget = (int)Projectile.ai[0];
                 Player p = Main.player[foundTarget];
-                if (Projectile.ai[1] > homingDelay && Projectile.ai[1] < waittime)
-                { 
-                    Vector2 desiredVelocity = Projectile.SafeDirectionTo(p.Center) * desiredFlySpeedInPixelsPerFrame;
-                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, desiredVelocity, 1f / amountOfFramesToLerpBy);
-                }
-                if (Projectile.ai[1] == 15 && FargoSoulsUtil.HostCheck)
+                if (!SpecialPhase)
                 {
-                    Projectile.NewProjectile(Terraria.Entity.InheritSource(Projectile), Projectile.Center, Vector2.Zero, ModContent.ProjectileType<MutantBombSmall>(), Projectile.damage, Projectile.knockBack, Projectile.owner);
+                    if (Projectile.ai[1] > homingDelay && Projectile.ai[1] < waittime)
+                    {
+                        Vector2 desiredVelocity = Projectile.SafeDirectionTo(p.Center) * desiredFlySpeedInPixelsPerFrame;
+                        Projectile.velocity = Vector2.Lerp(Projectile.velocity, desiredVelocity, 1f / amountOfFramesToLerpBy);
+                    }
+                    if (Projectile.ai[1] == 15 && FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(Terraria.Entity.InheritSource(Projectile), Projectile.Center, Vector2.Zero, ModContent.ProjectileType<MutantBombSmall>(), Projectile.damage, Projectile.knockBack, Projectile.owner);
+                    }
+                    if (Projectile.ai[1] < waittime)
+                    {
+                        Angle = Projectile.SafeDirectionTo(p.Center + p.velocity * 30f).ToRotation();
+                    }
                 }
-                if (Projectile.ai[1] < waittime)
-                {
-                    Angle = Projectile.SafeDirectionTo(p.Center + p.velocity * 30f).ToRotation();
-                }
-                if (Projectile.ai[1] >= 180 && (Main.getGoodWorld || Main.zenithWorld))//等mutant传参
-                {
-                    Projectile.velocity = 50 * Vector2.UnitX.RotatedBy(Angle);
-                }
-                if (Projectile.ai[1] >= 180)
+                else
                 {
                     SpecialTimer++;
-                }
-                if (SpecialTimer >= 25)
-                {
-                    Projectile.timeLeft = 1;
-                    Projectile.Kill();
+                    if (SpecialTimer > 5)
+                    {
+                        if (Main.getGoodWorld)
+                        {
+                            float vel = 80 * (float)Math.Pow(0.96f, SpecialTimer % 40);
+                            Projectile.velocity = vel * Vector2.UnitX.RotatedBy(Angle);
+                        }
+                        else
+                        {
+                            float vel = 3 * MathHelper.Clamp(SpecialTimer, 0, 50);
+                            Projectile.velocity = vel * Vector2.UnitX.RotatedBy(Angle);
+                        }
+                    }
                 }
                 Projectile.ai[1]++;
             }
@@ -84,6 +103,19 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Projectile.frameCounter = 0;
                 if (++Projectile.frame > 1)
                     Projectile.frame = 0;
+            }
+        }
+        public static void EnterSpecialPhase()
+        {
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                if (Main.projectile[i].active && Main.projectile[i].ModProjectile is PHMutantSphereSmall ball)
+                {
+                    ball.SpecialPhase = true;
+                    if (Main.projectile[i].timeLeft < 80)
+                    Main.projectile[i].timeLeft = 80;
+                    Main.projectile[i].netUpdate = true;
+                }
             }
         }
         public override void OnKill(int timeleft)
@@ -158,14 +190,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     oldRot, origin, scale, spriteEffects, 0);
             }
 
-            Asset<Texture2D> line = TextureAssets.Extra[178];
+            Asset<Texture2D> line = TextureAssets.Extra[ExtrasID.FairyQueenLance];
             float opacity = 0.55f; // 预警线透明度
 
             Main.EntitySpriteDraw(
                 line.Value, // 纹理：细长的直线
                 Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY),
                 null,
-                color * opacity,
+                color * opacity * (1 - MathHelper.Clamp(SpecialTimer / 15f, 0, 1)),
                 // 通过速度向量的角度确定旋转，使预警线指向弹幕飞行方向
                 Angle,
 
@@ -176,7 +208,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             );
             Main.EntitySpriteDraw(texture,
                 Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY),
-                rectangle, Color.White,
+                rectangle, Color.White * (1 - MathHelper.Clamp(SpecialTimer / 15f, 0, 1)),
                 Projectile.rotation, origin, Projectile.scale, spriteEffects, 0);
 
             //原始绘制
@@ -186,10 +218,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Rectangle glowrectangle = new(0, rect2, glow.Width, rect1);
             Vector2 gloworigin2 = glowrectangle.Size() / 2f;
             Color glowcolor = Color.Lerp(FargoSoulsUtil.AprilFools ? Color.Red : new Color(196, 247, 255, 0), Color.Transparent, 0.85f);
-
+            if (SpecialPhase)
+            {
+                Color acolor = FargoSoulsUtil.AprilFools ? Color.Purple : new Color(138, 177, 255, 0);
+                glowcolor = Color.Lerp(glowcolor, acolor, MathHelper.Clamp(SpecialTimer / 15f, 0, 1));
+            }
             for (int i = 0; i < ProjectileID.Sets.TrailCacheLength[Projectile.type]; i++) //reused betsy fireball scaling trail thing
             {
-
                 Color color27 = glowcolor;
                 color27 *= (float)(ProjectileID.Sets.TrailCacheLength[Projectile.type] - i) / ProjectileID.Sets.TrailCacheLength[Projectile.type];
                 float scale = Projectile.scale * (ProjectileID.Sets.TrailCacheLength[Projectile.type] - i) / ProjectileID.Sets.TrailCacheLength[Projectile.type];
@@ -198,6 +233,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     Projectile.velocity.ToRotation() + MathHelper.PiOver2, gloworigin2, scale * 1.5f, SpriteEffects.None, 0);
             }
             glowcolor = Color.Lerp(new Color(255, 255, 255, 0), Color.Transparent, 0.8f);
+            if (SpecialPhase)
+            {
+                Color acolor = FargoSoulsUtil.AprilFools ? Color.Purple : new Color(138, 177, 255, 0);
+                glowcolor = Color.Lerp(glowcolor, acolor, MathHelper.Clamp(SpecialTimer / 15f, 0, 1));
+            }
             Main.EntitySpriteDraw(glow, Projectile.position + Projectile.Size / 2f - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(glowrectangle), glowcolor,
                     Projectile.velocity.ToRotation() + MathHelper.PiOver2, gloworigin2, Projectile.scale * 1.5f, SpriteEffects.None, 0);
 

@@ -27,7 +27,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         {
             Projectile.width = 10;
             Projectile.height = 10;
-            Projectile.aiStyle = 1;
+            Projectile.aiStyle = ProjAIStyleID.Arrow;
             AIType = ProjectileID.FrostShard;
             Projectile.hostile = true;
             Projectile.timeLeft = 360;

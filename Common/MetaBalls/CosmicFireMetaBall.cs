@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Assets.ExtraTextures;
+using FargowiltasSouls.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,14 +27,13 @@ namespace FargosPhantasmMode.Common.MetaBalls
         }
         public override void PrepareShaderForTarget(int layerIndex)
         {
-            
             ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.BigTentacle");
-            Texture2D texture2D = PhantasmTextureRegistry.UniverseNoise.Value;
-            shader.TrySetParameter("color", new Color(102, 26, 179));//102, 26, 179（紫）  54，255，236(青)
+            var texture2D = PhantasmTextureRegistry.UniverseNoise;
+            shader.TrySetParameter("color", new Color(57, 10, 110));//102, 26, 179（紫）  54，255，236(青)
             shader.TrySetParameter("m", 0.62f);
             shader.TrySetParameter("n", 0.01f);
-            shader.SetTexture(texture2D, 1, SamplerState.LinearWrap);
-            shader.Apply("Tentacle");
+            shader.SetTexture(texture2D.Value, 1, SamplerState.LinearWrap);
+            shader.Apply();
             
             //shader.Apply();
         }

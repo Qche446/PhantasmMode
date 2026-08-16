@@ -1,8 +1,10 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.Champions.Earth;
+using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -12,7 +14,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantCrystalBomb : CrystalBomb
+    public class MutantCrystalBomb : CrystalBomb, IProjOwnedByBoss<MutantBoss>
     {
         int Timer = 0;
         const int waittime = 30;
@@ -91,7 +93,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class MutantCrystalBombShard : CrystalBombShard
+    public class MutantCrystalBombShard : CrystalBombShard, IProjOwnedByBoss<MutantBoss>
     {
         public override void SetDefaults()
         {

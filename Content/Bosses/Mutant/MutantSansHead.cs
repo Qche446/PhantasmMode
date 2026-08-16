@@ -1,5 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -8,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSansHead : MutantSansHead
+    public class PHMutantSansHead : MutantSansHead, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {
@@ -39,7 +40,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             base.Projectile.frame = 1;
         }
     }
-    public class PHMutantSansBeam : MutantSansBeam
+    public class PHMutantSansBeam : MutantSansBeam, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

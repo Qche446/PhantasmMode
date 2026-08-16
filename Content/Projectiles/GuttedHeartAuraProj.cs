@@ -54,7 +54,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             Projectile.width += (int)(speed - Decrement);
             Projectile.height += (int)(speed - Decrement);
             Projectile.Center = Projectile.position;
-            if (Projectile.Opacity == 0)
+            if (Projectile.Opacity <= 0)
             {
                 Projectile.Kill();
                 return false;
@@ -74,25 +74,22 @@ namespace FargosPhantasmMode.Content.Projectiles
 
         public override bool PreDraw(ref Color lightColor)
         {
-            Vector2 auraPos = Projectile.Center;
             float radius = Projectile.width / 2;
-            var target = Main.LocalPlayer;
             var blackTile = TextureAssets.MagicPixel;
-            var diagonalNoise = FargosTextureRegistry.CracksNoise;
+            var Noise = FargosTextureRegistry.CracksNoise;
             var maxOpacity = Projectile.Opacity * 0.5f;
 
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.CalcloneWaveShader");
-            shader.TrySetParameter("colorMult", 7.35f);
-            shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
-            shader.TrySetParameter("radius", radius * Projectile.scale);
-            shader.TrySetParameter("anchorPoint", auraPos);
+            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
             shader.TrySetParameter("screenPosition", Main.screenPosition);
             shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
-            shader.TrySetParameter("playerPosition", target.Center);
+            shader.TrySetParameter("Radius", radius * Projectile.scale);
+            shader.TrySetParameter("Center", Projectile.Center);
+            shader.TrySetParameter("color1", Color.DarkRed);
+            shader.TrySetParameter("color2", Color.DarkRed);
             shader.TrySetParameter("maxOpacity", maxOpacity);
+            shader.TrySetParameter("FadedWidth", 100 * MathHelper.Clamp(1 - Projectile.Opacity, 0, 1));
 
-
-            Main.spriteBatch.GraphicsDevice.Textures[1] = diagonalNoise.Value;
+            Main.spriteBatch.GraphicsDevice.Textures[1] = Noise.Value;
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, shader.WrappedEffect, Main.GameViewMatrix.TransformationMatrix);

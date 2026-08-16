@@ -2,6 +2,7 @@
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -10,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSpearDash : MutantSpearDash
+    public class PHMutantSpearDash : MutantSpearDash, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

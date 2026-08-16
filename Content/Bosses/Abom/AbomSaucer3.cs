@@ -475,7 +475,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             );
 
             // 绘制指示箭头
-            Texture2D arrowTexture = Terraria.GameContent.TextureAssets.Extra[179].Value; // 使用一个小箭头纹理
+            Texture2D arrowTexture = Terraria.GameContent.TextureAssets.Extra[ExtrasID.Voronoi].Value; // 使用一个小箭头纹理
             if (arrowTexture != null)
             {
                 Main.EntitySpriteDraw(

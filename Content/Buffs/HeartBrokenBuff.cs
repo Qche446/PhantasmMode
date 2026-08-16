@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Buffs
             player.statLifeMax2 -= (int)(player.statLifeMax * 0.5f);
         }
     }
-    
+    /*
     public class HeartBrokenGlobalNPC : GlobalNPC
     {
         public override bool InstancePerEntity => true;
@@ -67,4 +67,5 @@ namespace FargosPhantasmMode.Content.Buffs
             originalLifeMax = 0;
         }
     }
+    */
 }

@@ -3,6 +3,7 @@ using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
@@ -14,7 +15,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantPungentAuraProj : PungentAuraProj
+    public class MutantPungentAuraProj : PungentAuraProj, IProjOwnedByBoss<MutantBoss>
     {
         public override void SetDefaults()
         {

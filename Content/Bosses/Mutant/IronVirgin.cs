@@ -1,4 +1,5 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -11,7 +12,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// <summary>
     /// 这个是4片叶绿水晶的铁处女弹幕，会高速旋转.ai0决定发射上下,ai1决定旋转方向(左负右正),ai2决定初始角偏移
     /// </summary>
-    public class IronVirgin : MutantMark2
+    public class IronVirgin : MutantMark2, IProjOwnedByBoss<MutantBoss>
     {
         public override void AI()
         {

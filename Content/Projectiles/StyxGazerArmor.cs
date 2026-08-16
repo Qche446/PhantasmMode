@@ -3,6 +3,7 @@ using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Projectiles
@@ -35,7 +36,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             {
                 Projectile.NewProjectile(base.Projectile.GetSource_FromThis(), target.Center + Main.rand.NextVector2Circular(100f, 100f), Vector2.Zero, ModContent.ProjectileType<AbomBlast>(), 0, 0f, base.Projectile.owner);
             }
-            target.AddBuff(153, 300);
+            target.AddBuff(BuffID.ShadowFlame, 300);
             target.AddBuff(ModContent.BuffType<MutantNibbleBuff>(), 300);
         }
     }

@@ -115,7 +115,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             }
             // 5. 绘制预警线（核心功能）
             // 使用原版Extra[178]纹理，这是一个细长的直线纹理
-            Asset<Texture2D> line = TextureAssets.Extra[178];
+            Asset<Texture2D> line = TextureAssets.Extra[ExtrasID.FairyQueenLance];
             float opacity = 0.55f; // 预警线透明度
 
             // 绘制预警线的参数详解：

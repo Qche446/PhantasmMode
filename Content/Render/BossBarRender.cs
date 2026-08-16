@@ -6,6 +6,7 @@ using Terraria;
 
 namespace FargosPhantasmMode.Content.Render
 {
+    /*
     public static class BossBarRender
     {
         /// <summary>
@@ -45,4 +46,5 @@ namespace FargosPhantasmMode.Content.Render
             Main.spriteBatch.Draw(barTexture, barTopLeft, barFrame, Color.White, 0f, Vector2.Zero, stretchScale, 0, 0f);
         }
     }
+    */
 }

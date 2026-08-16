@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Core.Config;
 using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
@@ -29,7 +30,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                 return;
             var modplayer = player.FargoSouls();
             Texture2D tex = TextureAssets.Item[ModContent.ItemType<BorealWoodEnchant>()].Value;
-            if (player.whoAmI == Main.myPlayer)
+            if (player.whoAmI == Main.myPlayer && BaseConfig.Instance.ExtraCoolDownBar)
                 CooldownBarManager.Activate("BorealCD", tex, new(182, 139, 38),
                 () => 1 - (float)modplayer.BorealCD / (player.ForceEffect<BorealEffect>() ? 30f: 60f), activeFunction: player.HasEffectEnchant<BorealEffect>, displayAtFull: true);
         }

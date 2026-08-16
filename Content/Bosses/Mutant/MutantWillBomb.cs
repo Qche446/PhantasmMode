@@ -5,6 +5,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
@@ -21,7 +22,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// ai0控制初始生成激光的角偏，ai1=whomi，ai2控制旋转方向（正负号）
     /// 激光个数固定为4，弹幕总生存时间120帧，旋转速度从零线性增加，120帧内旋转完90°
     /// </summary>
-    public class MutantWillBomb : WillBomb
+    public class MutantWillBomb : WillBomb, IProjOwnedByBoss<MutantBoss>
     {
         float speed = 0;
         public override string Texture => "FargowiltasSouls/Content/Bosses/Champions/Will/WillBomb";
@@ -140,7 +141,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class MutantWillDeathray : BaseDeathray
+    public class MutantWillDeathray : BaseDeathray, IProjOwnedByBoss<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Bosses/Champions/Will/WillDeathray";
         float omiga = 0;

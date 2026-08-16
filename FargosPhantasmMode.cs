@@ -17,6 +17,8 @@ using static Terraria.GameContent.Creative.CreativePowers;
 using Luminance.Common.Utilities;
 using Terraria.ModLoader.Default.Patreon;
 using FargosPhantasmMode.Core.Systems;
+using System.Collections.Generic;
+using FargosPhantasmMode.Common;
 
 
 namespace FargosPhantasmMode
@@ -73,7 +75,7 @@ namespace FargosPhantasmMode
             shader.TrySetParameter("color", new Color(54, 255, 236));//102, 26, 179£¨×Ï£©  54£¬255£¬236(Çà)
             shader.TrySetParameter("m", 0.62f);
             shader.TrySetParameter("n", 0.01f);
-            shader.Apply("Tentacle");
+            shader.Apply();
             sb.Draw(Rt, Vector2.Zero, Color.White);
             sb.End();
             #endregion

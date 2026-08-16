@@ -122,7 +122,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         {
             for (int index1 = 0; index1 < 20; ++index1)
             {
-                int index2 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, Main.rand.NextBool() ? 80 : 76, 0.0f, 0.0f, 0, new Color(), 1f);
+                int index2 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, Main.rand.NextBool() ? DustID.Ice : DustID.Snow, 0.0f, 0.0f, 0, new Color(), 1f);
                 Main.dust[index2].noGravity = true;
                 Main.dust[index2].noLight = true;
                 Main.dust[index2].scale++;

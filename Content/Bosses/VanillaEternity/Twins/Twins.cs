@@ -15,6 +15,7 @@ using FargowiltasSouls.Core.NPCMatching;
 using Luminance.Assets;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -66,7 +67,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public int Phaseinit { get; set; } = 1;
 
-        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(NPCID.Retinazer);
+        public override int NPCType => NPCID.Retinazer;
         public override bool SafePreAI(NPC npc)
         {
             EModeGlobalNPC.retiBoss = npc.whoAmI;
@@ -102,15 +103,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override void SetDefaults(NPC npc)
         {
-            npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
+
         }
         public override void StopEmodeAI(NPC npc) => npc.GetGlobalNPC<Retinazer>().RunEmodeAI = false;
         #endregion
-        public List<TwinsAtt> Phase1 => [
+        public static readonly List<TwinsAtt> phase1 = [
             TwinsAtt.NormalShoot,
             TwinsAtt.FlankingShoot
             ];
-        public List<TwinsAtt> Phase2 => [
+        public static readonly List<TwinsAtt> phase2 = [
             TwinsAtt.NormalShoot,
             TwinsAtt.FlankingShoot,
             TwinsAtt.PolyRing,
@@ -118,13 +119,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             TwinsAtt.NormalShoot,
             TwinsAtt.CurvedDeathRay,
             ];
-        public List<TwinsAtt> Phase3 => [
+        public static readonly List<TwinsAtt> phase3 = [
             TwinsAtt.LocatedShoot,
             TwinsAtt.Final_PolyRing,
             TwinsAtt.BulletHell_Open,
             TwinsAtt.BulletHell_End,
             TwinsAtt.Final_Deathray,
             ];
+        public List<TwinsAtt> Phase1 => phase1;
+        public List<TwinsAtt> Phase2 => phase2;
+        public List<TwinsAtt> Phase3 => phase3;
         public static void PHTwinsAI(NPC npc, Player player)
         {
             //Main.NewText(NPCID.Sets.TrailingMode[npc.type]);
@@ -1314,7 +1318,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     }
                     SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
                     for (int i = 0; i < 20; i++)
-                        Dust.NewDust(npc.position, npc.width, npc.height, 5, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
+                        Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
                     SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
             }
@@ -2838,38 +2842,40 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             if (AuraOpacity < 1f)
                 AuraOpacity += 0.01f;
+            if (!Main.dedServ)
+            {
+                Color darkColor = Color.DarkRed;
+                Color mediumColor = Color.Red;
+                Color lightColor2 = Color.Lerp(Color.IndianRed, Color.White, 0.35f);
+                Vector2 auraPos = position;
+                float radius = AuraRadius;
+                var blackTile = TextureAssets.MagicPixel;
+                var diagonalNoise = FargosTextureRegistry.Techno1Noise;
+                if (!blackTile.IsLoaded || !diagonalNoise.IsLoaded)
+                    return;
+                var maxOpacity = npc.Opacity * AuraOpacity;
 
-            Color darkColor = Color.DarkRed;
-            Color mediumColor = Color.Red;
-            Color lightColor2 = Color.Lerp(Color.IndianRed, Color.White, 0.35f);
-            Vector2 auraPos = position;
-            float radius = AuraRadius;
-            var blackTile = TextureAssets.MagicPixel;
-            var diagonalNoise = FargosTextureRegistry.Techno1Noise;
-            if (!blackTile.IsLoaded || !diagonalNoise.IsLoaded)
-                return;
-            var maxOpacity = npc.Opacity * AuraOpacity;
+                ManagedShader borderShader = ShaderManager.GetShader("FargowiltasSouls.TwinsAuraShader");
+                borderShader.TrySetParameter("colorMult", 7.35f);
+                borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
+                borderShader.TrySetParameter("radius", radius);
+                borderShader.TrySetParameter("anchorPoint", auraPos);
+                borderShader.TrySetParameter("screenPosition", Main.screenPosition);
+                borderShader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
+                borderShader.TrySetParameter("maxOpacity", maxOpacity);
+                borderShader.TrySetParameter("darkColor", darkColor.ToVector4());
+                borderShader.TrySetParameter("midColor", mediumColor.ToVector4());
+                borderShader.TrySetParameter("lightColor", lightColor2.ToVector4());
 
-            ManagedShader borderShader = ShaderManager.GetShader("FargowiltasSouls.TwinsAuraShader");
-            borderShader.TrySetParameter("colorMult", 7.35f);
-            borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
-            borderShader.TrySetParameter("radius", radius);
-            borderShader.TrySetParameter("anchorPoint", auraPos);
-            borderShader.TrySetParameter("screenPosition", Main.screenPosition);
-            borderShader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
-            borderShader.TrySetParameter("maxOpacity", maxOpacity);
-            borderShader.TrySetParameter("darkColor", darkColor.ToVector4());
-            borderShader.TrySetParameter("midColor", mediumColor.ToVector4());
-            borderShader.TrySetParameter("lightColor", lightColor2.ToVector4());
+                spriteBatch.GraphicsDevice.Textures[1] = diagonalNoise.Value;
 
-            spriteBatch.GraphicsDevice.Textures[1] = diagonalNoise.Value;
-
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, borderShader.WrappedEffect, Main.GameViewMatrix.TransformationMatrix);
-            Rectangle rekt = new(Main.screenWidth / 2, Main.screenHeight / 2, Main.screenWidth, Main.screenHeight);
-            spriteBatch.Draw(blackTile.Value, rekt, null, default, 0f, blackTile.Value.Size() * 0.5f, 0, 0f);
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, borderShader.WrappedEffect, Main.GameViewMatrix.TransformationMatrix);
+                Rectangle rekt = new(Main.screenWidth / 2, Main.screenHeight / 2, Main.screenWidth, Main.screenHeight);
+                spriteBatch.Draw(blackTile.Value, rekt, null, default, 0f, blackTile.Value.Size() * 0.5f, 0, 0f);
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+            }
         }
 
         public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
@@ -2915,7 +2921,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public int Phaseinit { get; set; } = 1;
 
-        public override NPCMatcher CreateMatcher() => new NPCMatcher().MatchType(NPCID.Spazmatism);
+        public override int NPCType => NPCID.Spazmatism;
         public override bool SafePreAI(NPC npc)
         {
             EModeGlobalNPC.spazBoss = npc.whoAmI;
@@ -2936,7 +2942,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
             Player player = Main.player[npc.target];
 
-            if (!AliveCheck(npc, player))
+            if (!AliveCheck(npc, bro, player))
                 return false;
             if (Phase >= 3)
             {
@@ -2954,21 +2960,20 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override void SetDefaults(NPC npc)
         {
-            npc.BossBar = ModContent.GetInstance<PhantasmBossBar>();
         }
         public override void StopEmodeAI(NPC npc)
         {
             npc.GetGlobalNPC<Spazmatism>().RunEmodeAI = false;
         }
         #endregion
-        public List<TwinsAtt> Phase1 => [
+        public static readonly List<TwinsAtt> phase1 = [
             TwinsAtt.CurFireDash,
             TwinsAtt.P1_BreathedFire,
             TwinsAtt.LegFireDash,
             TwinsAtt.P1_BreathedFire,
             ];
         
-        public List<TwinsAtt> Phase2 => [
+        public static readonly List<TwinsAtt> phase2 = [
             TwinsAtt.CurFireDash,
             TwinsAtt.LegFireDash,
             TwinsAtt.CurFireDash,
@@ -2979,18 +2984,36 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             TwinsAtt.P2_BreathedFire,
             //TwinsAtt.FlamesSlash,
             ];
-        public List<TwinsAtt> Phase3 => [
+        public static readonly List<TwinsAtt> phase3 = [
             TwinsAtt.LocatedShoot,
             TwinsAtt.FireRotate,
             TwinsAtt.Final_LegFireDash,
             TwinsAtt.Final_CurFireDashBreathed,
             TwinsAtt.Final_Embers,
             ];
+        public List<TwinsAtt> Phase1 => phase1;
+        public List<TwinsAtt> Phase2 => phase2;
+        public List<TwinsAtt> Phase3 => phase3;
         #region AI方法
 
         #endregion
         #region 辅助方法
-
+        public static bool AliveCheck(NPC npc, NPC bro, Player player)
+        {
+            bool length = Vector2.Distance(npc.Center, player.Center) > 5000f && bro == null;
+            if (!player.active || player.dead || length || Main.IsItDay())
+            {
+                npc.TargetClosest();
+                player = Main.player[npc.target];
+                if (!player.active || player.dead || length || Main.IsItDay())
+                {
+                    npc.EncourageDespawn(10);
+                    npc.velocity.Y -= 0.04f;
+                    return false;
+                }
+            }
+            return true;
+        }
         #endregion
         #region 重写方法
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot)

@@ -9,7 +9,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace FargosPhantasmMode.Content.NPCs
+namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     public class TrueEyeNPC : ModNPC
     {

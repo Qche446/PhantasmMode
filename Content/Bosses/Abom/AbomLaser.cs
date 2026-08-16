@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         {
             Projectile.width = 5;
             Projectile.height = 5;
-            Projectile.aiStyle = 1;
+            Projectile.aiStyle = ProjAIStyleID.Arrow;
             AIType = ProjectileID.SaucerLaser;
             Projectile.hostile = true;
             Projectile.alpha = 255;

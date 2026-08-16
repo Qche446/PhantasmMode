@@ -1,12 +1,14 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantIllusion : MutantIllusion
+    public class PHMutantIllusion : MutantIllusion, IProjOwnedByBoss<MutantBoss>
     {
         //四柱用
         public override void AI()
@@ -27,7 +29,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
                 for (int j = 0; j < 20; j++)
                 {
-                    int num2 = Dust.NewDust(base.NPC.position, base.NPC.width, base.NPC.height, 229, 0f, 0f, 0, default(Color), 2f);
+                    int num2 = Dust.NewDust(base.NPC.position, base.NPC.width, base.NPC.height, DustID.Vortex, 0f, 0f, 0, default(Color), 2f);
                     Main.dust[num2].noGravity = true;
                     Main.dust[num2].noLight = true;
                     Main.dust[num2].velocity *= 9f;

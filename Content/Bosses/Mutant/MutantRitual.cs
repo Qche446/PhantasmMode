@@ -1,4 +1,5 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
+using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria;
 

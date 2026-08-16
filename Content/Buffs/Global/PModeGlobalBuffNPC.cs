@@ -23,7 +23,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public bool Neurotoxin = false;
         public bool Hypothermia = false;
         public bool NanoErosion = false;
-        public bool HeartBroken = false;
+        
         public bool Sublimation = false;
         public bool HallowFlame = false;
         public int HallowFlameLevel = 0;
@@ -31,6 +31,10 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public float PosionMultiplier = 1f;
         public float FireMultiplier = 1f;
         public float IceMultiplier = 1f;
+
+        public bool HeartBroken = false;
+        private bool hasApplied = false;
+        private int originalLifeMax = 0;
         public override void Load()
         {
             //跳过原法dot处理内容
@@ -43,7 +47,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             Neurotoxin = false;
             Hypothermia = false;
             NanoErosion = false;
-            HeartBroken = false;
             Sublimation = false;
             if (!HallowFlame)
                 HallowFlameLevel = 0;
@@ -54,6 +57,34 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             PosionMultiplier = 1f;
             FireMultiplier = 1f;
             IceMultiplier = 1f;
+
+            float healthPrecentage = npc.GetLifePercent();
+            if (HeartBroken)
+            {
+                if (!hasApplied)
+                {
+                    originalLifeMax = npc.lifeMax;
+                    int reduction = (int)(npc.lifeMax * 0.15f);
+                    if (reduction < 1) reduction = 1;
+                    npc.lifeMax -= reduction;
+
+                    npc.life = (int)(healthPrecentage * npc.lifeMax);
+                    hasApplied = true;
+                }
+            }
+            else
+            {
+                if (hasApplied)
+                {
+                    npc.lifeMax = originalLifeMax;
+
+                    npc.life = (int)(healthPrecentage * npc.lifeMax);
+
+                    hasApplied = false;
+                    originalLifeMax = 0;
+                }
+            }
+            HeartBroken = false;
         }
         public override void AI(NPC npc)
         {
@@ -224,6 +255,11 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             {
                 modifiers.FinalDamage *= 1.05f;
             }
+        }
+        public override void OnKill(NPC npc)
+        {
+            hasApplied = false;
+            originalLifeMax = 0;
         }
     }
 }
