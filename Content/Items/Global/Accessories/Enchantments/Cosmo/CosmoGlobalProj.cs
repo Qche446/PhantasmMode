@@ -43,12 +43,12 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
             {
                 if (proj.ai[1] == 0 && proj.active)
                 {
-                    int MoonNum = py.ownedProjectileCounts[proj.type];
+                    MoonNum = py.ownedProjectileCounts[proj.type];
                 }
             }
             if (!py.HasEffect<VortexProjGravity>() || !Vortexed)
                 return true;
-            if (VortexedCD <= 0 && !proj.hostile && proj.friendly && proj.damage != 0)
+            if (VortexedCD <= 0 && !proj.hostile && proj.friendly && proj.damage != 0 && !VortexProjGravity.blacklist.Contains(proj.type))
             {
                 float r = 1200f;
                 foreach (NPC npc in Main.npc.Where(n => n.active && n != null && n.Distance(py.Center) < r && !n.friendly && n.Distance(proj.Center) < 400 && n.Distance(proj.Center) > 2))
@@ -62,7 +62,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
         }
         public override void ModifyHitNPC(Projectile projectile, NPC target, ref NPC.HitModifiers modifiers)
         {
-            VortexedCD = 40;
+            VortexedCD = 10;
             Player player = Main.player[projectile.owner];
             if (!player.FargoSouls().TerrariaSoul && projectile.type == ModContent.ProjectileType<CosmosForceMoon>() && CosmoExtraAttack && player.HasEffect<CosmoMoonEnhanceEffect>())
             {

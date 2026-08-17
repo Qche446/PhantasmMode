@@ -22,7 +22,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
     {
         public override Header ToggleHeader => Header.GetHeader<NatureHeader>();
         public override int ToggleItemType => ModContent.ItemType<ChlorophyteEnchant>();
-        public static List<int> ChlorophyteItem => [
+        public static List<int> ChlorophyteItem = [
             ItemID.ChlorophyteMask, ItemID.ChlorophytePlateMail, ItemID.ChlorophyteGreaves,
             ItemID.ChlorophyteWarhammer,
             ItemID.ChlorophyteClaymore,

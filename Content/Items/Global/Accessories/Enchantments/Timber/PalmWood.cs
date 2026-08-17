@@ -22,6 +22,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         }
         private static void PalmwoodEffectFixed(Action<Player> orig, Player player)
         {
+            if (!PModeChangeApply)
+            {
+                orig.Invoke(player);
+                return;
+            }
             if (player.HasEffect<PalmwoodEffect>() && player.HasEffectEnchant<PalmwoodEffect>())
             {
                 if (player.whoAmI == Main.myPlayer)
@@ -33,7 +38,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
 
                     int maxSpawn = player.maxTurrets;
 
-                    List<Projectile> PalmTree = Main.projectile.Where(p => p.active && p.type == ModContent.ProjectileType<PalmTreeSentry>() && p.owner == player.whoAmI).ToList();
+                    List<Projectile> PalmTree = [.. Main.projectile.Where(p => p.active && p.type == ModContent.ProjectileType<PalmTreeSentry>() && p.owner == player.whoAmI)];
                     if (PalmTree.Count >= maxSpawn)
                     {
                         int time = 0;

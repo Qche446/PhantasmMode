@@ -40,6 +40,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         }
         private static void BorealSnowballsFixed(Action<BorealEffect, Player, int> orig, BorealEffect self, Player player, int baseDamage)
         {
+            if (!PModeChangeApply)
+            {
+                orig?.Invoke(self, player, baseDamage);
+                return;
+            }
             FargoSoulsPlayer modPlayer = player.FargoSouls();
             if (modPlayer.BorealCD <= 0 && player.whoAmI == Main.myPlayer)
             {
@@ -52,24 +57,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
 
                 Vector2 vel = Vector2.Normalize(Main.MouseWorld - player.Center) * 20f;
                 float snowballDamage = baseDamage / 2;
-                if (PModeChangeApply)
-                {
-                    snowballDamage = baseDamage * (forceEffect ? 0.8f : 0.6f);
-                }
+                snowballDamage = baseDamage * (forceEffect ? 0.8f : 0.6f);
                 if (!player.HasEffect<TimberEffect>() && heldItem != null && heldItem.IsWeaponWithDamageClass())
                 {
                     snowballDamage *= player.ActualClassDamage(DamageClass.Ranged);
                     float softcapMult = forceEffect ? 10f : 1f;
-                    if (PModeChangeApply)
-                    {
-                        if (snowballDamage > (50f * softcapMult)) // diminishing returns above 15 snowballDamage for non wiz, 100 for wiz (post-deflation numbers; current numbers are higher)
-                            snowballDamage = (float)Math.Round(((100f * softcapMult) + snowballDamage) / 3f);
-                    }
-                    else
-                    {
-                        if (snowballDamage > (25f * softcapMult)) // diminishing returns above 15 snowballDamage for non wiz, 100 for wiz (post-deflation numbers; current numbers are higher)
-                            snowballDamage = (float)Math.Round(((50f * softcapMult) + snowballDamage) / 3f);
-                    }
+                    if (snowballDamage > (50f * softcapMult)) // diminishing returns above 15 snowballDamage for non wiz, 100 for wiz (post-deflation numbers; current numbers are higher)
+                        snowballDamage = (float)Math.Round(((100f * softcapMult) + snowballDamage) / 3f);
                 }
                 if (player.HasEffect<TimberEffect>())
                     snowballDamage = 400;

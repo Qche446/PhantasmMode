@@ -62,7 +62,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             Projectile.friendly = true;
             Projectile.penetrate = -1;
             Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 30;
+            Projectile.localNPCHitCooldown = 40;
             Projectile.scale = 1;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.FargoSouls().CanSplit = false;
@@ -80,7 +80,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         {
             Projectile proj = Main.projectile[(int)Projectile.ai[0]];
             Player player = Main.player[Projectile.owner];
-            float damage = 120;
+            float damage = 110;
             Projectile.damage = (int)(player.ActualClassDamage(DamageClass.Magic) * damage);
             //Projectile.localNPCHitCooldown = 30;
             if (StartFaded)

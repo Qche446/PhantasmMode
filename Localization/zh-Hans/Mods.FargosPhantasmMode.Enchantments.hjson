@@ -20,7 +20,7 @@ TitaniumEnchant:
 	'''
 BeeEnchant: 强化其作为翅膀的能力
 BeetleEnchant: 无
-CactusEnchant: 仙人掌尖刺增强，被仙人掌尖刺击中的敌怪每隔一段时间或死亡时将随机掉落红心或魔力星
+CactusEnchant: 仙人掌尖刺增强，被仙人掌尖刺击中的敌怪一段时间或死亡后随机掉落红心或魔力星
 PumpkinEnchant: 提供一些药水和增益站效果，背包中即可生效
 SpiderEnchant: 无
 TurtleEnchant: 无
@@ -29,6 +29,7 @@ CrimsonEnchant:
 	'''
 	再次受击时会刷新[c/C8364B:猩红治愈]而不是仅仅只是清除
 	猩红治愈期间额外增加伤害加成和伤害减免，效果正比于该状态的持续时间
+	"[c/FF0000:猩红治愈单次治疗量不会超过100]"
 	'''
 FrostEnchant: 发射的弹幕会不断坠落雪花，攻击造成霜冻减益
 JungleEnchant: 增强丛林系列物品，增强的物品会被特殊标记

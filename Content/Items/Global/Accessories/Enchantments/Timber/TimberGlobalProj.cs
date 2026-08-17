@@ -24,10 +24,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
     {
         public override bool InstancePerEntity => true;
         public int PalmTreeTimer = 0;
+        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? NewInstance(target) : null;
         public override void OnSpawn(Projectile proj, IEntitySource source)
         {
             Player player = Main.player[proj.owner];
-            if (proj.type == ModContent.ProjectileType<SuperBlood>() && player.HasEffect<ShadewoodEffect>() && PModeWorldSavingSystem.PhantasmMode)
+            if (proj.type == ModContent.ProjectileType<SuperBlood>() && player.HasEffect<ShadewoodEffect>())
             {
                 proj.localNPCHitCooldown = 20;
             }
@@ -36,7 +37,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         {
             Player player = Main.player[proj.owner];
             var modPlayer = player.FargoSouls();
-            if (proj.type == ModContent.ProjectileType<EbonwoodAuraProj>() && player.HasEffect<EbonwoodEffect>() && PModeWorldSavingSystem.PhantasmMode)
+            if (proj.type == ModContent.ProjectileType<EbonwoodAuraProj>() && player.HasEffect<EbonwoodEffect>())
             {
                 bool f = player.ForceEffect<EbonwoodEffect>();
                 int dist = ShadewoodEffect.Range(player, f);
@@ -56,7 +57,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                     }
                 }
             }
-            if (proj.type == ModContent.ProjectileType<PalmTreeSentry>() && player.HasEffect<PalmwoodEffect>() && PModeWorldSavingSystem.PhantasmMode)
+            if (proj.type == ModContent.ProjectileType<PalmTreeSentry>() && player.HasEffect<PalmwoodEffect>())
             {
                 PalmTreeTimer++;
             }
@@ -65,7 +66,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         {
             Player player = Main.player[proj.owner];
             var modPlayer = player.FargoSouls();
-            if (proj.type == ProjectileID.SnowBallFriendly && player.HasEffect<BorealEffect>() && PModeWorldSavingSystem.PhantasmMode)
+            if (proj.type == ProjectileID.SnowBallFriendly && player.HasEffect<BorealEffect>())
             {
                 if (player.HasEffect<TimberEffect>())
                     modPlayer.BorealCD -= 9;

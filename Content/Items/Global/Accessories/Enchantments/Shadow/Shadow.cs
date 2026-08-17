@@ -96,7 +96,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
             if (!c.TryGotoNext(MoveType.After, i => i.MatchLdcI4(50)))
                 throw new Exception("IL edit failed!");
             c.Emit(OpCodes.Pop);
-            c.EmitDelegate(() => PModeChangeApply && Main.LocalPlayer.HasEffect<ShadowForceEffect>() ? 180 : 50);
+            c.EmitDelegate(() => PModeChangeApply && Main.LocalPlayer.HasEffect<ShadowForceEffect>() ? 160 : 50);
         }
     }
 }

@@ -18,6 +18,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Terra
         }
         private static void OnHitNPCEitherFixed(Action<ObsidianProcEffect, Player, NPC, NPC.HitInfo, DamageClass, int, Projectile, Item> orig, ObsidianProcEffect self, Player player, NPC target, NPC.HitInfo hitInfo, DamageClass damageClass, int baseDamage, Projectile projectile, Item item)
         {
+            if (!PModeChangeApply)
+            {
+                orig?.Invoke(self, player, target, hitInfo, damageClass, baseDamage, projectile, item);
+                return;
+            }
             if (!self.HasEffectEnchant(player))
                 return;
             if (player.FargoSouls().ObsidianCD == 0)

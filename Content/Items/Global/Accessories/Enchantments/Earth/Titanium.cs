@@ -48,12 +48,12 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             {
                 modplayer.TiEnergy = 0;
                 bool HF = player.ForceEffect<TitaniumRitualEffect>();
-                int N = HF ? 6 : 4;
-                float R = 90;
+                int N = HF ? 5 : 3;
+                float R = 120;
                 for (int i = 1; i <= N; i++)
                 {
                     float max = 8;
-                    int damage = player.HasEffect<EarthForceEffect>() ? 300 : HF ? 40 : 20;
+                    int damage = player.HasEffect<EarthForceEffect>() ? 280 : HF ? 34 : 20;
                     damage = (int)(player.ActualClassDamage(DamageClass.Melee) * damage);
                     for (int j = 0; j < max; j++)
                     {
@@ -109,7 +109,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
         {
             Player py = Main.player[Projectile.owner];
             var Earthpy = py.GetModPlayer<EarthPlayer>();
-            List<Projectile> list = Earthpy.TiList.Where(p => p.ai[0] == Radius).ToList();
+            List<Projectile> list = [.. Earthpy.TiList.Where(p => p.ai[0] == Radius)];
             if (!py.active || py == null || list.Count <= 0)
             {
                 Projectile.Kill();

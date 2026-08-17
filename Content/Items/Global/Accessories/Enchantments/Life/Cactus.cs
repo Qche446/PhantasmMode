@@ -1,5 +1,6 @@
 ﻿using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
+using FargowiltasSouls.Content.Bosses.Champions.Terra;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Content.Projectiles.Souls;
@@ -17,14 +18,16 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
 {
-    public class CactusOverride : PModeGlobalEnchant<CactusEnchant>
+    public class Cactus : PModeGlobalEnchant<CactusEnchant>
     {
     }
     public class CactusNeedleGlobalNPC : GlobalNPC
     {
-        public static bool PModeChangeApply => WorldSavingSystem.masochistModeReal;
+        public static bool PModeChangeApply => PModeWorldSavingSystem.PhantasmMode;
+        public override GlobalNPC NewInstance(NPC target) => PModeChangeApply ? base.NewInstance(target) : null;
         public override bool InstancePerEntity => true;
         public int CactusDropCD = 0;
+        public static List<int> blacklist = [NPCID.TheDestroyerBody, NPCID.TheDestroyerTail, ModContent.NPCType<TerraChampionBody>()];
         public override void AI(NPC npc)
         {
             if (npc.FargoSouls().Needled && PModeChangeApply)
@@ -34,6 +37,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
                     CactusDropCD = 0;
                     Player player = Main.LocalPlayer;
                     CactusDropItem(player, npc);
+                    npc.FargoSouls().Needled = false;
                 }
             }
             /*
@@ -44,7 +48,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
         public override void OnKill(NPC npc)
         {
             if (npc.FargoSouls().Needled && PModeChangeApply)
+            {
                 CactusDropItem(Main.LocalPlayer, npc);
+                npc.FargoSouls().Needled = false;
+            }
         }
         public static void CactusDropItem(Player player, NPC npc)
         {
@@ -71,6 +78,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
     {
         public override bool InstancePerEntity => true;
         public static bool PModeChangeApply => PModeWorldSavingSystem.PhantasmMode;
+        public override GlobalProjectile NewInstance(Projectile target) => PModeChangeApply ? base.NewInstance(target) : null;
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation) => entity.type == ModContent.ProjectileType<CactusNeedle>();
         
         public override void OnSpawn(Projectile proj, IEntitySource source)

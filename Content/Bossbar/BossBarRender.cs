@@ -71,7 +71,7 @@ namespace FargosPhantasmMode.Content.Bossbar
             vector.Y += TextOffset;
             long totalLife = npc.life;
             long totalMaxlife = npc.lifeMax;
-            if (npc.type == NPCID.EaterofWorldsHead && TryGetEaterOfWorldsChainLife(npc, out long life, out long maxLife))
+            if (npc.type == NPCID.EaterofWorldsHead && TryGetEaterOfWorldsChainLife(npc, out int life, out int maxLife))
             {
                 totalLife = life;
                 totalMaxlife = maxLife;
@@ -97,10 +97,10 @@ namespace FargosPhantasmMode.Content.Bossbar
             Vector2 vector2 = value.MeasureString(healthtext);
             Utils.DrawBorderStringFourWay(sb, value, healthtext, vector.X, vector.Y, Color.White, Color.Transparent, vector2 / 2f, 0.80f);
         }
-        public static bool TryGetEaterOfWorldsChainLife(NPC head, out long life, out long maxLife)
+        public static bool TryGetEaterOfWorldsChainLife(NPC head, out int life, out int maxLife)
         {
-            life = 0L;
-            maxLife = 0L;
+            life = 0;
+            maxLife = 0;
 
             if (head is null || !head.active || head.type != NPCID.EaterofWorldsHead)
             {
@@ -131,17 +131,14 @@ namespace FargosPhantasmMode.Content.Bossbar
 
                 NPC next = Main.npc[nextIndex];
 
-                if (!next.active ||
-                    (next.type != NPCID.EaterofWorldsBody &&
-                     next.type != NPCID.EaterofWorldsTail) ||
-                    (int)next.ai[1] != segment.whoAmI)
+                if (!next.active || (next.type != NPCID.EaterofWorldsBody && next.type != NPCID.EaterofWorldsTail) || (int)next.ai[1] != segment.whoAmI)
                 {
                     break;
                 }
                 segment = next;
             }
 
-            return maxLife > 0L;
+            return maxLife > 0;
         }
     }
 }

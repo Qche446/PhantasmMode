@@ -2,12 +2,15 @@
 using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature;
+using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shadow;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
 using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
+using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Systems;
+using Luminance.Common.Utilities;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
@@ -75,6 +78,14 @@ namespace FargosPhantasmMode.Content.Items.Global
                         result = Multiplier[i];
                 }
                 modifiers.FinalDamage *= result;
+            }
+            if (player.HasEffect<NinjaAttackSpeedEffect>())
+            {
+                bool hasForce = player.ForceEffect<NinjaAttackSpeedEffect>();
+                if (item == player.HeldItem || item == player.HeldMouseItem())
+                {
+                    modifiers.FinalDamage *= hasForce ? 0.3f : 0.45f;
+                }
             }
         }
         public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)

@@ -11,8 +11,8 @@ SlimyShield:
 DarkenedHeart: 迷你噬魂者额外造成敌人最大生命值0.1%的伤害
 GuttedHeart:
 	'''
-	每隔一段时间生成碎心震荡
-	[c/FF0000:碎心] : 最大生命值减少15%
+	每隔一段时间生成碎心震荡，造成[c/FF0000:碎心]减益
+	[c/FF0000:碎心]能让最大生命值减少15%
 	'''
 QueenStinger:
 	'''
@@ -22,7 +22,7 @@ QueenStinger:
 NecromanticBrew:
 	'''
 	骷髅王手臂能造成暗影焰减益
-	添加额外能力：冲刺速度可进一步提升至50%
+	冲刺速度可进一步提升至50%
 	'''
 Deerclawps: 弱化冰刺生成条件，进一步提升冰刺的伤害
 
@@ -37,7 +37,7 @@ SupremeDeathbringerFairy: {
 		[i:FargowiltasSouls/QueenStinger]获得[c/CCCC00:蜂蜜]增益，背包中即可生效
 		[i:FargowiltasSouls/QueenStinger]蜜蜂冲刺期间进入精确模式，若该冲刺期间未收到伤害，则在冲刺结束后减少一半冷却
 		[i:FargowiltasSouls/NecromanticBrew]骷髅王手臂能造成暗影焰减益
-		[i:FargowiltasSouls/NecromanticBrew]添加额外能力：冲刺速度可进一步提升至50%
+		[i:FargowiltasSouls/NecromanticBrew]冲刺速度可进一步提升至50%
 		'''
 	Extra: “永恒的启程，为邪恶敲响死亡”
 }
@@ -47,7 +47,7 @@ GelicWings: 凝胶尖刺将造成宇宙之焰和浸油减益
 ReinforcedPlating:
 	'''
 	对伤害你的敌人施加[c/FF0000:纳米侵蚀]
-	[c/FF0000:纳米侵蚀]:受到的减益伤害乘1.2，破晓减益受到的减益伤害提升不再减半，魔法诅咒对减益伤害的提升改为乘算
+	[c/FF0000:纳米侵蚀]能让受到的减益伤害乘1.2，破晓减益受到的减益伤害提升不再减半，魔法诅咒对减益伤害的提升改为乘算
 	'''
 FusedLens:
 	'''
@@ -85,17 +85,17 @@ WyvernFeather:
 	飞行时间增加60
 	'''
 ConcentratedRainbowMatter: 无
-FrigidGemstone: 添加额外能力：攻击造成霜冻减益
+FrigidGemstone: 攻击造成霜冻减益
 SandsofTime:
 	'''
-	添加额外能力：能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
+	能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
 	“赐福于伪人”
 	'''
 SqueakyToy: 无
 TribalCharm: 无
 MysticSkull: 魔法伤害提升15%
 SecurityWallet: 无
-WretchedPouch: 添加额外能力：攻击造成暗影焰
+WretchedPouch: 攻击造成暗影焰
 NymphsPerfume: 生成心的频率提升
 TimsConcoction: 魔力消耗减少15%
 
@@ -103,11 +103,9 @@ BionomicCluster: {
 	Base:
 		'''
 		继承下位额外效果
-		[i:FargowiltasSouls/WyvernFeather]飞行时间增加30
-		[i:FargowiltasSouls/WyvernFeather]更快频率生成光球
-		[i:FargowiltasSouls/FrigidGemstone]添加额外能力：攻击造成霜冻减益
-		[i:FargowiltasSouls/WretchedPouch]添加额外能力：攻击造成暗影焰
-		[i:FargowiltasSouls/SandsofTime]添加额外能力：能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
+		[i:FargowiltasSouls/WyvernFeather]飞行时间增加30，更快频率生成光球
+		[i:FargowiltasSouls/FrigidGemstone][i:FargowiltasSouls/WretchedPouch]添加额外能力：攻击造成暗影焰和霜冻减益
+		[i:FargowiltasSouls/SandsofTime]能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
 		[i:FargowiltasSouls/NymphsPerfume]生成心的频率提升
 		[i:FargowiltasSouls/TimsConcoction]魔力消耗减少5%
 		[i:FargowiltasSouls/MysticSkull]魔法伤害提升5%
@@ -133,11 +131,11 @@ LumpOfFlesh: {
 MagicalBulb:
 	'''
 	以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
-	[c/1CB631:常春藤毒素]:流失生命值，时间可重复累计，时长到达20秒后转化为[c/303F32:神经毒素]
-	[c/303F32:神经毒素]:剧烈流失生命值
+	[c/1CB631:常春藤毒素]能让敌人流失生命值，时间可重复累计，时长到达20秒后转化为[c/303F32:神经毒素]
+	[c/303F32:神经毒素]则会让敌人剧烈流失生命值
 	'''
 LihzahrdTreasureBox: 增加5点防御
-CelestialRune: 添加额外能力：召唤一个拜月教徒保护你
+CelestialRune: 召唤一个拜月教徒保护你
 
 ChaliceoftheMoon: {
 	Base:
@@ -145,17 +143,17 @@ ChaliceoftheMoon: {
 		继承下位额外效果
 		[i:FargowiltasSouls/MagicalBulb]以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
 		[i:FargowiltasSouls/LihzahrdTreasureBox]增加5点防御
-		[i:FargowiltasSouls/CelestialRune]添加额外能力：召唤一个拜月教徒保护你
+		[i:FargowiltasSouls/CelestialRune]召唤一个拜月教徒保护你
 		转换召唤物增伤提升至3%
 		'''
-	Extra: “哦哦！居然是四柱时期的装备，一定很强吧！”
+	Extra: “希望它能派上用场”
 }
 
 PumpkingsCape: 格挡时不再减速，腐败光环范围扩大
 IceQueensCrown:
 	'''
 	使用炸弹时赋予敌怪[c/427994:失温症]
-	[c/427994:失温症]:收到的伤害提升至1.05被，剧烈流失生命值，破晓减益的减益伤害增幅不再减半，魔法诅咒对减益伤害的提升改为乘算
+	[c/427994:失温症]能让受到的伤害提升至1.05被，剧烈流失生命值，破晓减益的减益伤害增幅不再减半，魔法诅咒对减益伤害的提升改为乘算
 	'''
 SaucerControlConsole: 背包中即可免疫[c/FF33FF:扭曲]
 BetsysHeart: 冲刺时发射一大片追踪烈焰凤凰

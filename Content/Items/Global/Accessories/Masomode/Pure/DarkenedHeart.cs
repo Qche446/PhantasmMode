@@ -40,6 +40,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure
                 {
                     float PrecentageDamage = 0.1f / 100f;
                     int CaseDamage = (int)(PrecentageDamage * target.lifeMax);
+                    if (CaseDamage > 1000)
+                        CaseDamage = 1000;
                     modifiers.FlatBonusDamage += CaseDamage;
                     //modifiers.HideCombatText();
                     //CombatText.NewText(target.Hitbox, Color.Aqua, CaseDamage);

@@ -24,14 +24,12 @@ namespace FargosPhantasmMode.Content.Sky
 
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
         {
+            /*
             if (maxDepth < float.MaxValue || !Main.npc.IndexInRange(StormWeaverHeadIndex))
                 return;
             PHDestroyer globalNPC = Main.npc[StormWeaverHeadIndex].GetGlobalNPC<PHDestroyer>();
             if (globalNPC == null)
                 return;
-            // Draw lightning in the background based on TextureAssets.MagicPixel.
-            // It is a long, white vertical strip that exists for some reason.
-            // This lightning effect is achieved by expanding this to fit the entire background and then drawing it as a distinct element.
             Texture2D white = TextureAssets.MagicPixel.Value;
             float lightningFlashPower = globalNPC.lightning;
             Vector2 scale = new Vector2(Main.screenWidth * 1.1f / white.Width, Main.screenHeight * 1.1f / white.Height);
@@ -41,6 +39,7 @@ namespace FargosPhantasmMode.Content.Sky
 
             for (int i = 0; i < 2; i++)
                 spriteBatch.Draw(white, screenCenter, null, drawColor, 0f, origin, scale, SpriteEffects.None, 0f);
+            */
         }
 
         public override void Reset() { }

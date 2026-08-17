@@ -33,17 +33,17 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure
                 bool pure = player.FargoSouls().PureHeart;
                 int visualProj = ModContent.ProjectileType<GuttedHeartAuraProj>();
 
-                if (ModContent.GetInstance<GuttedHeartAura>().Timer >= 60 && flag)
+                if (Timer >= 60 && flag)
                 {
                     Projectile.NewProjectile(GetSource_EffectItem(player), player.Center, Vector2.Zero, visualProj, 1, 0, Main.myPlayer, ai2: pure ? 16 : 12);
                     flag = false;
                 }
                 if (!pure)
                     Lighting.AddLight((int)(player.Center.X / 16f), (int)(player.Center.Y / 16f), 0.65f, 0.4f, 0.1f);
-                if (++ModContent.GetInstance<GuttedHeartAura>().Timer >= (player.FargoSouls().PureHeart ? 180 : 240))
+                if (++Timer >= (player.FargoSouls().PureHeart ? 180 : 240))
                 {
                     flag = true;
-                    ModContent.GetInstance<GuttedHeartAura>().Timer = 0;
+                    Timer = 0;
                 }
             }
         }

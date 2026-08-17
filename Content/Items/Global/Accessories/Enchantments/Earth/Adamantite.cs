@@ -155,6 +155,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
     public class AdamantiteGlobalProj : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
+        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public int AdamModifier;
         public override void OnSpawn(Projectile projectile, IEntitySource source)
         {

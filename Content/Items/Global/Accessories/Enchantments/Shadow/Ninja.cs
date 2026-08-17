@@ -25,8 +25,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
         public override void PostUpdateEquips(Player player)
         {
             bool hasForce = Main.LocalPlayer.ForceEffect<NinjaAttackSpeedEffect>();
-            player.GetArmorPenetration(DamageClass.Generic) += hasForce ? 40f : 15f;
-            player.GetDamage(DamageClass.Generic) *= hasForce ? 0.5f : 0.6f;
+            player.GetArmorPenetration(DamageClass.Generic) += hasForce ? 50f : 15f;
             player.FargoSouls().AttackSpeed *= hasForce ? 3f : 2f;
         }
     }

@@ -30,6 +30,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
         }
         private static void ApprenticeFixed(Action<ApprenticeSupport, Player> orig, ApprenticeSupport self, Player player)
         {
+            if (!PModeChangeApply)
+            {
+                orig?.Invoke(self, player);
+                return;
+            }
             FargoSoulsPlayer modPlayer = player.FargoSouls();
             bool forceEffect = modPlayer.ForceEffect<ApprenticeEnchant>();
             //update item cd
@@ -112,7 +117,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
                             }
 
                             if (!self.HasEffectEnchant(player))
-                                divisor = PModeChangeApply ? 3 : 10;
+                                divisor = 4;
 
                             modPlayer.ApprenticeItemCD = item2.useAnimation * divisor;
 
@@ -321,6 +326,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
     }
     public class FlameburstMinionGlobal : GlobalProjectile
     {
+        public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation) => entity.type == ModContent.ProjectileType<FlameburstMinion>();
         public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public override bool PreAI(Projectile proj)

@@ -34,6 +34,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Bionomic
                 IEnumerable<NPC> targetnpc = Main.npc.Where(p => p.Alive() && !p.friendly && Main.GameUpdateCount % 30 == 0 && (p.Center - Main.LocalPlayer.Center).Length() <= 1200);
                 if (targetnpc.Any() && Main.GameUpdateCount % 20 == 0)
                 {
+                    int num = 0;
                     foreach (NPC p in targetnpc)
                     {
                         for (int x = -3; x < 3; x += 2)
@@ -57,24 +58,28 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Bionomic
                                     Main.projectile[proj].friendly = true;
                                     Main.projectile[proj].hostile = false;
                                     flag = true;
+                                    num++;
                                     break;
                                 }
                             }
                             if (!flag)
                             {
-                                int damage = Main.hardMode ? 50 : 20;
-                                if (player.FargoSouls().MasochistSoul) damage *= 20;
+                                int damage = Main.hardMode ? 40 : 10;
+                                if (player.FargoSouls().MasochistSoul) damage *= 40;
                                 if ((p.type == ModContent.NPCType<CursedCoffin>() || p.type == ModContent.NPCType<CursedSpirit>()) && Main.zenithWorld)
                                 {
-                                    damage *= 10;
+                                    damage *= 15;
                                 }
                                 Vector2 projPos = p.Center + Vector2.UnitX * x * 16 + Vector2.UnitY * -40 * 16;
                                 int proj = Projectile.NewProjectile(GetSource_EffectItem(player), projPos, Vector2.Zero,
                                     ModContent.ProjectileType<FallingSandstone>(), (int)(player.ActualClassDamage(DamageClass.Generic) * damage), 0f, Main.myPlayer, Main.rand.Next(40, 60));
                                 Main.projectile[proj].friendly = true;
                                 Main.projectile[proj].hostile = false;
+                                num++;
                             }
                         }
+                        if (num >= 9)
+                            break;
                     }
                 }
             }

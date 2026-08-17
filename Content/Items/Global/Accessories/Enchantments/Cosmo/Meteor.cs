@@ -74,7 +74,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
                 }
                 SoundEngine.PlaySound(FargosSoundRegistry.ThrowShort, pos);
                 int force = player.HasEffect<CosmoForceEffect>() || player.ForceEffect<MeteorEffect>() ? 1 : 0;
-                int damage = player.HasEffect<CosmoForceEffect>() ? 400 : player.ForceEffect<MeteorEffect>() ? 80 : 20;
+                int damage = player.HasEffect<CosmoForceEffect>() ? 400 : player.ForceEffect<MeteorEffect>() ? 70 : 20;
                 IEntitySource entitySource = null;
                 if (player.HasEffect<CosmoForceEffect>())
                     entitySource = player.GetSource_EffectItem<CosmosMoonEffect>();
@@ -82,7 +82,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
                     entitySource = player.GetSource_EffectItem<MeteorEffect>();
                 if (entitySource == null)
                     return true;
-                Projectile.NewProjectile(entitySource, pos, vel, ModContent.ProjectileType<MeteorEnchantMeatball>(), (int)(damage * player.ActualClassDamage(DamageClass.Magic)), 0.5f, player.whoAmI, force);
+                Projectile.NewProjectile(entitySource, pos, vel, ModContent.ProjectileType<MeteorEnchantMeatball>(), (int)(damage * player.ActualClassDamage(DamageClass.Magic)), 0.5f, player.whoAmI, 0);
             }
             return true;
         }

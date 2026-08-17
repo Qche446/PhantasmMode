@@ -21,6 +21,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         }
         private int HitModifiers_GetDamageReRoll(On_NPC.HitModifiers.orig_GetDamage orig, ref NPC.HitModifiers self, float baseDamage, bool crit, bool damageVariation, float luck)
         {
+            if (!PModeChangeApply)
+                return orig.Invoke(ref self, baseDamage, crit, damageVariation, luck);
             crit = self._critOverride ?? crit;
             if (self.SuperArmor)
             {

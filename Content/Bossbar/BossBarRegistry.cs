@@ -64,7 +64,7 @@ namespace FargosPhantasmMode.Content.Bossbar
                 [NPCType<CursedCoffin>()] = BaseBarStyle(Color.Purple, Color.Yellow, 1),
                 [NPCID.EaterofWorldsHead] = new BossBarConfig((sb, npc, rec) =>
                 {
-                    if (BossBarRender.TryGetEaterOfWorldsChainLife(npc, out long life, out long maxLife))
+                    if (BossBarRender.TryGetEaterOfWorldsChainLife(npc, out int life, out int maxLife))
                     {
                         DoubleColorPulse(sb, npc, rec, () => Color.Purple, () => new Color(144, 144, 144), (float)life / (float)maxLife, 3);
                     }

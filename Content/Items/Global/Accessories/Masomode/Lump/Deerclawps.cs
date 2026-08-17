@@ -148,6 +148,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Lump
     }
     public class IceDeerclopsIceSpike : GlobalProjectile
     {
+        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
             if (projectile.type == ProjectileID.DeerclopsIceSpike && PModeWorldSavingSystem.PhantasmMode)

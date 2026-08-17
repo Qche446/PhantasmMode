@@ -37,8 +37,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 return; 
             modPlayer.CrimsonRegenTime = 0;
             float returnHeal = 0.5f;
-            modPlayer.CrimsonRegenAmount = (int)(info.Damage * returnHeal); 
-
+            float heal = info.Damage * returnHeal;
+            if (heal > 100)
+                heal = 100;
+            modPlayer.CrimsonRegenAmount = (int)heal; 
             player.AddBuff(ModContent.BuffType<CrimsonRegenBuff>(),
                 modPlayer.ForceEffect<CrimsonEnchant>() ? 900 : 430); 
         }

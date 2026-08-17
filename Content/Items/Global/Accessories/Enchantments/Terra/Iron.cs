@@ -21,8 +21,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Terra
             if (modPlayer.IronReductionDuration > 0)
             {
                 player.endurance += player.HasEffectEnchant<IronPickupEffect>() && player.ForceEffect<IronPickupEffect>() ? 0.35f : 0.2f;
-                player.statDefense += player.HasEffectEnchant<IronPickupEffect>() && player.ForceEffect<IronPickupEffect>() ? 15 : 0;
-                player.GetDamage(DamageClass.Generic) += player.HasEffectEnchant<IronPickupEffect>() && player.ForceEffect<IronPickupEffect>() ? 0.2f : 0.1f;
+                if (PModeChangeApply)
+                {
+                    player.statDefense += player.HasEffectEnchant<IronPickupEffect>() && player.ForceEffect<IronPickupEffect>() ? 15 : 0;
+                    player.GetDamage(DamageClass.Generic) += player.HasEffectEnchant<IronPickupEffect>() && player.ForceEffect<IronPickupEffect>() ? 0.2f : 0.1f;
+                }
                 modPlayer.IronReductionDuration--;
             }
         }

@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
         public override Header ToggleHeader => Header.GetHeader<LifeHeader>();
         public override int ToggleItemType => ModContent.ItemType<PumpkinEnchant>();
 
-        public static List<int> PumpkinBuff => [BuffID.Regeneration, BuffID.Ironskin, BuffID.Swiftness, 
+        public static List<int> PumpkinBuff = [BuffID.Regeneration, BuffID.Ironskin, BuffID.Swiftness, 
             BuffID.Wrath, BuffID.Rage,BuffID.Endurance,BuffID.Warmth,
             BuffID.Lucky, BuffID.WellFed3,
             BuffID.Sharpened, BuffID.Sunflower,BuffID.Campfire, BuffID.SugarRush];

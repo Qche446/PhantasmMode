@@ -20,7 +20,8 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Bionomic
         {
             player.FargoSouls().WyvernBallsCD++;
             player.wingTimeMax += 60;
-            player.AddEffect<ClippedWingsAttackEffect>(item);
+            if (Main.hardMode)
+                player.AddEffect<ClippedWingsAttackEffect>(item);
         }
     }
     public class ClippedWingsAttackEffect : AccessoryEffect

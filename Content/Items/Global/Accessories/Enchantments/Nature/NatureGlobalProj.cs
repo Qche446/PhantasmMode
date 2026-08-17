@@ -28,10 +28,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             ProjectileID.NorthPoleSnowflake,
             ModContent.ProjectileType<NatureTrailProj>(),
             ];
-        public override GlobalProjectile NewInstance(Projectile target)
-        {
-            return PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
-        }
+        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public override void OnSpawn(Projectile projectile, IEntitySource source)
         {
             Player player = Main.LocalPlayer;

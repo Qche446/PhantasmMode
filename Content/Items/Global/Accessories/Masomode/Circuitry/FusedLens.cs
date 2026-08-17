@@ -31,7 +31,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry
         public int TimerCD = 300;
         public override void PostUpdateEquips(Player player)
         {
-            if (player.whoAmI == Main.myPlayer)
+            if (player.whoAmI == Main.myPlayer && !player.FargoSouls().MutantDesperation)
             {
                 FargoSoulsPlayer modPlayer = player.FargoSouls();
                 int currentOrbs = player.ownedProjectileCounts[ModContent.ProjectileType<FusedLensMechElectricOrb>()] + player.ownedProjectileCounts[ModContent.ProjectileType<FusedLensDarkStar>()];
