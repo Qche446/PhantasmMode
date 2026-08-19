@@ -1,16 +1,16 @@
 Nekomi:
 	'''
-	猫猫斧将随流程变强
-	当前基础伤害:
+	The Nekomi Axe grows stronger as you progress
+	Current damage (base damage): {0}({1})
 	'''
 Styx:
 	'''
-	生成双向冥狱魔剑，剑身将能造成暴击
-	当前伤害:
+	Summons the two-way Abom Sword; its blade can deal critical strikes
+	Current damage (base damage): {0}({1})
 	'''
 Jungle:
 	'''
-	减少30%魔力消耗
-	击中敌人时敌人身上产生数团孢子云
-	若造成伤害的类型为魔法，则施加[c/00CC00:中毒]减益
+	Reduces mana cost by 30%
+	Creates several spore clouds on enemies when they are hit
+	If the damage type is magic, inflicts the [c/00CC00:Poisoned] debuff
 	'''

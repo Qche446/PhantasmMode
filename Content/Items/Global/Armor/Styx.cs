@@ -65,7 +65,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
             int damage = FargoSoulsUtil.HighestDamageTypeScaling(Main.LocalPlayer, 666);
             if (PModeWorldSavingSystem.PhantasmMode)
             {
-                var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Styx") + damage + "(" + 666 + ")")
+                var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Styx", damage, 666))
                 {
                     OverrideColor = Color.Aqua // 可选：设置颜色
                 };

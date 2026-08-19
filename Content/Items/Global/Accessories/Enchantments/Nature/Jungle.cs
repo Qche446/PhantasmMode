@@ -52,7 +52,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             switch (item.type)
             {
                 case ItemID.BladeofGrass:
-                    Addtooltips(tooltips, "BladeofGrass", HasEnhance ? 3f : 1.2f, HasNature ? 16 : HasEnhance ? 2.4f : 1.1f);
+                    Addtooltips(tooltips, "BladeofGrass", HasEnhance ? 3f : 1.2f, HasNature ? 16 : HasEnhance ? 2.5f : 1.1f);
                     break;
                 case ItemID.ThornChakram:
                     Addtooltips(tooltips, "ThornChakram", HasNature ? 20 : HasEnhance ? 2.6f : 1.1f);
@@ -133,7 +133,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 if (item.type == ItemID.PoisonDart)
                     damage *= HasEnhance ? 1.8f : 1.2f;
                 if (item.type == ItemID.BladeofGrass)
-                    damage *= HasNature ? 16 : HasEnhance ? 2.4f : 1.1f;
+                    damage *= HasNature ? 16 : HasEnhance ? 2.5f : 1.1f;
                 if (item.type == ItemID.ThornChakram)
                     damage *= HasNature ? 20 : HasEnhance ? 2.6f : 1.1f;
             }

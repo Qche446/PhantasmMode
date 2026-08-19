@@ -70,9 +70,9 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         }
         public override void SetDefaults(NPC npc)
         {
-            npc.damage = 150;
+            npc.damage = 180;
             npc.defense = 100;
-            npc.lifeMax = 1296000; // 680000
+            npc.lifeMax = 1400000; // 680000
             npc.netAlways = true;
             npc.BossBar = ModContent.GetInstance<AbominationnBossBar>();
             AIState = ThrowScythes;
@@ -89,7 +89,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             int[] rituals = [ModContent.ProjectileType<AbomRitual>(), ModContent.ProjectileType<AbomRitualMaso>(), ModContent.ProjectileType<AbomRitualFTW>(), ModContent.ProjectileType<AbomRitual2>()];
             Main.dayTime = false;
             Main.time = 0;
-            Main.bloodMoon = true;
+            //Main.bloodMoon = true;
             Main.eclipse = false;
             for (int i = 0; i < Main.projectile.Length; i++)
             {
@@ -370,13 +370,16 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             if (npc.localAI[2] == 0) 
             {
                 int AngleLimit = 35;
-                float randAngle = 2 * AngleLimit * Main.rand.NextFloat(-1, 1);
+                int MaxAngle = 70;
+                float randAngle = MaxAngle * Main.rand.NextFloat(-1, 1);
                 if (HugeMove && Math.Abs(randAngle) > AngleLimit)
                 {
                     randAngle = AngleLimit * Main.rand.NextFloat(-1, 1);
                 }
                 if (Math.Abs(randAngle) > AngleLimit)
                     HugeMove = true;
+                else
+                    HugeMove = false;
                 npc.localAI[2] = player.SafeDirectionTo(npc.Center).ToRotation()
                     + MathHelper.ToRadians(randAngle);
                 npc.netUpdate = true;

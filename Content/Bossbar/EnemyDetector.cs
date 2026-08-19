@@ -93,6 +93,7 @@ namespace FargosPhantasmMode.Content.Bossbar
                     TryAddBoss(npc);
                 }
             }
+            /*
             _activeBossBars.Sort(delegate (BossBarData a, BossBarData b)
             {
                 NPC val = Main.npc[a.NPCWhoAmI];
@@ -101,6 +102,7 @@ namespace FargosPhantasmMode.Content.Bossbar
                 float value = (float)val2.life / (float)val2.lifeMax;
                 return num.CompareTo(value);
             });
+            */
             if (_activeBossBars.Count > 4)
             {
                 _activeBossBars.RemoveRange(4, _activeBossBars.Count - 4);

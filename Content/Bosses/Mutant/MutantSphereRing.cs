@@ -31,9 +31,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         private float advance;      // 弧长参数，tick 单位（1 tick = originalSpeed 像素）
         private float speedMul;     // 当前速度倍率，0 → MaxMul
         private int phaseTimer;     // 阶段内计时（静止 / 加速用）
-        private readonly int HoldFrames = 30;   // 静止帧数（可调）
-        private const float Accel = 0.03f;   // 每帧倍率增量（可调）
-        private const float MaxMul = 3f;     // 最大倍率（可调）
+        private readonly int HoldFrames = 10;   // 静止帧数（可调）
+        private const float Accel = 0.02f;   // 每帧倍率增量（可调）
+        private const float MaxMul = 1.5f;     // 最大倍率（可调）
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(specialPhase);

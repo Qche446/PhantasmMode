@@ -1,20 +1,20 @@
 Jungle: {
 	BladeofGrass:
 		'''
-		大小提升至{0}倍，基础伤害提升至{1}倍
-		毒特攻
+		Size increased to {0}x, base damage increased to {1}x
+		Poison special attack
 		'''
 	ThornChakram:
 		'''
-		基础伤害提升至{0}倍，弹幕速度提升，发射不受限制
-		毒特攻
+		Base damage increased to {0}x, projectile speed increased, firing is unrestricted
+		Poison special attack
 		'''
-	IvyWhip: 钩爪性能提升
-	JungleYoyo: 基础伤害提升至{0}倍，悠悠球性能提升
+	IvyWhip: Improved hook performance
+	JungleYoyo: Base damage increased to {0}x, improved yoyo performance
 	ThornWhip:
 		'''
-		基础伤害提升至{0}倍，鞭子范围提升至{1}倍
-		毒特攻
+		Base damage increased to {0}x, whip range increased to {1}x
+		Poison special attack
 		'''
-	PoisonDart: 基础伤害提升至{0}倍，弹幕速度提升至2倍，穿透次数增加{1}
+	PoisonDart: Base damage increased to {0}x, projectile speed increased to 2x, penetration increased by {1}
 }

@@ -9,7 +9,6 @@ float4 flameColor; // 火焰主色 (中段)
 float4 brightFlameColor; // 亮焰色 (接近焰尖)
 float4 tipColor; // 焰尖/边缘强光色 (最亮处)
 
-// ---------- 火焰像素着色器 ----------
 float4 FireBurnShader(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {
     // 1. 采样原始文字纹理

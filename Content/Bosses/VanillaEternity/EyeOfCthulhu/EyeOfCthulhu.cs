@@ -46,6 +46,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public int P3AttackChange = 0;
         public override void SetDefaults(NPC npc)
         {
+            npc.lifeMax *= (int)(1.2f * npc.lifeMax);
         }
         public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<EyeofCthulhu>().RunEmodeAI = false;
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot)
@@ -341,7 +342,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.netUpdate = true;
                 if (npc.netSpam > 10)
                     npc.netSpam = 10;
-                if (Main.netMode != 1)
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 60);
             }
             if (npc.ai[1] > 40)
@@ -525,7 +526,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 6 + Main.rand.Next(1, 4);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                if (Main.netMode != 1)
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
                     FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);

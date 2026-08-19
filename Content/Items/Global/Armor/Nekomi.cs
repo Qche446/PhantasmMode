@@ -41,7 +41,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                 {
                     int baseDamage = NekomiDamage();
                     int p = FargoSoulsUtil.NewSummonProjectile(player.GetSource_Misc(""), player.Center, Vector2.Zero, ModContent.ProjectileType<NekomiDevi>(), baseDamage, 16f, player.whoAmI);
-                    if (NPC.downedMoonlord && PModeWorldSavingSystem.PhantasmMode) Main.projectile[p].scale *= 2;
+                    //if (NPC.downedMoonlord && PModeWorldSavingSystem.PhantasmMode) Main.projectile[p].scale *= 2;
                     SoundEngine.PlaySound(SoundID.Item43, player.Center);
                     modPlayer.NekomiMeter = 0;
                     modPlayer.NekomiAttackReadyTimer = 0;
@@ -67,16 +67,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            int baseDamage = 660;
-            if (!Main.hardMode)
-                baseDamage /= 2;
             if (PModeWorldSavingSystem.PhantasmMode)
             {
-                baseDamage = NekomiDamage();
-            }
-            if (PModeWorldSavingSystem.PhantasmMode)
-            {
-                var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Nekomi") + baseDamage + "(" + 666 + ")")
+                int baseDamage = NekomiDamage();
+                int actualDamage = (int)(NekomiDamage() * Main.LocalPlayer.ActualClassDamage(DamageClass.Summon));
+                var extraLine = new TooltipLine(Mod, "PHAddTooltips", Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Nekomi", actualDamage, baseDamage))
                 {
                     OverrideColor = Color.Aqua // 可选：设置颜色
                 };
@@ -87,11 +82,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
         {
             int baseDamage = 333;
             if (Main.hardMode) baseDamage = 666;
-            if (NPC.downedMechBoss1 || NPC.downedMechBoss2 || NPC.downedMechBoss3) baseDamage = 999;
-            if (NPC.downedPlantBoss) baseDamage = 1200;
-            if (NPC.downedGolemBoss) baseDamage = 2000;
-            if (NPC.downedMoonlord) baseDamage = 6000;
-            if (WorldSavingSystem.downedAbom) baseDamage = 10000;
+            if (NPC.downedMechBoss1 || NPC.downedMechBoss2 || NPC.downedMechBoss3) baseDamage = 1111;
+            if (NPC.downedPlantBoss) baseDamage = 2000;
+            if (NPC.downedGolemBoss) baseDamage = 2468;
+            if (NPC.downedMoonlord) baseDamage = 12345;
+            if (WorldSavingSystem.downedAbom) baseDamage = 22222;
             return baseDamage;
         }
     }

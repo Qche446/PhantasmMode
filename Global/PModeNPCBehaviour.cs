@@ -32,14 +32,14 @@ namespace FargosPhantasmMode.Global
 
         public bool FirstTick = true; 
         public virtual void OnFirstTick(NPC npc) { }
-        public virtual void StopEmodeAI(NPC npc) { }//字面意思
+        //public virtual void StopEmodeAI(NPC npc) { }//字面意思
         public virtual bool SafePreAI(NPC npc) => base.PreAI(npc);
         public sealed override bool PreAI(NPC npc)
         {
             if (FirstTick)
             {
                 FirstTick = false;
-                StopEmodeAI(npc);
+                //StopEmodeAI(npc);
                 OnFirstTick(npc);
             }
             if (!RunPmodeAI)

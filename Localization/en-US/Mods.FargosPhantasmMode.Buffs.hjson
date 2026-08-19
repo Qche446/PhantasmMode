@@ -1,59 +1,54 @@
 HeartBrokenBuff: {
-	DisplayName: 心碎
+	DisplayName: Heartbroken
 	Description:
 		'''
-		最大生命值降低15%
-		“解裂之时...”
+		Maximum life reduced by 15%
+		"At the moment of breaking..."
 		'''
 }
 
 FlawlessBuff: {
-	DisplayName: 无暇
+	DisplayName: Flawless
 	Description:
 		'''
-		提升生命再生速度，增加10点盔甲穿透，10%暴击率，10点防御和10%的减伤
-		”献给值得的人...“
+		Increases life regeneration, armor penetration by 10, critical chance by 10%, defense by 10, and damage reduction by 10%
+		"For those who are worthy..."
 		'''
 }
 
 NanoErosionBuff: {
-	DisplayName: 纳米侵蚀
+	DisplayName: Nano-Erosion
 	Description:
 		'''
-		受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
-		“结构之外...”
+		Debuff damage taken is multiplied by 1.2. Daybreak's debuff damage bonus is no longer halved, and the Magical Curse bonus to debuff damage becomes multiplicative
+		"Beyond structure..."
 		'''
 }
 
 TimeGodsTrickBuff: {
-	DisplayName: 时神把戏
-	Description: “驾虚御实，彼者怀有时光...”
+	DisplayName: Time God's Trick
+	Description: "Riding through the unreal and the real, one who holds time..."
 }
 
 HypothermiaBuff: {
-	DisplayName: 失温症
+	DisplayName: Hypothermia
 	Description:
 		'''
-		急剧流失生命值，收到的伤害提升至1.05倍,破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
-		“失衡...”
+		Rapidly drains life, damage taken is multiplied by 1.05. Daybreak's debuff damage bonus is no longer halved, and the Magical Curse bonus to debuff damage becomes multiplicative
+		"Imbalance..."
 		'''
 }
 
 PhSublimationBuff: {
-	DisplayName: 影灼之升华
-	Description: “你的灵魂正在挣脱你的肉体”
-}
-
-MadMoonBuff: {
-	DisplayName: Mad Moon Buff
-	Description: Mods.FargosPhantasmMode.Buffs.MadMoonBuff.Description
+	DisplayName: Shadowflame Sublimation
+	Description: "Your soul is breaking free from your body"
 }
 
 HallowFlameBuff: {
-	DisplayName: 圣灼
+	DisplayName: Holy Flame
 	Description:
 		'''
-		免疫药水疾病，全方面消减你的生存能力
-		“于圣炎之中重获新生...”
+		Immune to Potion Sickness, but severely reduces your survivability in every way
+		"Reborn in holy flame..."
 		'''
 }

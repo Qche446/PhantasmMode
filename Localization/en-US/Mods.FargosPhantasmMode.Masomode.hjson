@@ -1,189 +1,189 @@
 ﻿AgitatingLens:
 	'''
-	增加10%移动速度，生命值低于最大生命值一半时提升至30%
-	鲜血镰刀将造成月之诅咒和狂暴减益
+	Increases movement speed by 10%, raised to 30% below half maximum life
+	Blood Scythes inflict Moon Curse and Berserk
 	'''
 SlimyShield:
 	'''
-	平台直穿效果在背包中即可生效
-	粘液球将造成宇宙之焰减益
+	Platforms can be passed through while this item is in the inventory
+	Slime Balls inflict the Cosmo Flame debuff
 	'''
-DarkenedHeart: 迷你噬魂者额外造成敌人最大生命值0.1%的伤害
+DarkenedHeart: Mini Eaters deal an additional 0.1% of the enemy's maximum life as damage
 GuttedHeart:
 	'''
-	每隔一段时间生成碎心震荡，造成[c/FF0000:碎心]减益
-	[c/FF0000:碎心]能让最大生命值减少15%
+	Periodically creates a Gutted Heart shockwave that inflicts [c/FF0000:Heartbroken]
+	[c/FF0000:Heartbroken] reduces maximum life by 15%
 	'''
 QueenStinger:
 	'''
-	获得蜂蜜增益，背包中即可生效
-	蜜蜂冲刺期间进入精确模式，若该冲刺期间未收到伤害，则在冲刺结束后减少一半冷却
+	Grants the Honey buff; works from the inventory
+	Bee dashes enter precision mode. If you take no damage during the dash, its cooldown is halved afterward
 	'''
 NecromanticBrew:
 	'''
-	骷髅王手臂能造成暗影焰减益
-	冲刺速度可进一步提升至50%
+	Skeletron's arms inflict Shadowflame
+	Dash speed can be further increased to 50%
 	'''
-Deerclawps: 弱化冰刺生成条件，进一步提升冰刺的伤害
+Deerclawps: Eases the conditions for Ice Spikes to spawn and further increases their damage
 
 SupremeDeathbringerFairy: {
 	Base:
 		'''
-		继承下位额外效果
-		[i:FargowiltasSouls/SlimyShield]平台直穿效果在背包中即可生效
-		[i:FargowiltasSouls/SlimyShield]粘液球将造成宇宙之焰减益
-		[i:FargowiltasSouls/AgitatingLens]增加10%移动速度，生命值低于最大生命值一半时提升至30%
-		[i:FargowiltasSouls/AgitatingLens]鲜血镰刀将造成[c/0BFFE8:月之诅咒]和[c/FF0000:狂暴]减益
-		[i:FargowiltasSouls/QueenStinger]获得[c/CCCC00:蜂蜜]增益，背包中即可生效
-		[i:FargowiltasSouls/QueenStinger]蜜蜂冲刺期间进入精确模式，若该冲刺期间未收到伤害，则在冲刺结束后减少一半冷却
-		[i:FargowiltasSouls/NecromanticBrew]骷髅王手臂能造成暗影焰减益
-		[i:FargowiltasSouls/NecromanticBrew]冲刺速度可进一步提升至50%
+		Inherits additional effects from lower tiers
+		[i:FargowiltasSouls/SlimyShield]Platforms can be passed through while this item is in the inventory
+		[i:FargowiltasSouls/SlimyShield]Slime Balls inflict the Cosmo Flame debuff
+		[i:FargowiltasSouls/AgitatingLens]Increases movement speed by 10%, raised to 30% below half maximum life
+		[i:FargowiltasSouls/AgitatingLens]Blood Scythes inflict [c/0BFFE8:Moon Curse] and [c/FF0000:Berserk]
+		[i:FargowiltasSouls/QueenStinger]Grants the [c/CCCC00:Honey] buff; works from the inventory
+		[i:FargowiltasSouls/QueenStinger]Bee dashes enter precision mode; taking no damage during the dash halves its cooldown afterward
+		[i:FargowiltasSouls/NecromanticBrew]Skeletron's arms inflict Shadowflame
+		[i:FargowiltasSouls/NecromanticBrew]Dash speed can be further increased to 50%
 		'''
-	Extra: “永恒的启程，为邪恶敲响死亡”
+	Extra: "An eternal beginning, ringing death for evil"
 }
 
-PungentEyeball: "[c/FF0000:尖刻注视]积累速度提升"
-GelicWings: 凝胶尖刺将造成宇宙之焰和浸油减益
+PungentEyeball: "[c/FF0000:Scathing Gaze] builds faster"
+GelicWings: Gel Spikes inflict Cosmo Flame and Oiled
 ReinforcedPlating:
 	'''
-	对伤害你的敌人施加[c/FF0000:纳米侵蚀]
-	[c/FF0000:纳米侵蚀]能让受到的减益伤害乘1.2，破晓减益受到的减益伤害提升不再减半，魔法诅咒对减益伤害的提升改为乘算
+	Inflicts [c/FF0000:Nano-Erosion] on enemies that damage you
+	[c/FF0000:Nano-Erosion] multiplies debuff damage taken by 1.2. Daybreak's debuff damage bonus is no longer halved, and Magical Curse's bonus becomes multiplicative
 	'''
 FusedLens:
 	'''
-	生成友好的双色机械电球围绕着你，周围有敌人时自动追击
-	收到灵液或诅咒焰影响时，将生成暗星替代机械电球，额外造成浸油减益
+	Creates friendly dual-color Mech Electric Orbs around you that automatically pursue nearby enemies
+	When affected by Ichor or Cursed Inferno, Dark Stars spawn instead and additionally inflict Oiled
 	'''
-GroundStick: 对激光类弹幕的减伤效果提升至80%
+GroundStick: Damage reduction against laser projectiles increased to 80%
 
 DubiousCircuitry: {
 	Base:
 		'''
-		继承下位额外效果
-		[i:FargowiltasSouls/ReinforcedPlating]对伤害你的敌人施加[c/FF0000:纳米侵蚀]
-		[i:FargowiltasSouls/FusedLens]生成友好的四色机械电球围绕着你，周围有敌人时自动追击，受到灵液或诅咒焰影响时替换为暗星
-		[i:FargowiltasSouls/GroundStick]对激光类弹幕的减伤效果提升至80%
+		Inherits additional effects from lower tiers
+		[i:FargowiltasSouls/ReinforcedPlating]Inflicts [c/FF0000:Nano-Erosion] on enemies that damage you
+		[i:FargowiltasSouls/FusedLens]Creates friendly four-color Mech Electric Orbs that pursue nearby enemies and become Dark Stars when affected by Ichor or Cursed Inferno
+		[i:FargowiltasSouls/GroundStick]Damage reduction against laser projectiles increased to 80%
 		'''
-	Extra: “看上去就很强！”
+	Extra: "It looks incredibly strong!"
 }
 
 PureHeart: {
 	Base:
 		'''
-		[i:FargowiltasSouls/PureHeart]15秒内不受到伤害则获得[c/00FFAB:无暇]增益
-		[c/00FFAB:无暇]：提升各项能力
-		[i:FargowiltasSouls/DarkenedHeart]迷你噬魂者额外造成敌人最大生命值0.1%的伤害
-		[i:FargowiltasSouls/GuttedHeart]每隔一段时间生成范围更大的碎心震荡
-		[i:FargowiltasSouls/GelicWings]凝胶尖刺将造成宇宙之焰和浸油减益
+		[i:FargowiltasSouls/PureHeart]Avoid damage for 15 seconds to gain the [c/00FFAB:Flawless] buff
+		[c/00FFAB:Flawless]: Improves all abilities
+		[i:FargowiltasSouls/DarkenedHeart]Mini Eaters deal an additional 0.1% of the enemy's maximum life as damage
+		[i:FargowiltasSouls/GuttedHeart]Periodically creates a larger Gutted Heart shockwave
+		[i:FargowiltasSouls/GelicWings]Gel Spikes inflict Ominous Flame and Oiled
 		'''
-	Extra: “净魂绝垢，羽化登仙”
+	Extra: "A purified soul ascends beyond mortality"
 }
 
 WyvernFeather:
 	'''
-	光球生成频率提升
-	飞行时间增加60
+	Increases orb spawn frequency
+	Increases flight time by 60
 	'''
-ConcentratedRainbowMatter: 无
-FrigidGemstone: 攻击造成霜冻减益
+ConcentratedRainbowMatter: None
+FrigidGemstone: Attacks inflict Frostburn
 SandsofTime:
 	'''
-	能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
-	“赐福于伪人”
+	Can summon falling sand above solid blocks or at a set height above enemies
+	"Bless the false men"
 	'''
-SqueakyToy: 无
-TribalCharm: 无
-MysticSkull: 魔法伤害提升15%
-SecurityWallet: 无
-WretchedPouch: 攻击造成暗影焰
-NymphsPerfume: 生成心的频率提升
-TimsConcoction: 魔力消耗减少15%
+SqueakyToy: None
+TribalCharm: None
+MysticSkull: Magic damage increased by 15%
+SecurityWallet: None
+WretchedPouch: Attacks inflict Shadowflame
+NymphsPerfume: Increases heart spawn frequency
+TimsConcoction: Reduces mana cost by 15%
 
 BionomicCluster: {
 	Base:
 		'''
-		继承下位额外效果
-		[i:FargowiltasSouls/WyvernFeather]飞行时间增加30，更快频率生成光球
-		[i:FargowiltasSouls/FrigidGemstone][i:FargowiltasSouls/WretchedPouch]添加额外能力：攻击造成暗影焰和霜冻减益
-		[i:FargowiltasSouls/SandsofTime]能在敌怪头顶的物块或头顶一定高度的地方召唤落沙
-		[i:FargowiltasSouls/NymphsPerfume]生成心的频率提升
-		[i:FargowiltasSouls/TimsConcoction]魔力消耗减少5%
-		[i:FargowiltasSouls/MysticSkull]魔法伤害提升5%
+		Inherits additional effects from lower tiers
+		[i:FargowiltasSouls/WyvernFeather]Increases flight time by 30 and spawns orbs more frequently
+		[i:FargowiltasSouls/FrigidGemstone][i:FargowiltasSouls/WretchedPouch]Adds the ability for attacks to inflict Shadowflame and Frostburn
+		[i:FargowiltasSouls/SandsofTime]Can summon falling sand above solid blocks or at a set height above enemies
+		[i:FargowiltasSouls/NymphsPerfume]Increases heart spawn frequency
+		[i:FargowiltasSouls/TimsConcoction]Reduces mana cost by 5%
+		[i:FargowiltasSouls/MysticSkull]Magic damage increased by 5%
 		'''
-	Extra: “调谐”
+	Extra: "Attunement"
 }
 
-DreadShell: 提升5点防御和5%减伤
-SkullCharm: 暗晶弹能造成暗影焰减益
+DreadShell: Increases defense by 5 and damage reduction by 5%
+SkullCharm: Dark Crystal projectiles inflict Shadowflame
 
 LumpOfFlesh: {
 	Base:
 		'''
-		继承下位额外能力
-		[i:FargowiltasSouls/SkullCharm]幻影死光额外造成[c/FFF489:惩戒]和狱炎减益
-		[i:FargowiltasSouls/PungentEyeball][c/FF0000:尖刻注视]积累速度提升且最大伤害增幅提升至20%
-		[i:FargowiltasSouls/DreadShell]提升5点防御和5%减伤
-		[i:FargowiltasSouls/Deerclawps]弱化冰刺生成条件，进一步提升冰刺的伤害
+		Inherits additional abilities from lower tiers
+		[i:FargowiltasSouls/SkullCharm]Phantasmal Deathrays additionally inflict [c/FFF489:Abigail] and Hellfire
+		[i:FargowiltasSouls/PungentEyeball][c/FF0000:Scathing Gaze] builds faster and its maximum damage bonus increases to 20%
+		[i:FargowiltasSouls/DreadShell]Increases defense by 5 and damage reduction by 5%
+		[i:FargowiltasSouls/Deerclawps]Eases the conditions for Ice Spikes to spawn and further increases their damage
 		'''
-	Extra: “看起来不像是好吃的”
+	Extra: "It doesn't look very appetizing"
 }
 
 MagicalBulb:
 	'''
-	以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
-	[c/1CB631:常春藤毒素]能让敌人流失生命值，时间可重复累计，时长到达20秒后转化为[c/303F32:神经毒素]
-	[c/303F32:神经毒素]则会让敌人剧烈流失生命值
+	At the cost of some survivability, attacks inflict [c/1CB631:Ivy Venom]
+	[c/1CB631:Ivy Venom] drains enemy life and stacks over time; after 20 seconds it converts into [c/303F32:Neurotoxin]
+	[c/303F32:Neurotoxin] causes enemies to rapidly lose life
 	'''
-LihzahrdTreasureBox: 增加5点防御
-CelestialRune: 召唤一个拜月教徒保护你
+LihzahrdTreasureBox: Increases defense by 5
+CelestialRune: Summons a Lunatic Cultist to protect you
 
 ChaliceoftheMoon: {
 	Base:
 		'''
-		继承下位额外效果
-		[i:FargowiltasSouls/MagicalBulb]以部分生存能力为代价，攻击造成[c/1CB631:常春藤毒素]减益
-		[i:FargowiltasSouls/LihzahrdTreasureBox]增加5点防御
-		[i:FargowiltasSouls/CelestialRune]召唤一个拜月教徒保护你
-		转换召唤物增伤提升至3%
+		Inherits additional effects from lower tiers
+		[i:FargowiltasSouls/MagicalBulb]At the cost of some survivability, attacks inflict [c/1CB631:Ivy Venom]
+		[i:FargowiltasSouls/LihzahrdTreasureBox]Increases defense by 5
+		[i:FargowiltasSouls/CelestialRune]Summons a Lunatic Cultist to protect you
+		Converted minion damage bonus increased to 3%
 		'''
-	Extra: “希望它能派上用场”
+	Extra: "I hope it proves useful"
 }
 
-PumpkingsCape: 格挡时不再减速，腐败光环范围扩大
+PumpkingsCape: No longer slowed while blocking; Corrupt Aura range increased
 IceQueensCrown:
 	'''
-	使用炸弹时赋予敌怪[c/427994:失温症]
-	[c/427994:失温症]能让受到的伤害提升至1.05被，剧烈流失生命值，破晓减益的减益伤害增幅不再减半，魔法诅咒对减益伤害的提升改为乘算
+	Using bombs inflicts [c/427994:Hypothermia] on enemies
+	[c/427994:Hypothermia] multiplies damage taken by 1.05, rapidly drains life, and makes Daybreak's debuff damage bonus no longer halved; Magical Curse's bonus becomes multiplicative
 	'''
-SaucerControlConsole: 背包中即可免疫[c/FF33FF:扭曲]
-BetsysHeart: 冲刺时发射一大片追踪烈焰凤凰
+SaucerControlConsole: Immune to [c/FF33FF:Warped] while in the inventory
+BetsysHeart: Fires a large spread of homing Flame Phoenixes while dashing
 MutantAntibodies:
 	'''
-	以部分生存能力为代价，攻击附带[c/0000CC:海洋重击]和[c/087575:突变啃啄]
-	[c/0000CC:海洋重击:]高速流失生命值，防御减少40
+	At the cost of some survivability, attacks inflict [c/0000CC:Oceanic Maul] and [c/087575:Mutant Chomp]
+	[c/0000CC:Oceanic Maul:] rapidly drains life and reduces defense by 40
 	'''
-PrecisionSeal: 判定点进一步缩小
-GalacticGlobe: 飞行时间提升666倍
+PrecisionSeal: Hitbox becomes even smaller
+GalacticGlobe: Flight time increased 666-fold
 
 HeartoftheMasochist: {
 	Base:
 		'''
-		继承下位额外效果
-		[i:FargowiltasSouls/PumpkingsCape]格挡时不再减速，腐败光环范围提升
-		[i:FargowiltasSouls/IceQueensCrown]使用炸弹时赋予敌人[c/427994:失温症֢]
-		[i:FargowiltasSouls/SaucerControlConsole]背包中即可免疫[c/FF33FF:扭曲]
-		[i:FargowiltasSouls/BetsysHeart]冲刺时发射一大片追踪烈焰凤凰
-		[i:FargowiltasSouls/MutantAntibodies]能以一部分生存能力为代价，攻击附带[c/0000CC:海洋重击]和[c/087575:突变啃啄]
-		[i:FargowiltasSouls/PrecisionSeal]判定点进一步缩小
-		[i:FargowiltasSouls/GalacticGlobe]无限飞行
-		转换召唤物增伤提升至3%
+		Inherits additional effects from lower tiers
+		[i:FargowiltasSouls/PumpkingsCape]No longer slowed while blocking; Corrupt Aura range increased
+		[i:FargowiltasSouls/IceQueensCrown]Using bombs inflicts [c/427994:Hypothermia] on enemies
+		[i:FargowiltasSouls/SaucerControlConsole]Immune to [c/FF33FF:Warped] while in the inventory
+		[i:FargowiltasSouls/BetsysHeart]Fires a large spread of homing Flame Phoenixes while dashing
+		[i:FargowiltasSouls/MutantAntibodies]At the cost of some survivability, attacks inflict [c/0000CC:Oceanic Maul] and [c/087575:Mutant Chomp]
+		[i:FargowiltasSouls/PrecisionSeal]Hitbox becomes even smaller
+		[i:FargowiltasSouls/GalacticGlobe]Infinite flight
+		Converted minion damage bonus increased to 3%
 		'''
-	Extra: “燃烧吧，我所积淀的一切”
+	Extra: "Burn, everything I have accumulated"
 }
 
-SinisterIcon: 无
+SinisterIcon: None
 
 MasochistSoul: {
-	Base: 继承下位额外效果
-	Extra: “此刻，言语的重量早已失去。”
+	Base: Inherits additional effects from lower tiers
+	Extra: "At this moment, words have long since lost their weight."
 }

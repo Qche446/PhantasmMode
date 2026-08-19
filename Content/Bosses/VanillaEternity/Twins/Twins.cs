@@ -37,16 +37,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
     public class P_Retinazer : PModeNPCBehaviour, IPTwins
     {
         #region 不常修改
-        public static readonly SoundStyle DeathrayFire = new SoundStyle("FargosPhantasmMode/Assets/Sounds/DeathrayFire")
-        {
-            Volume = 2f,          // 音量 (0.0f 到 1.0f)
-            PitchVariance = 0.3f,   // 音高随机变化范围，增加声音自然度
-            MaxInstances = 1,       // 最多同时存在的实例数，防止声音叠加
-            SoundLimitBehavior = SoundLimitBehavior.IgnoreNew
-        };
-
-        public static readonly SoundStyle LensEject = new SoundStyle("FargosPhantasmMode/Assets/Sounds/LensEject");
-
         public float AuraOpacity = 0;
 
         public float AuraRadius = 1;
@@ -103,9 +93,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override void SetDefaults(NPC npc)
         {
-
+            if (!Main.getGoodWorld)
+                npc.lifeMax *= (int)(1.2f * npc.lifeMax);
         }
-        public override void StopEmodeAI(NPC npc) => npc.GetGlobalNPC<Retinazer>().RunEmodeAI = false;
+        public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<Retinazer>().RunEmodeAI = false;
         #endregion
         public static readonly List<TwinsAtt> phase1 = [
             TwinsAtt.NormalShoot,
@@ -177,7 +168,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             Vector2 vel = npc.localAI[0].ToRotationVector2();
             float progress = npc.ai[1] / 240f;
             npc.ai[2] += MathHelper.SmoothStep(1f, 5.5f, progress);
-            float maxspeed = MathHelper.SmoothStep(8, 12, progress);
+            float maxspeed = MathHelper.SmoothStep(8, 16, progress);
             float inter = MathHelper.SmoothStep(10, 3, progress);
             npc.ai[3]++;
             if (npc.ai[2] > 20 && npc.ai[1] > 20)
@@ -282,7 +273,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.localAI[0] == 0)
                 {
                     npc.localAI[0] = 1;
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    //SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     float chargeSpeed = MathHelper.Lerp(21, 16, modifier);
                     npc.velocity = chargeSpeed * npc.SafeDirectionTo(player.Center);
                     npc.netUpdate = true;
@@ -432,7 +424,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.localAI[0] == 0)
                 {
                     npc.localAI[0] = 1;
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    //SoundEngine.PlaySound(SoundID.ForceRoar with { MaxInstances = 5 }, npc.Center);
                     float chargeSpeed = MathHelper.SmoothStep(30, 40f, progress);
                     npc.velocity = chargeSpeed * npc.SafeDirectionTo(player.Center);
                     npc.rotation = npc.velocity.ToRotation() - 1.57f;
@@ -634,6 +626,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
             }
+            if (npc.ai[0] == 30 && FargoSoulsUtil.HostCheck)
+            {
+                //Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), Vector2.Zero, ModContent.ProjectileType<TwinsScanTelegraph>(), 0, 0, Main.myPlayer,
+                    //npc.whoAmI, 90, 2 * MathHelper.Pi / 3);
+            }
             if (npc.ai[1] < 60)
             {
                 if (npc.ai[1] == 0)
@@ -659,13 +656,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             else
             {
                 npc.velocity *= 0.9f;
-            }
-            if (npc.ai[1] == 90)
-            {
-                if (!Main.dedServ)
-                    SoundEngine.PlaySound(DeathrayFire);
-
-                //SoundEngine.PlaySound(FargosSoundRegistry.TwinsDeathray with { Volume = 2f }, npc.Center);
             }
             if (npc.ai[1] >= 120)
             {
@@ -738,7 +728,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[2] >= 40 && npc.localAI[0] == 1)
                 {
                     npc.localAI[0] = 2;
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    //SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     float maxspeed = MathHelper.SmoothStep(30, 50, npc.ai[1] / 240f);
                     float chargeSpeed = maxspeed;
                     npc.velocity = chargeSpeed * Vector2.UnitX.RotatedBy(npc.localAI[2]);
@@ -947,7 +938,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[2] >= 40 && npc.localAI[0] == 1)
                 {
                     npc.localAI[0] = 2;
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     float maxspeed = Main.getGoodWorld ? 26 : 19;
                     float chargeSpeed = MathHelper.Lerp(maxspeed, 14, modifier);
                     npc.velocity = chargeSpeed * Vector2.UnitX.RotatedBy(npc.localAI[2]);
@@ -1161,6 +1152,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
                 Main.projectile[p].scale *= 1.5f;
+                //Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), Vector2.Zero, ModContent.ProjectileType<TwinsScanTelegraph>(), 0, 0, Main.myPlayer,
+                    //npc.whoAmI, 60, MathHelper.Pi / 3f);
             }
             //int flagX = npc.OnRightSideOf(player) ? 1 : -1;
             Vector2 targetPos = player.Center;// + 600 * player.SafeDirectionTo(npc.Center);
@@ -1259,7 +1252,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), 6);
                     }
                     for (int i = 0; i < 20; i++)
-                        Dust.NewDust(npc.position, npc.width, npc.height, 5, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
+                        Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
                     SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
                 if (npc.ai[1] > 60 && reti != null)
@@ -1342,7 +1335,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (npc.ai[1] > 30)
             {
                 int heal = (int)(npc.lifeMax / 90 * Main.rand.NextFloat(1f, 1.5f));
-                float maxlifepre = npc.type == NPCID.Retinazer ? 0.5f : 0.4f;
+                float maxlifepre = npc.type == NPCID.Retinazer ? 0.5f : 0.5f;
                 if (npc.life > maxlifepre * npc.lifeMax)
                     npc.life = (int)(maxlifepre * npc.lifeMax);
                 else
@@ -2461,7 +2454,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         #region 辅助方法
         public static bool AliveCheck(NPC npc, Player player)
         {
-            bool length = Vector2.Distance(npc.Center, player.Center) > 5000f;
+            bool length = Vector2.Distance(npc.Center, player.Center) > 6000f;
             if (!player.active || player.dead || length || Main.IsItDay())
             {
                 npc.TargetClosest();
@@ -2960,8 +2953,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override void SetDefaults(NPC npc)
         {
+            if (!Main.getGoodWorld)
+                npc.lifeMax *= (int)(1.2f * npc.lifeMax);
         }
-        public override void StopEmodeAI(NPC npc)
+        public override void OnFirstTick(NPC npc)
         {
             npc.GetGlobalNPC<Spazmatism>().RunEmodeAI = false;
         }

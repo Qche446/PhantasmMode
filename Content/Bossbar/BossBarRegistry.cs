@@ -70,8 +70,8 @@ namespace FargosPhantasmMode.Content.Bossbar
                     }
                 }),
                 [NPCID.BrainofCthulhu] = BaseBarStyle(Color.Red, Color.DeepPink, 3, true, 
-                    npc => Main.npc.Count(n => n.type == NPCID.Creeper && n.active), 
-                    n => NPC.GetBrainOfCthuluCreepersCount()),
+                    _ => Main.npc.Count(n => n.type == NPCID.Creeper && n.active), 
+                    _ => NPC.GetBrainOfCthuluCreepersCount()),
                 [NPCID.QueenBee] = BaseBarStyle(Color.Yellow, new Color(102, 170, 39), 1),
                 [NPCID.SkeletronHead] = BaseBarStyle(Color.White, Color.WhiteSmoke, 2),
                 [NPCID.Deerclops] = BaseBarStyle(new Color(112, 132, 255), Color.AliceBlue, 1),

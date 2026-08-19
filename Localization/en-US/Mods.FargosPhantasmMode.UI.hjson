@@ -1,20 +1,20 @@
 MainMenu: Phantasm
-Phantasm: 境妄模式
-OpenPhanState: 境妄模式已开启
-PhantasmOption: "[c/00CCCC:一个非官方的特殊难度，建议熟悉原版法狗后再来挑战。]"
+Phantasm: Phantasm Mode
+OpenPhanState: Phantasm Mode Enabled
+PhantasmOption: "[c/00CCCC:An unofficial special difficulty. Familiarity with Fargo's Souls is recommended.]"
 ExpandedFeatures:
 	'''
-	会将世界的难度设置为大师模式
-	- 保留原本受虐特点
-	- 减益对你造成的伤害一般不会致死
-	- 在受虐模式的基础上重置部分Boss，使其更加困难
-	- 对部分永恒模式掉落，魔石，魂，力等进行调整以适应新难度
-	以下是你可能会在这个模式遇到的情况：
-	*致死量的堆弹幕（玩家和boss都是）
-	*炸裂的数值和滚木平衡
-	*剧烈的掉帧
-	你可以在物品栏右下角小扳手里面选择性关闭某些选项，或者来骂我(雾)
+	Sets the world difficulty to Master Mode
+	- Retains the original Masochist features
+	- Debuff damage will generally not be fatal
+	- Reworks some bosses from Masochist Mode to make them more difficult
+	- Adjusts some Eternity Mode drops, enchantments, souls, and forces for the new difficulty
+	Possible features of this mode include:
+	*Lethal projectile spam (from both players and bosses)
+	*Explosive numbers and questionable balance
+	*Severe frame drops
+	You can selectively disable options using the wrench in the lower-right of your inventory, or come yell at me (maybe)
 	'''
-PhantasmOn: "[c/2FD6FF:受虐模式已然颤动，境妄模式已开启。]"
-PhantasmOff: "[c/2FD6FF:境妄模式已关闭。]"
-PhantasmFTWWarning: "[c/2FD6FF:传奇受虐再绽新华，传奇境妄已开启，祝好运^ ^]"
+PhantasmOn: "[c/2FD6FF:Masochist Mode trembles; Phantasm Mode is now enabled.]"
+PhantasmOff: "[c/2FD6FF:Phantasm Mode has been disabled.]"
+PhantasmFTWWarning: "[c/2FD6FF:Legendary Masochist blooms anew; Legendary Phantasm is enabled. Good luck ^ ^]"

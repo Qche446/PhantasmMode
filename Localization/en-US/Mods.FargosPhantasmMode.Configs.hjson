@@ -1,8 +1,8 @@
 BaseConfig: {
-	DisplayName: 基础设置
+	DisplayName: General Settings
 
 	ExtraCoolDownBar: {
-		Label: 额外冷却条
-		Tooltip: 为原本没有冷却条的部分效果添加冷却条
+		Label: Extra Cooldown Bars
+		Tooltip: Adds cooldown bars to effects that do not normally have one
 	}
 }

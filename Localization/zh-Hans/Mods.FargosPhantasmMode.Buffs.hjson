@@ -44,11 +44,6 @@ PhSublimationBuff: {
 	Description: “你的灵魂正在挣脱你的肉体”
 }
 
-MadMoonBuff: {
-	DisplayName: Mad Moon Buff
-	Description: Mods.FargosPhantasmMode.Buffs.MadMoonBuff.Description
-}
-
 HallowFlameBuff: {
 	DisplayName: 圣灼
 	Description:

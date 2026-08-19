@@ -1,170 +1,170 @@
-MeteorEnchant: 冷却加长，触发效果时持续向着目标倾泻流星雨
-NebulaEnchant: 星云射击不再摧毁弹幕
-SolarEnchant: 无
-StardustEnchant: 无
-VortexEnchant: 你的弹幕将获得一定程度的追踪能力
-AdamantiteEnchant: 部分弹幕能分裂，盔甲穿透提升，但是伤害降低，强化时该效果增强
-AncientCobaltEnchant: 无
+MeteorEnchant: Longer cooldown; when triggered, continuously rains meteors toward the target
+NebulaEnchant: Nebula shots no longer destroy projectiles
+SolarEnchant: None
+StardustEnchant: None
+VortexEnchant: Your projectiles gain a degree of homing
+AdamantiteEnchant: Some projectiles split and gain armor penetration, but deal reduced damage; enhanced versions improve this effect
+AncientCobaltEnchant: None
 CobaltEnchant:
 	'''
-	进一步提升跳跃能力
-	(其实是由于原法钴蓝的跳跃加速效果会在某些情况下变成滚木而做的补偿)
+	Further improves jumping ability
+	(This compensates for the original Cobalt jump acceleration sometimes turning into a rolling log)
 	'''
-MythrilEnchant: 减少停止使用物品后秘银条的充能延迟，略微提升秘银条充能速度
-OrichalcumEnchant: 强化后的减益伤害提升增加至300%，[c/FF0000:但你受到的减益伤害也会增加20%]
-PalladiumEnchant: 钯金治疗将强化[c/FF8000:快速治疗]增益，提供5点防御和部分减益伤害的减免
+MythrilEnchant: Reduces the Mythril bar recharge delay after stopping item use and slightly increases its recharge speed
+OrichalcumEnchant: Enhanced debuff damage bonus increased to 300%, [c/FF0000:but debuff damage taken also increases by 20%]
+PalladiumEnchant: Palladium healing empowers the [c/FF8000:Rapid Healing] buff, providing 5 defense and some debuff damage reduction
 TitaniumEnchant:
 	'''
-	击中敌人时积攒钛金充能，充能完成后生成数个钛金碎片光环
-	强化时伤害提升，钛金碎片光环层数增加
+	Builds Titanium charge when hitting enemies; when fully charged, creates several Titanium Shard Auras
+	Enhanced versions deal more damage and create more aura layers
 	'''
-BeeEnchant: 强化其作为翅膀的能力
-BeetleEnchant: 无
-CactusEnchant: 仙人掌尖刺增强，被仙人掌尖刺击中的敌怪一段时间或死亡后随机掉落红心或魔力星
-PumpkinEnchant: 提供一些药水和增益站效果，背包中即可生效
-SpiderEnchant: 无
-TurtleEnchant: 无
-ChlorophyteEnchant: 获得丛林魔石强化能力
+BeeEnchant: Improves its function as wings
+BeetleEnchant: None
+CactusEnchant: Cactus spikes are enhanced; enemies hit by them may randomly drop hearts or mana stars after a time or on death
+PumpkinEnchant: Provides some potion and buff station effects; works from the inventory
+SpiderEnchant: None
+TurtleEnchant: None
+ChlorophyteEnchant: Gains the Jungle enchantment's enhancement ability
 CrimsonEnchant:
 	'''
-	再次受击时会刷新[c/C8364B:猩红治愈]而不是仅仅只是清除
-	猩红治愈期间额外增加伤害加成和伤害减免，效果正比于该状态的持续时间
-	"[c/FF0000:猩红治愈单次治疗量不会超过100]"
+	Being hit again refreshes [c/C8364B:Crimson Vitality] instead of merely clearing it
+	During Crimson Vitality, additionally increases damage and damage reduction in proportion to the buff's duration
+	"[c/FF0000:Crimson Vitality cannot heal more than 100 per instance]"
 	'''
-FrostEnchant: 发射的弹幕会不断坠落雪花，攻击造成霜冻减益
-JungleEnchant: 增强丛林系列物品，增强的物品会被特殊标记
-MoltenEnchant: 受到伤害时会产生爆炸，对自己造成大量击退且无视击退免疫
-RainEnchant: 羽落效果不再依赖伞
-ShroomiteEnchant: 弹幕穿透次数增加，但伤害降低
+FrostEnchant: Fired projectiles continuously drop snowflakes; attacks inflict Frostburn
+JungleEnchant: Enhances Jungle items; enhanced items are specially marked
+MoltenEnchant: Taking damage creates an explosion that heavily knocks you back, ignoring knockback immunity
+RainEnchant: The Featherfall effect no longer depends on an umbrella
+ShroomiteEnchant: Projectiles gain more penetration but deal reduced damage
 SnowEnchant:
 	'''
-	产生一个伤害性缓时领域，附带冰特攻属性
-	为你生成一个雪色尾迹，伤害尾迹上的敌人
+	Creates a damaging time-slowing field with an ice special attack property
+	Creates a snowy trail that damages enemies on it
 	'''
-AncientShadowEnchant: 无
-ApprenticeEnchant: 获得暗黑艺术家魔石的效果，强化时爆炸烈焰召唤物增强
-CrystalAssassinEnchant: 提升冲刺速度，减少冲刺冷却，强化时冷却进一步减少
-DarkArtistEnchant: 获得闪电光环召唤物，强化时增强
-HuntressEnchant: 无
-MonkEnchant: 冲刺期间若伤害到敌怪，则减少部分冲刺冷却
-NecroEnchant: 无
-NinjaEnchant: 大幅提升攻速和盔甲穿透，但是伤害减少，强化时该效果增强
-RedRidingEnchant: 无
-ShadowEnchant: 无
-ShinobiEnchant: 无
-SpookyEnchant: 无
-AncientHallowEnchant: 神圣之剑的操控不再受范围限制
-ForbiddenEnchant: 无
-FossilEnchant: 无
+AncientShadowEnchant: None
+ApprenticeEnchant: Gains the Dark Artist enchantment's effects; enhanced versions improve Explosive Flame minions
+CrystalAssassinEnchant: Increases dash speed and reduces dash cooldown; enhanced versions reduce it further
+DarkArtistEnchant: Gains a Lightning Ring minion; enhanced versions improve it
+HuntressEnchant: None
+MonkEnchant: Damaging an enemy during a dash reduces part of the dash cooldown
+NecroEnchant: None
+NinjaEnchant: Greatly increases attack speed and armor penetration but reduces damage; enhanced versions improve this effect
+RedRidingEnchant: None
+ShadowEnchant: None
+ShinobiEnchant: None
+SpookyEnchant: None
+AncientHallowEnchant: The Holy Sword's control is no longer range-limited
+ForbiddenEnchant: None
+FossilEnchant: None
 HallowEnchant:
 	'''
-	使用治疗物品时为自身施加[c/FFF230:圣灼]，该效果能让你免疫药水疾病，但是会全方位消减你的生存能力
-	期间再次使用治疗物品会增加效果的持续时间和强度，最高10层，同时你的攻击也将附带[c/FFF230:圣灼]
+	Using a healing item inflicts [c/FFF230:Holy Flame] on you. This grants immunity to Potion Sickness but severely reduces your survivability in every way
+	Using another healing item during this effect increases its duration and strength, up to 10 stacks; your attacks also inflict [c/FFF230:Holy Flame]
 	'''
-SpectreEnchant: 攻击时能生成幽魂弹幕，能伤害敌人或治疗你
-TikiEnchant: 鞭子长度获得最小值，强化时该最小值提升
-CopperEnchant: 闪电能攻击到的单位数量+1
-IronEnchant: 铁减伤期间额外增伤
-LeadEnchant: "[c/FF0000:减益减伤效果降低10%]"
-ObsidianEnchant: 爆炸的伤害提高
-PlatinumEnchant: 无
-SilverEnchant: 格挡时的减速效果大幅减少
-TinEnchant: 无
-TungstenEnchant: 大小增幅提升至75%，强化时该效果提升至150%
-AshWoodEnchant: 无
-BorealWoodEnchant: 提高雪球的伤害，雪球击中敌人时减少部分该技能冷却
-EbonwoodEnchant: 乌木光环能将你受到的减益施加给敌人
-PalmWoodEnchant: 略微降低棕榈木召唤物的伤害，其最大数量和你的最大哨兵数量相同
+SpectreEnchant: Attacks can create Spectre projectiles that damage enemies or heal you
+TikiEnchant: Whips gain a minimum length; enhanced versions increase this minimum
+CopperEnchant: Lightning can hit one additional unit
+IronEnchant: Deals extra damage while Iron damage reduction is active
+LeadEnchant: "[c/FF0000:Debuff damage reduction is reduced by 10%]"
+ObsidianEnchant: Increases explosion damage
+PlatinumEnchant: None
+SilverEnchant: Greatly reduces the slowing effect while blocking
+TinEnchant: None
+TungstenEnchant: Size increase raised to 75%; enhanced versions raise it to 150%
+AshWoodEnchant: None
+BorealWoodEnchant: Increases snowball damage; snowballs hitting enemies reduce part of this skill's cooldown
+EbonwoodEnchant: The Ebonwood Aura inflicts your debuffs on enemies
+PalmWoodEnchant: Slightly reduces Palm Wood minion damage; its maximum count equals your maximum sentry count
 PearlwoodEnchant:
 	'''
-	基础伤害浮动也会获得额外计算次数
-	(也就是说，如果想让该效果生效，请确保伤害浮动已开启)
+	Base damage variance also receives additional calculation rolls
+	(For this effect to work, make sure damage variance is enabled)
 	'''
-RichMahoganyEnchant: 无
-ShadewoodEnchant: 血液基础伤害提升，冷却减少，造成伤害的频率提升
-WoodEnchant: 无
-GladiatorEnchant: 无
-GoldEnchant: 无
-SquireEnchant: 无
-ValhallaKnightEnchant: 无
+RichMahoganyEnchant: None
+ShadewoodEnchant: Increases Blood base damage, reduces cooldown, and increases damage frequency
+WoodEnchant: None
+GladiatorEnchant: None
+GoldEnchant: None
+SquireEnchant: None
+ValhallaKnightEnchant: None
 CosmoForce:
 	'''
-	不同的月亮获得额外效果：
-	[i:FargowiltasSouls/SolarEnchant]日耀月亮首次造成伤害时产生一道大型日耀喷发
-	[i:FargowiltasSouls/VortexEnchant]星璇月亮首次造成伤害时发射一道星璇激光
-	[i:FargowiltasSouls/NebulaEnchant]星云月亮首次造成伤害时发射一道星云射击
-	[i:FargowiltasSouls/StardustEnchant][i:FargowiltasSouls/MeteorEnchant]星尘月亮首次造成伤害时持续向着目标倾泻流星雨
-	[i:FargowiltasSouls/WizardEnchant]若场上同时存在4个月亮，则对应的额外攻击的总伤提升
-	"群星连珠，命定此刻……"
+	Different moons gain additional effects:
+	[i:FargowiltasSouls/SolarEnchant]Solar Moon creates a large Solar Eruption on its first hit
+	[i:FargowiltasSouls/VortexEnchant]Vortex Moon fires a Vortex laser on its first hit
+	[i:FargowiltasSouls/NebulaEnchant]Nebula Moon fires a Nebula shot on its first hit
+	[i:FargowiltasSouls/StardustEnchant][i:FargowiltasSouls/MeteorEnchant]Stardust Moon continuously rains meteors toward the target on its first hit
+	[i:FargowiltasSouls/WizardEnchant]If four moons are present, the total damage of their additional attacks increases
+	"Stars align; this moment was fated..."
 	'''
 EarthForce:
 	'''
-	[i:FargowiltasSouls/AdamantiteEnchant]部分弹幕能分裂，盔甲穿透提升，但是伤害降低
-	[i:FargowiltasSouls/CobaltEnchant]进一步提升跳跃能力
-	[i:FargowiltasSouls/MythrilEnchant]减少停止使用物品后秘银条的充能延迟，略微提升秘银条充能速度
-	[i:FargowiltasSouls/OrichalcumEnchant]减益伤害提升增加至300%
-	[i:FargowiltasSouls/PalladiumEnchant]钯金治疗将强化[c/FF8000:快速治疗]增益，提供5点防御和部分减益伤害的减免
-	[i:FargowiltasSouls/TitaniumEnchant]击中敌人时积攒钛金充能，充能完成后生成数个钛金碎片光环
-	"星球之核，隆隆作响……"
+	[i:FargowiltasSouls/AdamantiteEnchant]Some projectiles split and gain armor penetration, but deal reduced damage
+	[i:FargowiltasSouls/CobaltEnchant]Further improves jumping ability
+	[i:FargowiltasSouls/MythrilEnchant]Reduces Mythril bar recharge delay and slightly increases recharge speed
+	[i:FargowiltasSouls/OrichalcumEnchant]Debuff damage bonus increased to 300%
+	[i:FargowiltasSouls/PalladiumEnchant]Palladium healing empowers [c/FF8000:Rapid Healing], providing 5 defense and some debuff damage reduction
+	[i:FargowiltasSouls/TitaniumEnchant]Builds Titanium charge on hit; when full, creates several Titanium Shard Auras
+	"The planet's core rumbles..."
 	'''
 LifeForce:
 	'''
-	[i:FargowiltasSouls/CactusEnchant]获得仙人掌魔石的效果
-	[i:FargowiltasSouls/SpiderEnchant]你的召唤物能造成暴击
-	[i:FargowiltasSouls/BeetleEnchant]获得甲虫魔石效果
-	"温温生命，透体而过……"
+	[i:FargowiltasSouls/CactusEnchant]Gains the Cactus enchantment's effects
+	[i:FargowiltasSouls/SpiderEnchant]Your minions can deal critical strikes
+	[i:FargowiltasSouls/BeetleEnchant]Gains the Beetle enchantment's effects
+	"Warm life flows through the body..."
 	'''
 NatureForce:
 	'''
-	[i:FargowiltasSouls/SnowEnchant][i:FargowiltasSouls/FrostEnchant]发射的弹幕产生伤害性尾迹
-	[i:FargowiltasSouls/CrimsonEnchant]受击时获得[c/C8364B:猩红治愈]，期间提升伤害，增加伤害减免
-	[i:FargowiltasSouls/JungleEnchant]强化丛林系列物品
-	[i:FargowiltasSouls/MoltenEnchant]受击时产生爆炸并击退你
-	[i:FargowiltasSouls/ShroomiteEnchant]发射的弹幕穿透次数提升，但是伤害降低
-	"葱茏之风，骤然吹起……"
+	[i:FargowiltasSouls/SnowEnchant][i:FargowiltasSouls/FrostEnchant]Fired projectiles create damaging trails
+	[i:FargowiltasSouls/CrimsonEnchant]Gain [c/C8364B:Crimson Vitality] when hit; damage and damage reduction increase during it
+	[i:FargowiltasSouls/JungleEnchant]Enhances Jungle items
+	[i:FargowiltasSouls/MoltenEnchant]Being hit creates an explosion and knocks you back
+	[i:FargowiltasSouls/ShroomiteEnchant]Fired projectiles gain penetration but deal reduced damage
+	"The flourishing wind suddenly rises..."
 	'''
 ShadowForce:
 	'''
-	[i:FargowiltasSouls/AncientShadowEnchant]召唤5个远古暗影球，破坏时生成追踪弹幕
-	[i:FargowiltasSouls/ApprenticeEnchant]副武器使用频率保持在1/3
-	[i:FargowiltasSouls/DarkArtistEnchant]召唤更加强大的烈焰炮台和闪电光环保护你
-	[i:FargowiltasSouls/NinjaEnchant]大幅提升攻速，但是伤害降低
-	"黑夜之暗，愈深愈沉……"
+	[i:FargowiltasSouls/AncientShadowEnchant]Summons 5 Ancient Shadow Orbs that create homing projectiles when destroyed
+	[i:FargowiltasSouls/ApprenticeEnchant]Offhand weapon use frequency is maintained at 1/3
+	[i:FargowiltasSouls/DarkArtistEnchant]Summons stronger Flame Turrets and Lightning Rings to protect you
+	[i:FargowiltasSouls/NinjaEnchant]Greatly increases attack speed but reduces damage
+	"The darkness of night grows deeper and heavier..."
 	'''
 SpiritForce:
 	'''
-	[i:FargowiltasSouls/AncientHallowEnchant]召唤一个可以手操的泰拉棱镜
-	[i:FargowiltasSouls/FossilEnchant]你会以幽魂姿态复活
-	[i:FargowiltasSouls/SpectreEnchant]攻击时能生成幽魂弹幕，能伤害敌人或治疗你
-	[i:FargowiltasSouls/HallowEnchant]使用治疗物品时为自身施加[c/FFF230:圣灼]，最大层数解放为15
-	[i:FargowiltasSouls/TikiEnchant]鞭子长度获得最小值
-	"瞿烁精神，振奋人心……"
+	[i:FargowiltasSouls/AncientHallowEnchant]Summons a manually controlled Terraprisma
+	[i:FargowiltasSouls/FossilEnchant]You revive in a Spectre form
+	[i:FargowiltasSouls/SpectreEnchant]Attacks can create Spectre projectiles that damage enemies or heal you
+	[i:FargowiltasSouls/HallowEnchant]Using healing items inflicts [c/FFF230:Holy Flame] on you; maximum stacks increased to 15
+	[i:FargowiltasSouls/TikiEnchant]Whips gain a minimum length
+	"A brilliant spirit stirs the heart..."
 	'''
 TerraForce:
 	'''
-	[i:FargowiltasSouls/CopperEnchant]泰拉闪电冷却速度加快
-	[i:FargowiltasSouls/IronEnchant]铁减伤期间额外增伤并提升防御
-	[i:FargowiltasSouls/LeadEnchant]受到的减益伤害为原来的50%
-	[i:FargowiltasSouls/SilverEnchant]格挡时的减速效果大幅减少
-	[i:FargowiltasSouls/TungstenEnchant]大小增幅提升至150%
-	"磐石震动，四野颤抖……"
+	[i:FargowiltasSouls/CopperEnchant]Terra Lightning cooldown is faster
+	[i:FargowiltasSouls/IronEnchant]Gain bonus damage and defense while Iron damage reduction is active
+	[i:FargowiltasSouls/LeadEnchant]Debuff damage taken is reduced to 50%
+	[i:FargowiltasSouls/SilverEnchant]Greatly reduces the slowing effect while blocking
+	[i:FargowiltasSouls/TungstenEnchant]Size increase raised to 150%
+	"Bedrock shakes; the four corners tremble..."
 	'''
 TimberForce:
 	'''
-	[i:FargowiltasSouls/BorealWoodEnchant]雪球命中时会减少部分冷却时间
-	[i:FargowiltasSouls/EbonwoodEnchant]乌木光环能将你受到的减益施加给敌人
-	[i:FargowiltasSouls/PearlwoodEnchant]基础伤害浮动也会获得额外计算次数
-	[i:FargowiltasSouls/ShadewoodEnchant]血液基础伤害提升，冷却减少，造成伤害的频率提升
-	"林叶沙沙，环绕四周……"
+	[i:FargowiltasSouls/BorealWoodEnchant]Snowballs reduce part of the cooldown when they hit
+	[i:FargowiltasSouls/EbonwoodEnchant]The Ebonwood Aura inflicts your debuffs on enemies
+	[i:FargowiltasSouls/PearlwoodEnchant]Base damage variance receives additional calculation rolls
+	[i:FargowiltasSouls/ShadewoodEnchant]Increases Blood base damage, reduces cooldown, and increases damage frequency
+	"Leaves rustle all around..."
 	'''
 WillForce:
 	'''
-	[i:FargowiltasSouls/GladiatorEnchant]意志旗帜的速度提升，提供的减伤+15%，额外提供15防御
-	[i:FargowiltasSouls/RedRidingEnchant]向周围的敌怪身旁生成意志投矛，金身时效果更强
-	"金铁呜咽，回荡深渊……"
+	[i:FargowiltasSouls/GladiatorEnchant]Will Banner speed increases, damage reduction provided increases by 15%, and 15 defense is added
+	[i:FargowiltasSouls/RedRidingEnchant]Spawns Will Javelins near surrounding enemies; stronger while invulnerable
+	"Gold and iron wail, echoing through the abyss..."
 	'''
 
 TerrariaSoul: {
-	Base: 继承下位部分额外效果
-	Extra: 那么，去将胜利攥在手中吧。
+	Base: Inherits some additional effects from lower tiers
+	Extra: Then go and seize victory in your hands.
 }

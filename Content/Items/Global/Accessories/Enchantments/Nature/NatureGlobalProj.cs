@@ -23,7 +23,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public int SnowCD = 0;
         //public bool HasSnowTrail = false;
         public bool CanSpawnSnow = false;
-        public static List<int> ignoreProj => [
+        public readonly static List<int> ignoreProj = [
             ModContent.ProjectileType<ShroomiteShroom>(),
             ProjectileID.NorthPoleSnowflake,
             ModContent.ProjectileType<NatureTrailProj>(),
@@ -59,7 +59,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                     projectile.penetrate += HasForce ? 2 : 1;
                 }
             }
-            if (player.HasEffect<FrostSnowEffect>() && source is EntitySource_Parent p && !(p.Entity is Projectile) && projectile.damage != 0 && projectile.friendly && !ignoreProj.Contains(projectile.type))
+            if (player.HasEffect<FrostSnowEffect>() && source is EntitySource_Parent p && p.Entity is not Projectile && projectile.damage != 0 && projectile.friendly && !ignoreProj.Contains(projectile.type))
             {
                 CanSpawnSnow = true;
             }
@@ -80,7 +80,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 }
             }
             int num = player.ownedProjectileCounts[ModContent.ProjectileType<NatureTrailProj>()];
-            if (player.HasEffect<NatureTrailEffect>() && source is EntitySource_Parent s && !(s.Entity is Projectile) && projectile.active && projectile.damage != 0 && projectile.friendly && !ignoreProj.Contains(projectile.type) && num < 80)
+            if (player.HasEffect<NatureTrailEffect>() && source is EntitySource_Parent s && s.Entity is not Projectile && projectile.active && projectile.damage != 0 && projectile.friendly && !ignoreProj.Contains(projectile.type) && num < 80)
             {
                 Projectile.NewProjectile(player.GetSource_FromThis(), projectile.Center, Vector2.Zero, ModContent.ProjectileType<NatureTrailProj>(), 0, 2, Main.myPlayer, projectile.whoAmI);
             }
@@ -92,9 +92,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 //Player player = Main.player[projectile.owner];
                 bool HasForce = Main.LocalPlayer.ForceEffect<FrostSnowEffect>();
                 int TotalSnowCD = 30;
-                float Maxdamage = HasForce ? 60 : 15;
+                float Maxdamage = HasForce ? 54 : 14;
                 Maxdamage = Main.LocalPlayer.HasEffect<NatureEffect>() ? 120 : Maxdamage;
-                float damage = projectile.damage * 0.5f;
+                float damage = projectile.damage * 0.45f;
                 if (damage > Maxdamage) 
                     damage = Maxdamage;
                 damage *= Main.LocalPlayer.ActualClassDamage(DamageClass.Melee);

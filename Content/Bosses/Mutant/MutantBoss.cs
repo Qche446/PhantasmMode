@@ -157,9 +157,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         }
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax = 12600000;
+            npc.lifeMax = 15000000;
             npc.damage = 444 + 44;
-            npc.defense = 255;
+            npc.defense = 255 + 44;
         }
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
@@ -551,7 +551,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     EdgyBossText(npc, RandomObnoxiousQuote());
 
-                    int max = 15;
+                    int max = 9;
                     float speed = 10;
                     int sign = npc.ai[2] % 2 == 0 ? 1 : -1;
                     SpawnSphereRing(npc, max, speed, (int)(0.8 * FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage)), 1f * sign);
@@ -764,7 +764,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (--NPC.ai[1] < 0)
             {
                 if (FargoSoulsUtil.HostCheck)
-                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(9 - 0 * Math.Abs(NPC.ai[2]) / MathHelper.PiOver2, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                {
+                    int p = Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, new Vector2(9 - 0 * Math.Abs(NPC.ai[2]) / MathHelper.PiOver2, 0).RotatedBy(NPC.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    if (NPC.localAI[0] <= 4)
+                    {
+                        Main.projectile[p].hostile = false;
+                    }
+                }
                 NPC.ai[1] = 3;
                 NPC.ai[2] += NPC.ai[3];
                 NPC.ai[2] -= NPC.ai[3] / 60f;
@@ -1111,7 +1117,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
 
-        private void ApproachForNextAttackP2(NPC NPC, Player player)//11挂机
+        private void ApproachForNextAttackP2(NPC NPC, Player player)//11准备虚无射线
         {
             if (!AliveCheck(NPC, player))
                 return;
@@ -1141,16 +1147,20 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2] + MathHelper.Pi), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2]), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    int q = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, new Vector2(8, 0).RotatedBy(npc.ai[2] + MathHelper.Pi), ModContent.ProjectileType<PHMutantMark1>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, MathHelper.Pi / 3);
+                    if (npc.localAI[0] <= 4)
+                    {
+                        Main.projectile[p].hostile = false;
+                        Main.projectile[q].hostile = false;
+                    }
                 }
                 npc.ai[1] = 4;
                 npc.ai[2] += npc.ai[3];
-
+                npc.ai[2] -= npc.ai[3] / 60f;
                 if (npc.localAI[0]++ == 20 || npc.localAI[0] == 40)
                 {
                     npc.netUpdate = true;
-                    npc.ai[2] -= npc.ai[3] / (WorldSavingSystem.MasochistModeReal ? 3 : 2);
 
                     if (npc.localAI[0] == 21 && endTimeVariance > 0.33f //sometimes skip to end
                     || npc.localAI[0] == 41 && endTimeVariance < -0.33f)
@@ -1161,24 +1171,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 else if (npc.localAI[0] >= 60)
                 {
                     ChooseNextAttack(npc);
-                }
-            }
-            int num = 0;
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                if (Main.projectile[i].type == ModContent.ProjectileType<PHMutantMark1>() && Main.projectile[i].active)
-                {
-                    num++;
-                }
-            }
-            if (num <= 6)
-            {
-                for (int i = 0; i < Main.maxProjectiles; i++)
-                {
-                    if (Main.projectile[i].type == ModContent.ProjectileType<PHMutantMark1>() && Main.projectile[i].active)
-                    {
-                        Main.projectile[i].hostile = false;
-                    }
                 }
             }
         }
@@ -4331,7 +4323,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         private bool Phase2Check(NPC NPC)
         {
-            if (NPC.life < NPC.lifeMax * (3f / 4))
+            if (NPC.life < NPC.lifeMax * (4f / 5))
             {
                 if (FargoSoulsUtil.HostCheck)
                 {

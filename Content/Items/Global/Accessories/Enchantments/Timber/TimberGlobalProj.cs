@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
     {
         public override bool InstancePerEntity => true;
         public int PalmTreeTimer = 0;
-        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? NewInstance(target) : null;
+        public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public override void OnSpawn(Projectile proj, IEntitySource source)
         {
             Player player = Main.player[proj.owner];
