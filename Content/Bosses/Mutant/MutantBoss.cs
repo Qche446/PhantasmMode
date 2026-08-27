@@ -157,9 +157,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         }
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax = 15000000;
+            npc.lifeMax = 12000000;
+            if (!Main.getGoodWorld)
+                npc.lifeMax = (int)(npc.lifeMax * 1.1f);
             npc.damage = 444 + 44;
-            npc.defense = 255 + 44;
+            npc.defense = 255;
         }
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
@@ -258,7 +260,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
                 case MuAt.VoidRaysP2: VoidRaysP2(npc); break; //虚无射线//概率由唐飞炸弹置换
 
-                case MuAt.PillarDunk: PillarDunk(npc, player); break;
+                case MuAt.PillarDunk: /*Jormungandr(npc, player)*/PillarDunk(npc, player); break;
 
                 case MuAt.EOCStarSickles: EOCStarSickles(npc, player); break;
 
@@ -1116,7 +1118,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 attackHistory.Enqueue(npc.ai[0]);
             }
         }
-
         private void ApproachForNextAttackP2(NPC NPC, Player player)//11准备虚无射线
         {
             if (!AliveCheck(NPC, player))
@@ -1139,7 +1140,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.ai[3] *= -1;
             }
         }
-
         private void VoidRaysP2(NPC npc)//12P2虚无射线
         {
             npc.velocity = Vector2.Zero;
@@ -1174,7 +1174,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
         }
-
         private void PrepareSpearDashPredictiveP2(NPC NPC, Player player)//13蓝冲准备
         {
             if (NPC.ai[3] == 0)
@@ -1209,7 +1208,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (NPC.Distance(player.Center) < 200)
                 Movement(NPC, NPC.Center + NPC.DirectionFrom(player.Center), 1.4f);
         }
-
         private void SpearDashPredictiveP2(NPC NPC, Player player)//14蓝冲
         {
             if (NPC.localAI[1] == 0) //max number of attacks
@@ -1293,7 +1291,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.localAI[0] = 0;
             }
         }
-
         private void WhileDashingP2(NPC NPC, Player player)
         {
             NPC.direction = NPC.spriteDirection = Math.Sign(NPC.velocity.X);
@@ -1310,7 +1307,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.velocity = NPC.SafeDirectionTo(player.Center) * 16f;
             }
         }//冲刺中
-
         private void BoundaryBulletHellP2(NPC NPC, Player player)
         {
             NPC.velocity = Vector2.Zero;
@@ -1362,7 +1358,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }//17波粒
-
         private void PillarDunk(NPC NPC, Player player)//19天界柱投掷
         {
             if (!AliveCheck(NPC, player))
@@ -1382,18 +1377,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     Clone(-1, 1, pillarAttackDelay * 4);
                     Clone(1, -1, pillarAttackDelay * 2);
                     Clone(1, 1, pillarAttackDelay * 3);
-                    if (WorldSavingSystem.MasochistModeReal)
+                    Clone(1, -1, pillarAttackDelay * 6);
+                    Clone(1, 1, pillarAttackDelay * 7);
+                    Clone(-1, 1, pillarAttackDelay * 8);
+                    if (Main.getGoodWorld)
                     {
-                        Clone(1, -1, pillarAttackDelay * 6);
-
-                        if (Main.getGoodWorld)
-                        {
-                            Clone(1, 1, pillarAttackDelay * 7);
-                            Clone(-1, 1, pillarAttackDelay * 8);
-                            Clone(1, -1, pillarAttackDelay * 10);
-                            Clone(1, 1, pillarAttackDelay * 11);
-                            Clone(-1, 1, pillarAttackDelay * 12);
-                        }
+                        Clone(1, -1, pillarAttackDelay * 10);
+                        Clone(1, 1, pillarAttackDelay * 11);
+                        Clone(-1, 1, pillarAttackDelay * 12);
                     }
 
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), player.Center, new Vector2(0, -4), ModContent.ProjectileType<BrainofConfusion>(), 0, 0, Main.myPlayer);
@@ -1483,7 +1474,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
         }
-
         private void EOCStarSickles(NPC NPC, Player player)//20克苏鲁星镰
         {
             if (!AliveCheck(NPC, player))
@@ -1566,7 +1556,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 break;
             }*/
         }
-
         private void PrepareSpearDashDirectP2(NPC NPC, Player player)//21青冲预备
         {
             if (NPC.ai[3] == 0)
@@ -1601,7 +1590,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (NPC.Distance(player.Center) < 200)
                 Movement(NPC, NPC.Center + NPC.DirectionFrom(player.Center), 1.4f);
         }
-
         private void SpearDashDirectP2(NPC NPC, Player player)//22青冲
         {
             NPC.velocity *= 0.9f;
@@ -1640,7 +1628,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(NPC, GFBQuote(15));
             }
         }
-
         private void SpawnDestroyersForPredictiveThrow(NPC NPC, Player player)//24蠕虫预判投矛准备
         {
             if (!AliveCheck(NPC, player))
@@ -1729,7 +1716,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
         }
-
         private void SpearTossPredictiveP2(NPC NPC, Player player)//25蠕虫预判投矛
         {
             if (!AliveCheck(NPC, player))
@@ -1769,7 +1755,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearAim>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, 2);
             }
         }
-
         private void PrepareMechRayFan(NPC NPC, Player player)//26准备机械光扇
         {
             if (NPC.ai[1] == 0)
@@ -1823,7 +1808,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 //NPC.TargetClosest();
             }
         }
-
         private void MechRayFan(NPC NPC, Player player)//27机械光扇
         {
             NPC.velocity = Vector2.Zero;
@@ -1935,7 +1919,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.netUpdate = true;
             }
         }
-
         private void PrepareFishron1(NPC NPC, Player player)//29准备猪鲨夹击
         {
             if (!AliveCheck(NPC, player))
@@ -1956,7 +1939,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(NPC, GFBQuote(18));
             }
         }
-
         private void SpawnFishrons(NPC NPC)//30生成猪鲨夹击
         {
             NPC.velocity *= 0.97f;
@@ -2046,7 +2028,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-
         private void PrepareTrueEyeDiveP2(NPC NPC, Player player)//31准备真眼俯冲
         {
             if (!AliveCheck(NPC, player))
@@ -2068,7 +2049,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.netUpdate = true;
             }
         }
-
         private void PrepareNuke(NPC NPC, Player player)//33准备核弹
         {
             if (!AliveCheck(NPC, player))
@@ -2106,7 +2086,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 //NPC.TargetClosest();
             }
         }
-
         private void Nuke(NPC NPC, Player player)//34核弹
         {
             if (!AliveCheck(NPC, player))
@@ -2180,7 +2159,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 */
             }
         }
-
         private void PrepareSlimeRain(NPC NPC, Player player)//35准备史莱姆雨
         {
             if (!AliveCheck(NPC, player))
@@ -2202,7 +2180,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(NPC, GFBQuote(20));
             }
         }
-
         private void SlimeRain(NPC NPC, Player player)//36史莱姆雨
         {
             if (NPC.ai[3] == 0)
@@ -2346,7 +2323,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-
         private void QueenSlimeRain(NPC NPC, Player player)//48皇后史莱姆雨
         {
             if (NPC.ai[3] == 0)
@@ -2464,7 +2440,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-
         private void PrepareFishron2(NPC NPC, Player player)//37准备猪鲨2
         {
             if (!AliveCheck(NPC, player))
@@ -2487,7 +2462,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(NPC, GFBQuote(18));
             }
         }
-
         private void PrepareOkuuSpheresP2(NPC NPC, Player player)//39阿空圆环准备
         {
             if (!AliveCheck(NPC, player))
@@ -2506,7 +2480,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 NPC.ai[3] = 0;
             }
         }
-
         private void OkuuSpheresP2(NPC NPC)//30阿空圆环
         {
             NPC.velocity = Vector2.Zero;
@@ -2554,7 +2527,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Main.dust[d].velocity *= 4f;
             }
         }
-
         private void SpawnSpearTossDirectP2Attack(NPC NPC, Player player)//生成投矛辅助方法
         {
             if (FargoSoulsUtil.HostCheck)
@@ -2569,7 +2541,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
             EdgyBossText(NPC, RandomObnoxiousQuote());
         }
-
         private void SpearTossDirectP2(NPC NPC, Player player)//41环绕投矛
         {
             if (!AliveCheck(NPC, player))
@@ -2637,7 +2608,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearAim>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, -1);
             }
         }
-
         private void PrepareTwinRangsAndCrystals(NPC NPC, Player player)//42准备双子水晶
         {
             if (!AliveCheck(NPC, player))
@@ -2658,7 +2628,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 EdgyBossText(NPC, GFBQuote(23));
             }
         }
-
         private void TwinRangsAndCrystals(NPC NPC, Player player)//43双子水晶
         {
             NPC.velocity = Vector2.Zero;
@@ -2731,7 +2700,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-
         private void EmpressSwordWave(NPC NPC, Player player)//44女皇剑阵
         {
             if (!AliveCheck(NPC, player))
@@ -2883,9 +2851,10 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-
         private void SANSGOLEM(NPC NPC, Player player)//49鳝丝石巨人
         {
+            if (!AliveCheck(NPC, player))
+                return;
             Vector2 targetPos = player.Center + NPC.DirectionFrom(player.Center) * 300;
             Movement(NPC, targetPos, 0.3f);
 
@@ -2917,7 +2886,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 for (int i = -1; i <= 1; i += 2)//水平
                 {
                     float SpeedWhenAttacking = Main.rand.NextFloat(10f, 20f);
-                    int safegas = WorldSavingSystem.masochistModeReal ? 120 : 150;
+                    int safegas = 120;
                     for (int j = -1; j <= 1; j += 2)
                     {
                         Vector2 sansTargetPos = centerPoint;
@@ -2935,7 +2904,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 for (int i = -1; i <= 1; i += 2)//垂直
                 {
                     float SpeedWhenAttacking = Main.rand.NextFloat(10f, 20f);
-                    int safegas = WorldSavingSystem.masochistModeReal ? 120 : 150;
+                    int safegas = 120;
                     for (int j = -1; j <= 1; j += 2)
                     {
                         Vector2 sansTargetPos = centerPoint;
@@ -2963,117 +2932,10 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 ChooseNextAttack(NPC);
             }
         }
-        /*
-        private void WoFUpAndDown(NPC npc, Player player)//50血肉墙
-        {
-            Vector2 centerPoint = FargoSoulsUtil.ProjectileExists(ritualProj, ModContent.ProjectileType<PHMutantRitual>()) == null ? player.Center : Main.projectile[ritualProj].Center;
-            Vector2 targetPos = centerPoint - 1200 * Vector2.UnitY;
-            int starttime = WorldSavingSystem.MasochistModeReal ? 30 : 50;
-            Movement(npc, targetPos, 0.3f);
-
-            int attackDelay = 2 * 180;
-            int timer = (int)npc.ai[1] - starttime;
-            
-            if (npc.ai[1] == starttime / 2)
-            {
-                for (int i = 500; i <= 1100; i += 190)
-                {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), centerPoint + i * Vector2.UnitX, Vector2.Zero, ModContent.ProjectileType<MutantWOFReticle>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f / 6), 0, Main.myPlayer, ai1 : 0);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), centerPoint - i * Vector2.UnitX, Vector2.Zero, ModContent.ProjectileType<MutantWOFReticle>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f / 6), 0, Main.myPlayer, ai1 : 0);
-                }
-                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantPungentAuraProj>(), 0, 0, Main.myPlayer);
-            }
-            if (timer <= 3 * attackDelay && timer >= 0)
-            {
-                if (timer % attackDelay < attackDelay / 2)//诅咒
-                {
-                    if (timer % attackDelay == 0)
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.UnitX, ModContent.ProjectileType<MutantCursedDeathray>(), 0, 0, Main.myPlayer, npc.whoAmI);
-                }//诅咒火
-                if (timer % attackDelay >= attackDelay / 2)//灵液
-                {
-                    if (timer % 8 == 0)
-                    {
-                        if (FargoSoulsUtil.HostCheck)
-                        {
-                            int max = WorldSavingSystem.MasochistModeReal ? 16 : 12;
-                            int flip = 1;
-                            for (int i = 0; i < max; i++)
-                            {
-                                flip *= -1;
-                                Vector2 target = npc.Center;
-                                target.Y += 1200f * (timer % (attackDelay / 2)) / 180f;
-                                target.Y += Main.rand.NextFloat(-100, 100);
-                                target.X += Main.rand.NextFloat(-450, 450);
-
-                                const float gravity = 0.5f;
-                                float time = 60f;
-                                Vector2 distance = target - npc.Center;
-                                distance.Y /= time;
-                                distance.X = distance.X / time - 0.5f * gravity * time;
-                                distance.X *= flip;
-
-                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + Vector2.UnitY * 8f, distance,
-                                    ModContent.ProjectileType<MutantGoldenShower>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.75f), 0f, Main.myPlayer, time, 2f, flip);
-                            }
-                        }
-                    }
-                }//灵液
-                /*
-                if (timer % 60 == 0 && timer > 0)
-                {
-                    for (int i = -1; i <= 1; i++)
-                    {
-                        float distance = 800;
-                        Vector2 vel = i * distance * Vector2.UnitX / 30;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MutantCrystalBomb>(),
-                                    FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer);
-                    }
-                }
-                */
-        /*
-                if (timer > 30)
-                {
-                    if (timer % 3 == 0)
-                    {
-                        foreach (Player n in Main.player.Where(n => n.active))
-                        {
-                            PungentGazeBuffPlayer pgp = player.GetModPlayer<PungentGazeBuffPlayer>();
-                            if (pgp.aimedCD >= 90)
-                            {
-                                pgp.aimedCD = 45;
-                                Vector2 vel = npc.SafeDirectionTo(player.Center);
-                                if (!pgp.Gazed)
-                                {
-                                    vel = vel.RotatedBy(Main.rand.NextFloat(MathHelper.Pi / 3, MathHelper.PiOver2) * (Main.rand.NextBool() ? 1 : -1));
-                                    pgp.aimedCD = 0;
-                                }
-                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MutantPhantasmalDeathrayWOFS>(),
-                                    0, 0f, Main.myPlayer, ai1: npc.whoAmI); 
-                            }
-                        }
-                    }
-                }//检测剑客蛛丝
-                if (timer % attackDelay == 0)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        //Projectile.NewProjectile(npc.GetSource_FromThis(), player.Center + 50 * Vector2.UnitX.RotatedBy(Main.rand.NextFloat(0,MathHelper.TwoPi)), Vector2.Zero, ModContent.ProjectileType<MutantWOFReticle>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f / 6), 0, Main.myPlayer, ai1: 90);
-                    }
-                    
-                }
-            }
-            
-            if (timer > 3 * attackDelay + 40)
-            {
-                npc.ai[1] = 0;
-                ChooseNextAttack(npc, 13, 19, 20, 21, 24, 28, 31, 33, 35, 41, 44);
-            } 
-            npc.ai[1]++;
-        }
-        */
         private void IronVirgin(NPC npc, Player player)//50肉山+世纪花
         {
+            if (!AliveCheck(npc, player))
+                return;
             Vector2 centerPoint = FargoSoulsUtil.ProjectileExists(ritualProj, ModContent.ProjectileType<PHMutantRitual>()) == null ? player.Center : Main.projectile[ritualProj].Center;
             if (npc.localAI[0] == 0)
             {
@@ -3136,8 +2998,8 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 int timer = (int)npc.ai[1] - starttime;
                 int delay = 120;
-                int offset = WorldSavingSystem.masochistModeReal ? Main.getGoodWorld ? 250 : 350 : 450;//maybe = 200
-                int maxX = WorldSavingSystem.masochistModeReal && Main.getGoodWorld ? 2 : 1;
+                int offset = Main.getGoodWorld ? 250 : 350;
+                int maxX = Main.getGoodWorld ? 2 : 1;
                 
                 if (timer % delay == 0)
                 {
@@ -3201,6 +3063,8 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         } 
         private void LieFlightBomb(NPC npc, Player player)//或与12.唐飞炸弹（hyw
         {
+            if (!AliveCheck(npc, player))
+                return;
             npc.velocity = Vector2.Zero;
             int StartTime = WorldSavingSystem.MasochistModeReal ? 60 : WorldSavingSystem.EternityMode ? 75 : 85;
             if (npc.ai[1] == 0)
@@ -3269,6 +3133,46 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 npc.netUpdate = true;
             }
         }
+        private void Jormungandr(NPC npc, Player player)
+        {
+            if (!AliveCheck(npc, player))
+                return;
+            int AllTime = 180 + 10 * 60;
+            if (Main.zenithWorld && npc.ai[1] > 180)
+                player.confused = true;
+            Vector2 targetPos = player.Center;
+            targetPos.X += npc.Center.X < player.Center.X ? -700 : 700;
+            targetPos.Y += npc.ai[1] < 240 ? 400 : 150;
+            if (npc.Distance(targetPos) > 50)
+                Movement(npc, targetPos, 1f);
+            if (npc.ai[1] == 0 && FargoSoulsUtil.HostCheck)
+            {
+                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantDestroyerGun>(), 0, 0, Main.myPlayer, npc.whoAmI, 180, 0);
+                npc.netUpdate = true;
+            }
+            if (npc.ai[1] == 180 && FargoSoulsUtil.HostCheck)
+            {
+                ScreenShakeSystem.StartShake(5);
+                SoundEngine.PlaySound(SoundID.NPCDeath13, npc.Center);
+                Vector2 vel = npc.DirectionFrom(player.Center) * 40f;
+                int current = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<JormungandrHead>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, 
+                    player.whoAmI, 60 * 10, 0);
+                int max = Main.rand.Next(254, 260);
+                for (int i = 0; i < max; i++)
+                    current = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<JormungandrBody>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, 
+                        Main.projectile[current].identity);
+                int previous = current;
+                current = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<JormungandrTail>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, Main.projectile[current].identity);
+                Main.projectile[previous].localAI[1] = Main.projectile[current].identity;
+                Main.projectile[previous].netUpdate = true;
+                npc.netUpdate = true;
+            }
+            if (++npc.ai[1] > AllTime)
+            {
+                ChooseNextAttack(npc);
+                npc.netUpdate = true;
+            }
+        }
         /*
         private void WillAttack(NPC npc, Player player)
         {
@@ -3320,7 +3224,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             float speed = 18f;
             float displacementAmplitude = 2 * speed * (MathHelper.PiOver2 * 0.7f) * 50f / MathHelper.TwoPi;
 
-            float difficultyMultiplier = WorldSavingSystem.masochistModeReal ? Main.getGoodWorld ? Main.zenithWorld ? 1f : 1f : 2f : 2f;
+            float difficultyMultiplier = Main.getGoodWorld ? 1f : 2f;
 
             float spacing = difficultyMultiplier * displacementAmplitude; // 间隔 = 位移振幅 × 2
             void SpawnCoffinWave(Vector2 spawnCenter, int flag, float Minister)
@@ -3784,7 +3688,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     ManagedScreenFilter filter = ShaderManager.GetFilter("FargowiltasSouls.FinalSpark");
                     filter.Activate();
-                    if (SoulConfig.Instance.ForcedFilters && Main.WaveQuality == 0)
+                    if (Main.WaveQuality == 0)
                         Main.WaveQuality = 1;
                 }
 

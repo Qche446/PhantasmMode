@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+ï»¿using FargowiltasSouls;
 using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Core.Systems;
@@ -56,18 +56,18 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
         private void CheckPlayerDistanceAndSpawnPortal()
         {
-            // Èç¹ûÒÑ¾­Éú³É¹ýÃÅ»§£¬ÔòÌø¹ý
+            // ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½Å»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (hasSpawnedPortal || Projectile.ai[1] >= 0)
                 return;
 
-            // ²éÕÒ×î½üµÄÍæ¼Ò
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Player nearestPlayer = null;
             float nearestDistance = float.MaxValue;
 
             for (int i = 0; i < Main.maxPlayers; i++)
             {
                 Player player = Main.player[i];
-                if (player.active && !player.dead && player.Distance(Projectile.Center) < 1500f) // ÏÈ¼ì²é´ó·¶Î§
+                if (player.active && !player.dead && player.Distance(Projectile.Center) < 1500f) // ï¿½È¼ï¿½ï¿½ï¿½Î§
                 {
                     float distance = Vector2.Distance(Projectile.Center, player.Center);
                     if (distance < nearestDistance)
@@ -78,27 +78,27 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 }
             }
 
-            // Èç¹ûÕÒµ½Íæ¼ÒÇÒ¾àÀëÐ¡ÓÚ150
+            // ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½Ò¾ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½150
             if (nearestPlayer != null && nearestDistance < 150f)
             {
-                // ³¢ÊÔ»ñÈ¡ShadowflamePortalµÄµ¯Ä»ÀàÐÍ
+                // ï¿½ï¿½ï¿½Ô»ï¿½È¡ShadowflamePortalï¿½Äµï¿½Ä»ï¿½ï¿½ï¿½ï¿½
                 int portalType = ModContent.ProjectileType<Projectiles.Masomode.ShadowflamePortal>();
 
                 if (portalType > 0)
                 {
-                    // Ö»ÔÚÖ÷»úÉú³É
+                    // Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     if (FargoSoulsUtil.HostCheck)
                     {
                         for (int i = 0;i < 3; i++)
                         {
                             Vector2 direct = Vector2.UnitX.RotatedBy((i * 2 / 3 - 1 / 6) * MathHelper.Pi);
-                            // Éú³ÉShadowflamePortal
+                            // ï¿½ï¿½ï¿½ï¿½ShadowflamePortal
                             Projectile.NewProjectile(
                                 Projectile.GetSource_FromThis(),
                                 Projectile.Center+150*direct,
-                                Vector2.Zero, // ÃÅ»§²»ÒÆ¶¯
+                                Vector2.Zero, // ï¿½Å»ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
                                 portalType,
-                                Projectile.damage / 2, // ¼õÉÙÉËº¦
+                                Projectile.damage / 2, // ï¿½ï¿½ï¿½ï¿½ï¿½Ëºï¿½
                                 Projectile.knockBack,
                                 Projectile.owner
                             );
@@ -106,7 +106,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     }
                 }
                 
-                // ±ê¼ÇÒÑÉú³ÉÃÅ»§
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½
                 hasSpawnedPortal = true;
 
             }
@@ -152,7 +152,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         }
         private void EnhancedDeathEffect()
         {
-            // ´´½¨±¬Õ¨Á£×Ó»·
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¨ï¿½ï¿½ï¿½Ó»ï¿½
             for (int i = 0; i < 36; i++)
             {
                 float angle = MathHelper.TwoPi * i / 36f;
@@ -164,7 +164,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Main.dust[d].scale = Main.rand.NextFloat(2f, 3f);
             }
 
-            // Ìí¼Ó×ÏÉ«Ë®¾§Á£×Ó
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«Ë®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (int i = 0; i < 20; i++)
             {
                 Vector2 velocity = Main.rand.NextVector2Circular(6f, 6f);

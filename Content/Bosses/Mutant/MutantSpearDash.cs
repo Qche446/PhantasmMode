@@ -13,27 +13,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantSpearDash : MutantSpearDash, IProjOwnedByBoss<MutantBoss>
     {
+        private float scaletimer;
         public override void AI()
         {
             if (base.Projectile.localAI[1] == 0f)
             {
                 base.Projectile.localAI[1] = 1f;
-                if (!WorldSavingSystem.masochistModeReal)
-                {
-                    if (base.Projectile.ai[1] != -2f)
-                    {
-                        SoundEngine.PlaySound(in FargosSoundRegistry.PenetratorThrow, base.Projectile.Center);
-                    }
-
-                    if (base.Projectile.ai[1] == -2f)
-                    {
-                        SoundEngine.PlaySound(in FargosSoundRegistry.PenetratorExplosion, base.Projectile.Center);
-                    }
-                }
-                else
-                {
-                    SoundEngine.PlaySound(in FargosSoundRegistry.PenetratorExplosion, base.Projectile.Center);
-                }
+                SoundEngine.PlaySound(in FargosSoundRegistry.PenetratorExplosion, base.Projectile.Center);
             }
 
             NPC nPC = Main.npc[(int)base.Projectile.ai[0]];

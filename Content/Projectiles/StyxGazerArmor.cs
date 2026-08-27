@@ -27,11 +27,6 @@ namespace FargosPhantasmMode.Content.Projectiles
             if (Main.player[Projectile.owner].reuseDelay < 17)
                 Main.player[Projectile.owner].reuseDelay = 17;
         }
-        public override bool PreDraw(ref Color lightColor)
-        {
-            DrawStyxGazerDeathray(Projectile, drawDistance, _ => Projectile.width * base.Projectile.scale * 1.25f);
-            return false;
-        }
         public static void DrawStyxGazerDeathray(Projectile projectile, float drawDistance, PrimitiveSettings.VertexWidthFunction widthFunction, bool drawHandle = true, bool fadeStart = false)
         {
             if (projectile.velocity == Vector2.Zero)
@@ -63,7 +58,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             Color color = AbomSword.midColor;
             shader.TrySetParameter("mainColor", color);
             shader.TrySetParameter("fadeStart", fadeStart);
-            Texture2D value4 = FargosTextureRegistry.WillStreak.Value;
+            Texture2D value4 = FargosTextureRegistry.MagmaStreak.Value;
             value4.SetTexture1();
             for (int j = 0; j < 2; j++)
             {

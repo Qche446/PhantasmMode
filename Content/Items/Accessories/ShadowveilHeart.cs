@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Content.InfoDisplays;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
@@ -18,7 +19,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace FargosPhantasmMode.Content.Items
+namespace FargosPhantasmMode.Content.Items.Accessories
 {
     public class ShadowveilHeart : SoulsItem
     {
@@ -39,7 +40,7 @@ namespace FargosPhantasmMode.Content.Items
             Item.width = 36;
             Item.height = 36;
             Item.accessory = true;
-            Item.rare = ItemRarityID.Gray;
+            Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 0, 70, 0);
         }
         public static float GrazeCap => 0.25f;
@@ -53,6 +54,11 @@ namespace FargosPhantasmMode.Content.Items
             {
                 Itemplayer.VeilGraze = true;
             }
+            player.GetModPlayer<InfoModPlayer>().ShowGrazeCount = true;
+        }
+        public override void UpdateInfoAccessory(Player player)
+        {
+            player.GetModPlayer<InfoModPlayer>().ShowGrazeCount = true;
         }
         private void AddGrazeSkill(Player player)
         {
@@ -65,6 +71,7 @@ namespace FargosPhantasmMode.Content.Items
         public override void UpdateVanity(Player player)
         {
             AddGrazeSkill(player);
+            player.GetModPlayer<InfoModPlayer>().ShowGrazeCount = true;
         }
         public static void OnGraze(Player player)
         {
@@ -171,9 +178,7 @@ namespace FargosPhantasmMode.Content.Items
                 VeilGrazeBonus = 0;
             if (VeilGrazeBonus > ShadowveilHeart.GrazeCap)
                 VeilGrazeBonus = ShadowveilHeart.GrazeCap;
-            var fp = Player.FargoSouls();
-            if (fp.DeviGrazeBonus > SparklingAdoration.GrazeCap(fp))
-                fp.DeviGrazeBonus = SparklingAdoration.GrazeCap(fp);
+            //var fp = Player.FargoSouls();
         }
         public override void PostUpdateEquips()
         {

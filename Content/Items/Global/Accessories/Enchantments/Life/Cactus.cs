@@ -64,11 +64,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
                 }
                 else if (Main.netMode == NetmodeID.MultiplayerClient)
                 {
-                    var heart = isHeart ? FargowiltasSouls.FargowiltasSouls.PacketID.RequestPerfumeHeart : FargowiltasSouls.FargowiltasSouls.PacketID.RequestPearlwoodStar;
                     var netMessage = FargosPhantasmMode.FargoMod.GetPacket();
-                    netMessage.Write((byte)heart);
+                    netMessage.Write((byte)global::FargosPhantasmMode.FargosPhantasmMode.PacketID.CactusDrop);
                     netMessage.Write((byte)player.whoAmI);
                     netMessage.Write((byte)npc.whoAmI);
+                    netMessage.Write(isHeart);
                     netMessage.Send();
                 }
             }

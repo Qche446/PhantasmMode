@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;

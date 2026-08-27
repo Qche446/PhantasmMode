@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+ï»¿using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
@@ -126,7 +126,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     {
                         Projectile.NewProjectile(NPC.GetSource_FromThis(), Main.player[NPC.target].Center, Vector2.Zero, ModContent.ProjectileType<AbomReticle>(), 0, 0f, Main.myPlayer);
                     }
-                    Projectile.NewProjectile(//Ìí¼ÓÉÁµç×÷Îª¼¤¹âµÄÌæ´ú
+                    Projectile.NewProjectile(//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                                 NPC.GetSource_FromThis(),
                                 NPC.Center,
                                 NPC.SafeDirectionTo(Main.player[NPC.target].Center),
@@ -139,7 +139,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 if (NPC.ai[1] > 120) //attack and reset
                 {
                     SoundEngine.PlaySound(SoundID.Item12, NPC.Center);
-                    /*È¡Ïû¼¤¹â
+                    /*È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     if (FargoSoulsUtil.HostCheck)
                     {
                         for (int i = 0; i < 5; i++)

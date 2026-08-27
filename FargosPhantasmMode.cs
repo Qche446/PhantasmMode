@@ -1,4 +1,4 @@
-using Terraria;
+ï»¿using Terraria;
 using Microsoft.Xna.Framework;
 using FargosPhantasmMode.Assets.ExtraTextures;
 using FargosPhantasmMode.Content.Render;
@@ -15,10 +15,7 @@ using Terraria.GameContent.Creative;
 using Terraria.ID;
 using static Terraria.GameContent.Creative.CreativePowers;
 using Luminance.Common.Utilities;
-using Terraria.ModLoader.Default.Patreon;
 using FargosPhantasmMode.Core.Systems;
-using System.Collections.Generic;
-using FargosPhantasmMode.Common;
 
 
 namespace FargosPhantasmMode
@@ -46,7 +43,7 @@ namespace FargosPhantasmMode
             GraphicsDevice gd = Main.instance.GraphicsDevice;
             SpriteBatch sb = Main.spriteBatch;
 
-            #region ¡°UIÓîÖæÖ®»ð¡±
+            #region ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½
             gd.SetRenderTarget(Main.screenTargetSwap);
             gd.Clear(Color.Transparent);
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
@@ -72,7 +69,7 @@ namespace FargosPhantasmMode
             sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.BigTentacle");
             gd.Textures[1] = PhantasmTextureRegistry.UniverseNoise.Value;
-            shader.TrySetParameter("color", new Color(54, 255, 236));//102, 26, 179£¨×Ï£©  54£¬255£¬236(Çà)
+            shader.TrySetParameter("color", new Color(54, 255, 236));//102, 26, 179ï¿½ï¿½ï¿½Ï£ï¿½  54ï¿½ï¿½255ï¿½ï¿½236(ï¿½ï¿½)
             shader.TrySetParameter("m", 0.62f);
             shader.TrySetParameter("n", 0.01f);
             shader.Apply();
@@ -85,6 +82,7 @@ namespace FargosPhantasmMode
         internal enum PacketID : byte
         {
             ActivePhamtasmMode,
+            CactusDrop,
         }
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
@@ -93,6 +91,20 @@ namespace FargosPhantasmMode
             {
                 switch ((PacketID)data)
                 {
+                    case PacketID.CactusDrop:
+                        if (Main.netMode == NetmodeID.Server)
+                        {
+                            int playerWhoAmI = reader.ReadByte();
+                            int npcWhoAmI = reader.ReadByte();
+                            bool isHeart = reader.ReadBoolean();
+                            if (playerWhoAmI >= 0 && playerWhoAmI < Main.maxPlayers && npcWhoAmI >= 0 && npcWhoAmI < Main.maxNPCs)
+                            {
+                                NPC npc = Main.npc[npcWhoAmI];
+                                if (npc.active)
+                                    Item.NewItem(Main.player[playerWhoAmI].GetSource_OnHit(npc), npc.Hitbox, isHeart ? ItemID.Heart : ItemID.Star);
+                            }
+                        }
+                        break;
                     case PacketID.ActivePhamtasmMode:
                         {
                             Player player = FargoSoulsUtil.PlayerExists(reader.ReadByte());

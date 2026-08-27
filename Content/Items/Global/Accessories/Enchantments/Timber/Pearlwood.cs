@@ -23,7 +23,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
         {
             if (!PModeChangeApply)
                 return orig.Invoke(ref self, baseDamage, crit, damageVariation, luck);
-            crit = self._critOverride ?? crit;
+            crit = ((bool?)PhanUtil._critOverride.GetValue(self)) ?? crit;
             if (self.SuperArmor)
             {
                 float dmg = 1f;
@@ -31,7 +31,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                 {
                     dmg *= self.CritDamage.Additive * self.CritDamage.Multiplicative;
                 }
-                return Math.Clamp((int)dmg, 1, Math.Min(self._damageLimit, 4));
+                return Math.Clamp((int)dmg, 1, Math.Min((int)PhanUtil._damageLimit.GetValue(self), 4));
             }
             float damage = self.SourceDamage.ApplyTo(baseDamage);
             damage += self.FlatBonusDamage.Value + self.ScalingBonusDamage.Value * damage;
@@ -41,12 +41,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
             {
                 if (PModeChangeApply && Main.LocalPlayer.HasEffect<PearlwoodEffect>())
                 {
-                    int rerolls = Main.LocalPlayer.ForceEffect<PearlwoodEffect>() ? 2 : 1;
+                    int rerolls = Main.LocalPlayer.ForceEffect<PearlwoodEffect>() ? 3 : 1;
                     float bestdamage = Main.DamageVar(damage, variationPercent, luck);
                     for (int i = 0; i < rerolls; i++)
                     {
                         float insda = PhanUtil.ApplyVariance(damage, variationPercent);
                         bestdamage = Math.Max(bestdamage, insda);
+                        //Main.NewText(insda);
                     }
                     damage = bestdamage;
                 }
@@ -59,7 +60,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
             float damageReduction = Math.Max(num - armorPenetration, 0f) * self.DefenseEffectiveness.Value;
             damage = Math.Max(damage - damageReduction, 1f);
             damage = (crit ? self.CritDamage : self.NonCritDamage).ApplyTo(damage);
-            return Math.Clamp((int)self.FinalDamage.ApplyTo(damage), 1, self._damageLimit);
+            return Math.Clamp((int)self.FinalDamage.ApplyTo(damage), 1, (int)PhanUtil._damageLimit.GetValue(self));
         }
     }
 }

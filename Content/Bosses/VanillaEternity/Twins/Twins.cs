@@ -94,7 +94,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         public override void SetDefaults(NPC npc)
         {
             if (!Main.getGoodWorld)
-                npc.lifeMax *= (int)(1.2f * npc.lifeMax);
+                npc.lifeMax = (int)(1.2f * npc.lifeMax);
         }
         public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<Retinazer>().RunEmodeAI = false;
         #endregion
@@ -515,7 +515,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 int timeLeft = (int)(speed / 27 * 90f);
                 float AngOff = MathHelper.Pi / 16f;
                 if (npc.ai[1] >= 150)
-                    AngOff *= MathHelper.SmoothStep(2, 0.5f, (npc.ai[1] - 150f) / 180f);
+                    AngOff *= MathHelper.SmoothStep(2, 1f, (npc.ai[1] - 150f) / 180f);
                 if (timeLeft > 60 && FargoSoulsUtil.HostCheck)
                 {
                     IPTwins pTwins = GetIPTwins(npc);
@@ -837,11 +837,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (npc.ai[1] % 2 == 0 && npc.ai[1] > 30 && FargoSoulsUtil.HostCheck)
             {
                 Vector2 vel = Vector2.Normalize(npc.velocity);
-                for (float i = -0.25f; i <= 0.25f; i += 0.25f)
+                for (float i = -0.75f; i <= 0.25f; i += 0.5f)
                 {
-                    int k = Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(i * MathF.PI), ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), vel.RotatedBy(i * MathF.PI), ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
                         Main.myPlayer, npc.target, ai2: pT.OrbColor);
-                    Main.projectile[k].timeLeft = 180;
                 }
                 Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), 1.5f * npc.SafeDirectionTo(player.Center), ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
                     Main.myPlayer, npc.target, ai2: pT.OrbColor);
@@ -1244,16 +1243,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     npc.ai[2] = 0f;
                 if (npc.ai[1] == 60)
                 {
-                    SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     for (int i = 0; i < 2; i++)
                     {
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), npc.type == NPCID.Retinazer ? 143 : 144);
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), 7);
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), 6);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), npc.type == NPCID.Retinazer ? 143 : 144);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), 7);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.5f, Main.rand.Next(-30, 31) * 0.5f), 6);
                     }
                     for (int i = 0; i < 20; i++)
                         Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    //SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
                 if (npc.ai[1] > 60 && reti != null)
                 {
@@ -1309,10 +1308,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         else
                             Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, NPCID.MoonLordCore);
                     }
-                    SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     for (int i = 0; i < 20; i++)
                         Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
+                    //SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
             }
             npc.rotation += npc.ai[2];
@@ -2954,7 +2953,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         public override void SetDefaults(NPC npc)
         {
             if (!Main.getGoodWorld)
-                npc.lifeMax *= (int)(1.2f * npc.lifeMax);
+                npc.lifeMax = (int)(1.2f * npc.lifeMax);
         }
         public override void OnFirstTick(NPC npc)
         {

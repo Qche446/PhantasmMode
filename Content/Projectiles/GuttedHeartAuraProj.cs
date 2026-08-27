@@ -30,13 +30,14 @@ namespace FargosPhantasmMode.Content.Projectiles
         public override void SetDefaults()
         {
             Projectile.friendly = true;
+            //Projectile.hostile = false;
             Projectile.penetrate = -1;
             Projectile.width = 1;
             Projectile.height = 1;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 5;
+            Projectile.localNPCHitCooldown = 20;
             Projectile.extraUpdates = 2;
             Projectile.damage = 1;
             Timer = 0;

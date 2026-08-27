@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
+using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -21,7 +22,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.HeartMaso
     {
         public override void Load()
         {
-            PhanUtil.AddHooks(ModContent.GetInstance<FargoSoulsPlayer>().RaisedShieldEffects, RottingDistanceEnhance);
+            //PhanUtil.AddHooks(ModContent.GetInstance<FargoSoulsPlayer>().RaisedShieldEffects, RottingDistanceEnhance);
+            MethodInfo method = typeof(FargoSoulsPlayer).GetMethod("RaisedShieldEffects", BindingFlags.NonPublic | BindingFlags.Instance);
+            MonoModHooks.Add(method, RottingDistanceEnhance);
         }
         private static void RottingDistanceEnhance(Action<FargoSoulsPlayer> orig, FargoSoulsPlayer self)
         {

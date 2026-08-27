@@ -254,7 +254,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         public override bool PreDraw(ref Color lightColor) => false;
 
-        public float WidthFunction(float _) => Projectile.width * Projectile.scale * (WorldSavingSystem.masochistModeReal ? 0.7f : 2.2f);
+        public float WidthFunction(float _) => Projectile.width * Projectile.scale * 0.7f;
 
         public static Color ColorFunction(float _)
         {
@@ -288,7 +288,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             shader.TrySetParameter("useFadeIn", true);
             shader.TrySetParameter("realopacity", 1); // do not change this.
 
-            PrimitiveRenderer.RenderTrail(baseDrawPoints, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader), WorldSavingSystem.masochistModeReal ? 15 : 15);
+            PrimitiveRenderer.RenderTrail(baseDrawPoints, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader), 15);
         }
     }
 }

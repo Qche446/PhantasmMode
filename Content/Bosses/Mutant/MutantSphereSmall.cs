@@ -59,16 +59,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     SpecialTimer++;
                     if (SpecialTimer > 5)
                     {
-                        if (Main.getGoodWorld)
-                        {
-                            float vel = 80 * (float)Math.Pow(0.96f, SpecialTimer % 40);
-                            Projectile.velocity = vel * Vector2.UnitX.RotatedBy(Angle);
-                        }
-                        else
-                        {
-                            float vel = 3 * MathHelper.Clamp(SpecialTimer, 0, 50);
-                            Projectile.velocity = vel * Vector2.UnitX.RotatedBy(Angle);
-                        }
+                        float muti = Main.getGoodWorld ? 1 : 0.6f;
+                        float vel = 80 * (float)Math.Pow(0.96f, SpecialTimer % 40) * muti;
+                        Projectile.velocity = vel * Vector2.UnitX.RotatedBy(Angle);
                     }
                 }
                 Projectile.ai[1]++;

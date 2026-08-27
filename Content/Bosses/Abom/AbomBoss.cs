@@ -73,6 +73,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             npc.damage = 180;
             npc.defense = 100;
             npc.lifeMax = 1400000; // 680000
+            if (!Main.getGoodWorld)
+                npc.lifeMax = (int)(npc.lifeMax * 1.2f);
             npc.netAlways = true;
             npc.BossBar = ModContent.GetInstance<AbominationnBossBar>();
             AIState = ThrowScythes;
@@ -81,7 +83,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         public override bool CanHitPlayer(NPC NPC, Player target, ref int CooldownSlot)
         {
             CooldownSlot = 1;
-            return NPC.Distance(FargoSoulsUtil.ClosestPointInHitbox(target, NPC.Center)) < Player.defaultHeight && AIState != ShadowScycle && AIState != Final_ThrowScythes && AIState != ActuallyDead;
+            return NPC.Distance(FargoSoulsUtil.ClosestPointInHitbox(target, NPC.Center)) < Player.defaultHeight && AIState != ShadowScycle && AIState != Final_ThrowScythes && AIState != ActuallyDead && AIState != PreVerticalDive;
 
         }
         public override void OnSpawn(NPC NPC, IEntitySource source)

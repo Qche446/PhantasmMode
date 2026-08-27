@@ -1,12 +1,15 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
 using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantRitual : MutantRitual
     {
+        private bool MutantDead;
+        private const float realRotation = MathF.PI / 140f;
         protected override void Movement(NPC npc)
         {
             //int[] unmovingArenaStates =

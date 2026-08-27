@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+ï»¿using FargowiltasSouls;
 using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -62,29 +62,29 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Projectile.velocity = (pivot - Projectile.Center).RotatedBy(Math.PI / 2 * Projectile.ai[1]);
                 Projectile.velocity *= 2 * (float)Math.PI / 360;
 
-                // Ìí¼Óµ­À¶É«Á£×ÓÐ§¹û - Ö»ÔÚÐý×ªÊ±Éú³É
-                if (Main.rand.NextBool(3)) // 33%¸ÅÂÊÃ¿Ö¡Éú³ÉÁ£×Ó
+                // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ - Ö»ï¿½ï¿½ï¿½ï¿½×ªÊ±ï¿½ï¿½ï¿½ï¿½
+                if (Main.rand.NextBool(3)) // 33%ï¿½ï¿½ï¿½ï¿½Ã¿Ö¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 {
-                    // ´´½¨µ­À¶É«Á£×Ó
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
                     Vector2 dustPos = Projectile.Center + Main.rand.NextVector2Circular(Projectile.width / 2, Projectile.height / 2);
                     Vector2 dustVel = Projectile.velocity * 0.3f + Main.rand.NextVector2Circular(0.5f, 0.5f);
 
-                    // Ê¹ÓÃµç³¾£¬ÑÕÉ«Îªµ­À¶É«
+                    // Ê¹ï¿½Ãµç³¾ï¿½ï¿½ï¿½ï¿½É«Îªï¿½ï¿½ï¿½ï¿½É«
                     int dust = Dust.NewDust(dustPos, 0, 0, DustID.Electric, dustVel.X, dustVel.Y, 100, Color.LightBlue, 1f);
                     Main.dust[dust].noGravity = true;
                     Main.dust[dust].velocity *= 0.8f;
                     Main.dust[dust].fadeIn = 0.8f;
                 }
 
-                // Ìí¼ÓÐý×ªÊ±±ßÔµµÄ·¢¹âÁ£×Ó
-                if (Main.rand.NextBool(10)) // 10%¸ÅÂÊÃ¿Ö¡Éú³É
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªÊ±ï¿½ï¿½Ôµï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                if (Main.rand.NextBool(10)) // 10%ï¿½ï¿½ï¿½ï¿½Ã¿Ö¡ï¿½ï¿½ï¿½ï¿½
                 {
-                    // ÔÚÁ­µ¶±ßÔµÉú³É·¢¹âÁ£×Ó
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                     Vector2 offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * (Projectile.width / 2);
                     Vector2 edgePos = Projectile.Center + offset;
 
-                    // Ê¹ÓÃËª³¾£¬ÑÕÉ«ÎªÇàÉ«
+                    // Ê¹ï¿½ï¿½Ëªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«Îªï¿½ï¿½É«
                     int dust = Dust.NewDust(edgePos, 0, 0, DustID.Frost, 0, 0, 100, Color.Cyan, 0.8f);
                     Main.dust[dust].noGravity = true;
                     Main.dust[dust].velocity = offset * 0.03f + Projectile.velocity * 0.2f;
@@ -100,7 +100,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                             Vector2 direction = Main.player[p].Center - Projectile.Center;
                             direction.Normalize();
 
-                            // ·¢ÉäÁ­µ¶
+                            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                             Projectile.NewProjectile(
                                 Projectile.GetSource_FromThis(),
                                 Projectile.Center,
@@ -121,7 +121,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                             );
                         }
                     }
-                    // ²¥·ÅÔÝÍ£ÒôÐ§
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½Ð§
                     SoundEngine.PlaySound(SoundID.Item92, Projectile.Center);
 
                     Projectile.netUpdate = true;
@@ -137,7 +137,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         {
             SoundEngine.PlaySound(SoundID.Item71, Projectile.Center);
 
-            // Ô­ÓÐµÄ»Ò³¾Ð§¹û
+            // Ô­ï¿½ÐµÄ»Ò³ï¿½Ð§ï¿½ï¿½
             for (int index1 = 0; index1 < 20; ++index1)
             {
                 int index2 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, DustID.Shadowflame, 0.0f, 0.0f, 0, new Color(), 1f);
@@ -147,7 +147,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Main.dust[index2].velocity *= 4f;
             }
 
-            // Ìí¼Óµ­À¶É«±¬Õ¨Á£×ÓÐ§¹û
+            // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½É«ï¿½ï¿½Õ¨ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             for (int i = 0; i < 15; i++)
             {
                 Vector2 speed = Main.rand.NextVector2Circular(2f, 2f);
@@ -156,7 +156,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Main.dust[dust].velocity = speed;
             }
             
-            // ·¢Éä5µÀÁ­µ¶
+            // ï¿½ï¿½ï¿½ï¿½5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (FargoSoulsUtil.HostCheck)
             {
                 int p = Player.FindClosest(Projectile.Center, 0, 0);
@@ -165,14 +165,14 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     Vector2 baseDirection = Main.player[p].Center - Projectile.Center;
                     baseDirection.Normalize();
 
-                    // ·¢Éä5µÀÁ­µ¶£¬ÔÚÖ¸ÏòÍæ¼Ò·½ÏòµÄÁ½²à¾ùÔÈ·Ö²¼£¬¼ä¸ô40¡ã
-                    float[] angles = { -80f, -40f, 0f, 40f, 80f }; // ×Ü¹²3µÀ£¬¼ä¸ô40¡ã
+                    // ï¿½ï¿½ï¿½ï¿½5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È·Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
+                    float[] angles = { -80f, -40f, 0f, 40f, 80f }; // ï¿½Ü¹ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
 
                     foreach (float angle in angles)
                     {
                         Vector2 direction = baseDirection.RotatedBy(MathHelper.ToRadians(angle));
 
-                        // ·¢ÉäAbomLightningTelegraph - Éú³ÉÉÁµçÔ¤¾¯µ¯Ä»
+                        // ï¿½ï¿½ï¿½ï¿½AbomLightningTelegraph - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½Ä»
                         Projectile.NewProjectile(
                             Projectile.GetSource_FromThis(),
                             Projectile.Center,
@@ -210,13 +210,13 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
             SpriteEffects spriteEffects = Projectile.spriteDirection > 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            // Ìí¼Óµ­À¶É«ÍÏÓ°Ð§¹û
+            // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½É«ï¿½ï¿½Ó°Ð§ï¿½ï¿½
             for (int i = 0; i < ProjectileID.Sets.TrailCacheLength[Projectile.type]; i++)
             {
-                // ±£³ÖÔ­ÓÐµÄÍÏÓ°ÑÕÉ«¼ÆËã·½Ê½£¬µ«Ìí¼Óµ­À¶É«É«µ÷
+                // ï¿½ï¿½ï¿½ï¿½Ô­ï¿½Ðµï¿½ï¿½ï¿½Ó°ï¿½ï¿½É«ï¿½ï¿½ï¿½ã·½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½É«É«ï¿½ï¿½
                 float progress = (float)i / ProjectileID.Sets.TrailCacheLength[Projectile.type];
                 Color trailColor = color26;
-                // Ìí¼Óµ­À¶É«É«µ÷
+                // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½É«É«ï¿½ï¿½
                 trailColor = Color.Lerp(trailColor, Color.LightBlue, 0.4f * (1f - progress));
                 trailColor *= (float)(ProjectileID.Sets.TrailCacheLength[Projectile.type] - i) / ProjectileID.Sets.TrailCacheLength[Projectile.type];
 
@@ -226,7 +226,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     new Microsoft.Xna.Framework.Rectangle?(rectangle), trailColor, num165, origin2, Projectile.scale * (1f - progress * 0.3f), spriteEffects, 0);
             }
 
-            // »æÖÆÖ÷µ¯Ä» - ±£³ÖÔ­É«µ÷
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä» - ï¿½ï¿½ï¿½ï¿½Ô­É«ï¿½ï¿½
             Main.EntitySpriteDraw(texture2D13, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY),
                 new Microsoft.Xna.Framework.Rectangle?(rectangle), Projectile.GetAlpha(lightColor), Projectile.rotation, origin2, Projectile.scale, spriteEffects, 0);
 
@@ -235,7 +235,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
         public override Color? GetAlpha(Color lightColor)
         {
-            // ±£³ÖÔ­É«µ÷²»±ä
+            // ï¿½ï¿½ï¿½ï¿½Ô­É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             return Color.White;
         }
     }

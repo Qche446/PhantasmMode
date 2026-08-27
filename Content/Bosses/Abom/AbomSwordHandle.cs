@@ -1,6 +1,4 @@
-﻿
-
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;

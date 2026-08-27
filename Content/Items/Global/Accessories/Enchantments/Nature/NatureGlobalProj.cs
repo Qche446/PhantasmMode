@@ -65,7 +65,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             }
             if (player.HasEffect<ShroomiteEffect>())
             {
-                List<int> proj = [ProjectileID.TinyEater, ModContent.ProjectileType<DevRocket>()];
+                List<int> proj = [ProjectileID.TinyEater];
+                if (ModContent.TryFind<ModProjectile>("FargowiltasSouls", "DevRocket", out ModProjectile devRocket))
+                    proj.Add(devRocket.Type);
                 if (projectile.penetrate != -1 && !proj.Contains(projectile.type))
                 {
                     bool HasForce = Main.LocalPlayer.ForceEffect<ShroomiteEffect>();

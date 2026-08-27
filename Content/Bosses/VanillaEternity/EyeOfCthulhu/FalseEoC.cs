@@ -228,7 +228,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         }
         public override bool PreDraw(ref Color lightColor)
         {
-            bool recolor = SoulConfig.Instance.BossRecolors && WorldSavingSystem.EternityMode;
+            bool recolor = true;
             Texture2D tex = TextureAssets.Npc[NPCID.EyeofCthulhu].Value;
             int sizeY = tex.Height / Main.projFrames[Type]; //ypos of lower right corner of sprite to draw
             int frameY = Projectile.frame * sizeY;

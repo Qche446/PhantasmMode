@@ -14,6 +14,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantEye : MutantEye, IProjOwnedByBoss<MutantBoss>
     {
+        private int ritualID = -1;
         public override void SetDefaults()
         {
             Projectile.width = 12;

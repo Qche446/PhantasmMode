@@ -1,0 +1,11 @@
+DotInfoDisplay: {
+	DisplayName: 减益秒伤
+	HasDotDamage: 减益秒伤: {0}
+	NoDotDamage: 无减益伤害
+}
+
+GrazeInfoDisplay: {
+	DisplayName: 擦弹计数
+	HasGrazeCount: 擦弹数: {0}
+	NoGrazeCount: 无擦弹
+}

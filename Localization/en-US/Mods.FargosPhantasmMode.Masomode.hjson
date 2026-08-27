@@ -1,4 +1,4 @@
-﻿AgitatingLens:
+AgitatingLens:
 	'''
 	Increases movement speed by 10%, raised to 30% below half maximum life
 	Blood Scythes inflict Moon Curse and Berserk
@@ -39,7 +39,7 @@ SupremeDeathbringerFairy: {
 		[i:FargowiltasSouls/NecromanticBrew]Skeletron's arms inflict Shadowflame
 		[i:FargowiltasSouls/NecromanticBrew]Dash speed can be further increased to 50%
 		'''
-	Extra: "An eternal beginning, ringing death for evil"
+	Extra: An eternal beginning, ringing death for evil
 }
 
 PungentEyeball: "[c/FF0000:Scathing Gaze] builds faster"
@@ -64,7 +64,7 @@ DubiousCircuitry: {
 		[i:FargowiltasSouls/FusedLens]Creates friendly four-color Mech Electric Orbs that pursue nearby enemies and become Dark Stars when affected by Ichor or Cursed Inferno
 		[i:FargowiltasSouls/GroundStick]Damage reduction against laser projectiles increased to 80%
 		'''
-	Extra: "It looks incredibly strong!"
+	Extra: It looks incredibly strong!
 }
 
 PureHeart: {
@@ -76,7 +76,7 @@ PureHeart: {
 		[i:FargowiltasSouls/GuttedHeart]Periodically creates a larger Gutted Heart shockwave
 		[i:FargowiltasSouls/GelicWings]Gel Spikes inflict Ominous Flame and Oiled
 		'''
-	Extra: "A purified soul ascends beyond mortality"
+	Extra: A purified soul ascends beyond mortality
 }
 
 WyvernFeather:
@@ -110,7 +110,7 @@ BionomicCluster: {
 		[i:FargowiltasSouls/TimsConcoction]Reduces mana cost by 5%
 		[i:FargowiltasSouls/MysticSkull]Magic damage increased by 5%
 		'''
-	Extra: "Attunement"
+	Extra: Attunement
 }
 
 DreadShell: Increases defense by 5 and damage reduction by 5%
@@ -125,7 +125,7 @@ LumpOfFlesh: {
 		[i:FargowiltasSouls/DreadShell]Increases defense by 5 and damage reduction by 5%
 		[i:FargowiltasSouls/Deerclawps]Eases the conditions for Ice Spikes to spawn and further increases their damage
 		'''
-	Extra: "It doesn't look very appetizing"
+	Extra: It doesn't look very appetizing
 }
 
 MagicalBulb:
@@ -146,7 +146,7 @@ ChaliceoftheMoon: {
 		[i:FargowiltasSouls/CelestialRune]Summons a Lunatic Cultist to protect you
 		Converted minion damage bonus increased to 3%
 		'''
-	Extra: "I hope it proves useful"
+	Extra: I hope it proves useful
 }
 
 PumpkingsCape: No longer slowed while blocking; Corrupt Aura range increased
@@ -178,12 +178,12 @@ HeartoftheMasochist: {
 		[i:FargowiltasSouls/GalacticGlobe]Infinite flight
 		Converted minion damage bonus increased to 3%
 		'''
-	Extra: "Burn, everything I have accumulated"
+	Extra: Burn, everything I have accumulated
 }
 
 SinisterIcon: None
 
 MasochistSoul: {
 	Base: Inherits additional effects from lower tiers
-	Extra: "At this moment, words have long since lost their weight."
+	Extra: At this moment, words have long since lost their weight.
 }

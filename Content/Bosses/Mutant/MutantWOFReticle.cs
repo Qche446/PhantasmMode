@@ -14,6 +14,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class MutantWOFReticle : WOFReticle, IProjOwnedByBoss<MutantBoss>
     {
+        private int additive = 130;
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Masomode/WOFReticle";
         public override void AI()
         {

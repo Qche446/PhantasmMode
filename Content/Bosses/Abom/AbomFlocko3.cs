@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;

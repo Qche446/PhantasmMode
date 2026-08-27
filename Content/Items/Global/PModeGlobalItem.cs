@@ -31,7 +31,9 @@ namespace FargosPhantasmMode.Content.Items.Global
         public bool OrdinaryAttributes;
         public override void Load()
         {
-            PhanUtil.AddILHooks(EModeGlobalItem.EModePrefixChanges, ILPrefixChanges);
+            //PhanUtil.AddILHooks(EModeGlobalItem.EModePrefixChanges, ILPrefixChanges);
+            MethodInfo method = typeof(EModeGlobalItem).GetMethod("EModePrefixChanges", BindingFlags.Static | BindingFlags.NonPublic);
+            MonoModHooks.Modify(method, ILPrefixChanges);
             PhanUtil.AddILHooks(ModContent.GetInstance<EModeGlobalItem>().ModifyTooltips, ILPrefixChanges);
         }
 
@@ -39,12 +41,12 @@ namespace FargosPhantasmMode.Content.Items.Global
         private void ILPrefixChanges(ILContext il)
         {
             ILCursor c = new(il);
-            if (!c.TryGotoNext(MoveType.After, i => i.MatchLdcR4(EModeGlobalItem.newViolentBaseAttackSpeed)))
+            if (!c.TryGotoNext(MoveType.After, i => i.MatchLdcR4(0.005f)))
                 throw new Exception("IL edit failed!");
             c.Emit(OpCodes.Pop);
             c.EmitDelegate<Func<float>>(() =>
             {
-                return PModeWorldSavingSystem.PhantasmMode ? PModeViolentBaseAttackSpeed : EModeGlobalItem.newViolentBaseAttackSpeed;
+                return PModeWorldSavingSystem.PhantasmMode ? PModeViolentBaseAttackSpeed : 0.005f;
             });
         }
         public override void OnConsumeItem(Item item, Player player)
@@ -56,7 +58,7 @@ namespace FargosPhantasmMode.Content.Items.Global
                 if (player.HasEffect<HallowFlameEffect>())
                 {
                     //Main.NewText("HallowFlame true");
-                    player.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 30 * 60);
+                    player.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 45 * 60);
                     if (player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel < 1)
                         player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel = 1;
                 }
@@ -84,7 +86,7 @@ namespace FargosPhantasmMode.Content.Items.Global
                 bool hasForce = player.ForceEffect<NinjaAttackSpeedEffect>();
                 if (item == player.HeldItem || item == player.HeldMouseItem())
                 {
-                    modifiers.FinalDamage *= hasForce ? 0.3f : 0.45f;
+                    modifiers.FinalDamage *= hasForce ? 0.333f : 0.5f;
                 }
             }
         }

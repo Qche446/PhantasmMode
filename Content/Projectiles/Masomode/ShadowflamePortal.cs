@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+ï»¿using FargowiltasSouls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -66,7 +66,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
         }
         private void EnhancedDeathEffect()
         {
-            // ´´½¨±¬Õ¨Á£×Ó»·
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¨ï¿½ï¿½ï¿½Ó»ï¿½
             for (int i = 0; i < 36; i++)
             {
                 float angle = MathHelper.TwoPi * i / 36f;
@@ -78,7 +78,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
                 Main.dust[d].scale = Main.rand.NextFloat(2f, 3f);
             }
 
-            // Ìí¼Ó×ÏÉ«Ë®¾§Á£×Ó
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«Ë®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (int i = 0; i < 20; i++)
             {
                 Vector2 velocity = Main.rand.NextVector2Circular(6f, 6f);
@@ -92,13 +92,13 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
         }
         private void SpawnEnhancedParticles()
         {
-            // ÖÐÐÄ°µÓ°»ðÑæÁ£×Ó
+            // ï¿½ï¿½ï¿½Ä°ï¿½Ó°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             int d = Dust.NewDust(Projectile.Center, 0, 0, DustID.Shadowflame);
             Main.dust[d].noGravity = true;
-            Main.dust[d].velocity *= 6f; // Ôö¼ÓËÙ¶È
-            Main.dust[d].scale += 0.8f; // Ôö¼Ó´óÐ¡
+            Main.dust[d].velocity *= 6f; // ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+            Main.dust[d].scale += 0.8f; // ï¿½ï¿½ï¿½Ó´ï¿½Ð¡
 
-            // Ìí¼Ó¶îÍâµÄÁ£×ÓÀàÐÍ
+            // ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (Main.rand.NextBool(2))
             {
                 int d2 = Dust.NewDust(Projectile.Center + Main.rand.NextVector2Circular(40, 40), 0, 0, DustID.PurpleTorch);

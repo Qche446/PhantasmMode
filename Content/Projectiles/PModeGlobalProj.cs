@@ -1,5 +1,6 @@
 ﻿using FargosPhantasmMode.Content.Buffs.Global;
-using FargosPhantasmMode.Content.Items;
+using FargosPhantasmMode.Content.InfoDisplays;
+using FargosPhantasmMode.Content.Items.Accessories;
 using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using System;
@@ -49,7 +50,7 @@ namespace FargosPhantasmMode.Content.Projectiles
                         {
                             GrazeCD = 30 * projectile.MaxUpdates;
                             ShadowveilHeart.OnGraze(py);
-
+                            py.GetModPlayer<InfoModPlayer>().GrazeCount++;
                         }
                     }
                 }

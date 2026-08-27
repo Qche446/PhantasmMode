@@ -6,7 +6,6 @@ using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Items.Weapons.BossDrops;
 using FargowiltasSouls.Content.Items.Weapons.Challengers;
 using FargowiltasSouls.Content.Projectiles;
-using FargowiltasSouls.Content.UI;
 using FargowiltasSouls.Content.UI.Elements;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
@@ -14,15 +13,9 @@ using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -112,15 +105,30 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
         public override int ToggleItemType => ModContent.ItemType<AdamantiteEnchant>();
         public override bool ExtraAttackEffect => true;
         public const float SpreadCap = 17; // spread cap in DEGREES
-        static int[] AdamIgnoreItems = new int[]
-        {
+        public readonly static int[] AdamIgnoreItems =
+        [
             ItemID.NightsEdge,
             ItemID.TrueNightsEdge,
             ItemID.Excalibur,
             ItemID.TrueExcalibur,
             ItemID.TerraBlade,
             ModContent.ItemType<DecrepitAirstrikeRemote>()
-        };
+        ];
+        public readonly static int[] NoSplit = [
+            ProjectileID.SandnadoFriendly,
+            ProjectileID.LastPrism,
+            ProjectileID.LastPrismLaser,
+            ProjectileID.BabySpider,
+            ProjectileID.Phantasm,
+            ProjectileID.VortexBeater,
+            ProjectileID.ChargedBlasterCannon,
+            ProjectileID.WireKite,
+            ProjectileID.DD2PhoenixBow,
+            ProjectileID.LaserMachinegun,
+            ProjectileID.PiercingStarlight,
+            ProjectileID.Celeb2Weapon,
+            ProjectileID.Xenopopper
+        ];
         public override void PostUpdateEquips(Player player)
         {
 
@@ -152,6 +160,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             }
         }
     }
+
+    //交给shadowglobalproj处理，避免与精金的霸哥
+    /*
     public class AdamantiteGlobalProj : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
@@ -193,7 +204,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             }
             
         }
-        public static int[] NoSplit => new int[] {
+        public readonly static int[] NoSplit = [
             ProjectileID.SandnadoFriendly,
             ProjectileID.LastPrism,
             ProjectileID.LastPrismLaser,
@@ -207,6 +218,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
             ProjectileID.PiercingStarlight,
             ProjectileID.Celeb2Weapon,
             ProjectileID.Xenopopper
-        };
+        ];
     }
+    */
 }

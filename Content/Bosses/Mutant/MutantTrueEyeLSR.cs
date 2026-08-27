@@ -19,6 +19,32 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantTrueEyeL : MutantTrueEyeL, IProjOwnedByBoss<MutantBoss>
     {
+        private float localAI0;
+
+        private float localAI1;
+
+        private float localai1;
+        private void UpdatePupil()
+        {
+            float f = (float)((double)localAI0 % 6.28318548202515 - 3.14159274101257);
+            float num = (float)Math.IEEERemainder(localAI1, 1.0);
+            if ((double)num < 0.0)
+            {
+                num += 1f;
+            }
+
+            float num2 = (float)Math.Floor(localAI1);
+            float max = 0.999f;
+            int num3 = 0;
+            float amount = 0.1f;
+            float f2 = base.Projectile.AngleTo(Main.player[(int)base.Projectile.ai[0]].Center);
+            num3 = 2;
+            float num4 = MathHelper.Clamp(num + 0.05f, 0f, max);
+            float num5 = num2 + (float)Math.Sign(-12f - num2);
+            Vector2 value = f2.ToRotationVector2();
+            localAI0 = (float)((double)Vector2.Lerp(f.ToRotationVector2(), value, amount).ToRotation() + (double)num3 * 6.28318548202515 + 3.14159274101257);
+            localAI1 = num5 + num4;
+        }
         public override void AI()
         {
             Player player = Main.player[(int)base.Projectile.ai[0]];

@@ -17,6 +17,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantEyeOfCthulhu : MutantEyeOfCthulhu, IProjOwnedByBoss<MutantBoss>
     {
+        private bool spawned;
         public override void AI()
         {
             #region 定位

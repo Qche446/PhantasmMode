@@ -30,7 +30,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (Projectile.localAI[1] == 0f)
             {
                 Projectile.localAI[1] = 1f;
-                SoundEngine.PlaySound(WorldSavingSystem.masochistModeReal ? FargosSoundRegistry.PenetratorExplosion : FargosSoundRegistry.PenetratorThrow, Projectile.Center);
+                SoundEngine.PlaySound(FargosSoundRegistry.PenetratorExplosion, Projectile.Center);
             }
 
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.ToRadians(135f);

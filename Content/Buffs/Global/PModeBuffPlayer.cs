@@ -1,4 +1,5 @@
-﻿using FargosPhantasmMode.Core.Systems;
+﻿using FargosPhantasmMode.Content.Items.Accessories;
+using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
@@ -14,6 +15,8 @@ namespace FargosPhantasmMode.Content.Buffs.Global
 {
     public class PModeBuffPlayer : ModPlayer
     {
+        public bool DotCrit = false;
+        public bool DotCanDie = false;
         public bool Sublimation = false;
         public bool HallowFlame = false;
         public int HallowFlameLevel = 0;
@@ -21,6 +24,8 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public static bool PModeChangdeApply => PModeWorldSavingSystem.PhantasmMode;
         public override void ResetEffects()
         {
+            DotCrit = false;
+            DotCanDie = false;
             Sublimation = false;
             if (!HallowFlame)
                 HallowFlameLevel = 0;
@@ -56,6 +61,8 @@ namespace FargosPhantasmMode.Content.Buffs.Global
 
             if (PModeChangdeApply && Player.ForceEffect<OrichalcumEffect>() && Player.lifeRegen < 0 && !Player.HasEffect<EarthForceEffect>())
                 Player.lifeRegen = (int)(Player.lifeRegen * 1.2f);
+            if (Player.HasEffect<GermDotEffect>() && Player.lifeRegen < 0)
+                Player.lifeRegen = (int)(Player.lifeRegen * 1.5f);
             if (Player.HasEffect<LeadEffect>() && Player.lifeRegen < 0)
             {
                 float mul = Player.ForceEffect<LeadEffect>() ? 0.4f : 0.6f;
@@ -72,7 +79,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                     Player.lifeRegen = 0;
             }
             
-            if (Player.statLife < 5 && Player.lifeRegen < 0)
+            if (Player.statLife < 5 && Player.lifeRegen < 0 && !DotCanDie)
                 Player.lifeRegen = 0;
             
         }

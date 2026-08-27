@@ -35,7 +35,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure
 
                 if (Timer >= 60 && flag)
                 {
-                    Projectile.NewProjectile(GetSource_EffectItem(player), player.Center, Vector2.Zero, visualProj, 1, 0, Main.myPlayer, ai2: pure ? 16 : 12);
+                    Projectile.NewProjectile(GetSource_EffectItem(player), player.Center, Vector2.Zero, visualProj, 5, 0, Main.myPlayer, ai2: pure ? 16 : 12);
                     flag = false;
                 }
                 if (!pure)

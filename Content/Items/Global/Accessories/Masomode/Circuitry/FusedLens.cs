@@ -43,7 +43,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry
                 if (masosoul)
                 {
                     max = 8;
-                    damage *= 15;
+                    damage *= 12;
                 }
                 else if (dubiouscircuitry) //可疑电路
                 {

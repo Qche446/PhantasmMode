@@ -1,6 +1,7 @@
 ﻿using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -42,9 +43,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Pure
                     int CaseDamage = (int)(PrecentageDamage * target.lifeMax);
                     if (CaseDamage > 1000)
                         CaseDamage = 1000;
-                    modifiers.FlatBonusDamage += CaseDamage;
-                    //modifiers.HideCombatText();
-                    //CombatText.NewText(target.Hitbox, Color.Aqua, CaseDamage);
+                    if (target.life > CaseDamage)
+                        target.life -= CaseDamage;
+                    else
+                        target.life = 1;
+                    CombatText.NewText(target.Hitbox, Color.Aqua, CaseDamage);
                 }
             }
         }

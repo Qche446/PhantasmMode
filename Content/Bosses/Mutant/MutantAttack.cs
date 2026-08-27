@@ -1,4 +1,4 @@
-namespace FargosPhantasmMode.Content.Bosses.Mutant
+﻿namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     /// <summary>
     /// Mutant 的 AI 状态机枚举，对应 <see cref="MutantBossOverride.MutantAI"/> 中

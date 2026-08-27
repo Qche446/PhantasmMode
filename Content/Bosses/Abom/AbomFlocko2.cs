@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+ï»¿using FargowiltasSouls;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
@@ -36,7 +36,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Player player = Main.player[(int)Projectile.ai[0]];
 
             
-            // Ñ°ÕÒAbomBoss
+            // Ñ°ï¿½ï¿½AbomBoss
             NPC abomBoss = null;
             for (int i = 0; i < Main.maxNPCs; i++)
             {
@@ -52,23 +52,23 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 return;
             }
 
-            // Èç¹ûÕÒ²»µ½Boss£¬Ê¹ÓÃÍæ¼ÒÎ»ÖÃ×÷Îª±¸ÓÃÄ¿±ê
+            // ï¿½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½Bossï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½
             Vector2 bossCenter = abomBoss.Center;
-            // ÈÆÍæ¼ÒÐý×ªµÄÂß¼­
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ß¼ï¿½
             float rotationRadius = 1100f;
-            float rotationSpeed = 0.02f; // ½ÇËÙ¶È
+            float rotationSpeed = 0.02f; // ï¿½ï¿½ï¿½Ù¶ï¿½
 
-            // Ê¹ÓÃlocalAI[2]´æ´¢Ðý×ª½Ç¶È
+            // Ê¹ï¿½ï¿½localAI[2]ï¿½æ´¢ï¿½ï¿½×ªï¿½Ç¶ï¿½
             float currentAngle = Projectile.localAI[2] + rotationSpeed;
             Projectile.localAI[2] = currentAngle;
 
-            // ¼ÆËãÄ¿±êÎ»ÖÃ£¨ÈÆÍæ¼ÒÐý×ª£©
+            // ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
             Vector2 targetPosition = bossCenter + new Vector2(
                 (float)Math.Cos(currentAngle + MathHelper.ToRadians(Projectile.ai[1])) * rotationRadius,
                 (float)Math.Sin(currentAngle + MathHelper.ToRadians(Projectile.ai[1])) * rotationRadius
             );
 
-            // Æ½»¬ÒÆ¶¯µ½Ä¿±êÎ»ÖÃ
+            // Æ½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Î»ï¿½ï¿½
             Vector2 direction = targetPosition - Projectile.Center;
             float distance = direction.Length();
 
@@ -83,32 +83,32 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Projectile.velocity *= 0.95f;
             }
 
-            // ÏÞÖÆ×î´óËÙ¶È
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
             if (Projectile.velocity.Length() > 15f)
                 Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 15f;
 
-            // ÐÞ¸ÄºóµÄµ¯Ä»·¢ÉäÂß¼­
+            // ï¿½Þ¸Äºï¿½Äµï¿½Ä»ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½
             if (++Projectile.localAI[0] > 60)
             {
                 float waveSpeed = WorldSavingSystem.MasochistModeReal ? 7f : 5f;
 
-                // ¸ù¾Ý½×¶Îµ÷Õû·¢Éä¼ä¸ôºÍ½Ç¶È
+                // ï¿½ï¿½ï¿½Ý½×¶Îµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í½Ç¶ï¿½
                 int fireInterval;
                 float angleSpread;
 
-                // P2½×¶Î£¨Projectile.ai[2] > 1£©Ê¹ÓÃ¸ü¶ÌµÄ¼ä¸ôºÍ¸üÐ¡µÄ½Ç¶È²î
+                // P2ï¿½×¶Î£ï¿½Projectile.ai[2] > 1ï¿½ï¿½Ê¹ï¿½Ã¸ï¿½ï¿½ÌµÄ¼ï¿½ï¿½ï¿½Í¸ï¿½Ð¡ï¿½Ä½Ç¶È²ï¿½
                 if (Projectile.ai[2] > 1)
                 {
-                    fireInterval = 5; // P2½×¶ÎÃ¿5Ö¡·¢ÉäÒ»´Î
-                    angleSpread = 40f; // ½Ç¶È²î´Ó55¶È¼õÉÙµ½40¶È
+                    fireInterval = 5; // P2ï¿½×¶ï¿½Ã¿5Ö¡ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+                    angleSpread = 40f; // ï¿½Ç¶È²ï¿½ï¿½55ï¿½È¼ï¿½ï¿½Ùµï¿½40ï¿½ï¿½
                 }
                 else
                 {
-                    fireInterval = Main.zenithWorld ? 15 : 30 ; // ·ÇP2½×¶Î±£³Ö30Ö¡¼ä¸ô
-                    angleSpread = 55f; // ·ÇP2½×¶Î±£³Ö55¶È½Ç¶È²î
+                    fireInterval = Main.zenithWorld ? 15 : 30 ; // ï¿½ï¿½P2ï¿½×¶Î±ï¿½ï¿½ï¿½30Ö¡ï¿½ï¿½ï¿½
+                    angleSpread = 55f; // ï¿½ï¿½P2ï¿½×¶Î±ï¿½ï¿½ï¿½55ï¿½È½Ç¶È²ï¿½
                 }
 
-                // ·¢ÉäÂß¼­
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½
                 if (++Projectile.localAI[1] > fireInterval)
                 {
                     Projectile.localAI[1] = 0f;
@@ -126,11 +126,11 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 }
             }
 
-            // ÊÓ¾õÐ§¹û
+            // ï¿½Ó¾ï¿½Ð§ï¿½ï¿½
             Projectile.rotation = System.Math.Min(MathHelper.PiOver2, Projectile.velocity.X / 16f);
             Projectile.frame = 0;
             if (--Projectile.frameCounter > 0)
-                Projectile.frame = Projectile.velocity.X > 0 ? 1 : 2; // ¸ù¾ÝÒÆ¶¯·½ÏòÏÔÊ¾²»Í¬Ö¡
+                Projectile.frame = Projectile.velocity.X > 0 ? 1 : 2; // ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Í¬Ö¡
         }
     }
 }

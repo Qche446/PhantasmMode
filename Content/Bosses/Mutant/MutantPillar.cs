@@ -71,6 +71,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     }
                 }
             }
+            /*
             if (Projectile.ai[0] == 1)//日耀
             {
                 for (int j = 0; j < 6; j++)
@@ -91,23 +92,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             else if (Projectile.ai[0] == 3)//星尘
             {
-                /*
-                for (int j = -1; j <= 1; j++) //to both sides
-                {
-                    if (j == 0)
-                        continue;
 
-                    const int gap = 30;
-                    const int max = 15;
-                    const int individualOffset = 8;
-                    Vector2 baseVel = Projectile.SafeDirectionTo(Main.LocalPlayer.Center).RotatedBy(MathHelper.ToRadians(gap) * j);
-                    for (int k = 0; k < max; k++) //a fan of blazes
-                    {
-                        Projectile.NewProjectile(Terraria.Entity.InheritSource(Projectile), Projectile.Center, 6f * baseVel.RotatedBy(MathHelper.ToRadians(individualOffset) * j * k),
-                            ModContent.ProjectileType<CosmosNebulaBlaze>(), Projectile.damage, 0f, Main.myPlayer, 0.009f);
-                    }
-                }
-                */
             }
             else//星云
             {
@@ -127,10 +112,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     }
                 }
             }
+            */
         }
     }
     public class PHMutantFragment : MutantFragment, IProjOwnedByBoss<MutantBoss>
     {
+        private int ritualID = -1;
         public override void AI()
         {
             Projectile.velocity *= 0.985f;

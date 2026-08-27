@@ -86,7 +86,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
             if (NPC.downedPlantBoss) baseDamage = 2000;
             if (NPC.downedGolemBoss) baseDamage = 2468;
             if (NPC.downedMoonlord) baseDamage = 12345;
-            if (WorldSavingSystem.downedAbom) baseDamage = 22222;
+            if (WorldSavingSystem.DownedAbom) baseDamage = 22222;
             return baseDamage;
         }
     }

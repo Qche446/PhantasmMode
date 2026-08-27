@@ -1,4 +1,4 @@
-using FargosPhantasmMode.Assets.ExtraTextures;
+ï»¿using FargosPhantasmMode.Assets.ExtraTextures;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,13 +21,13 @@ namespace FargosPhantasmMode.Content.Sky
 
         public override void OnLoad()
         {
-            // »ñÈ¡ÎÒÃÇ×Ô¼ºµÄAbomBossÀàÐÍ
+            // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½AbomBossï¿½ï¿½ï¿½ï¿½
             abomBossType = ModContent.NPCType<FargowiltasSouls.Content.Bosses.AbomBoss.AbomBoss>();
         }
 
         public override void Update(GameTime gameTime)
         {
-            // ¼ì²éÎÒÃÇ×Ô¼ºµÄAbomBossÊÇ·ñ´æ»î
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½AbomBossï¿½Ç·ï¿½ï¿½ï¿½
             if (NPC.AnyNPCs(abomBossType))
             {
                 this.intensity += 0.01f;
@@ -60,7 +60,7 @@ namespace FargosPhantasmMode.Content.Sky
                     new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * opacity * 1.5f);
                 spriteBatch.End();
                 
-                // ÉèÖÃ×ÅÉ«Æ÷²ÎÊý
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 noiseTexture = PhantasmTextureRegistry.FireNoise2.Value;
                 var blackTile = TextureAssets.MagicPixel;
                 shader = ShaderManager.GetShader("FargosPhantasmMode.AbomSkyEffect");

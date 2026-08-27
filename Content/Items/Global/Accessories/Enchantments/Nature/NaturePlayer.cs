@@ -1,14 +1,8 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static Terraria.ModLoader.BackupIO;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature
 {
@@ -43,7 +37,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         {
             if (HasSporeCloudShoot && SporeCloudCD > 10)
             {
-                if (this.Player.whoAmI == Main.myPlayer)
+                if (Player.whoAmI == Main.myPlayer)
                 {
                     foreach (Projectile p in FargoSoulsUtil.XWay(8, Player.GetSource_FromThis(), target.Center, ProjectileID.SporeCloud, Main.rand.Next(1, 5), FargoSoulsUtil.HighestDamageTypeScaling(Player, 20), 0f))
                     {

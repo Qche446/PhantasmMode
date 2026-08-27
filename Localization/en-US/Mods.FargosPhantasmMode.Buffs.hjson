@@ -27,7 +27,7 @@ NanoErosionBuff: {
 
 TimeGodsTrickBuff: {
 	DisplayName: Time God's Trick
-	Description: "Riding through the unreal and the real, one who holds time..."
+	Description: Riding through the unreal and the real, one who holds time...
 }
 
 HypothermiaBuff: {
@@ -41,7 +41,7 @@ HypothermiaBuff: {
 
 PhSublimationBuff: {
 	DisplayName: Shadowflame Sublimation
-	Description: "Your soul is breaking free from your body"
+	Description: Your soul is breaking free from your body
 }
 
 HallowFlameBuff: {

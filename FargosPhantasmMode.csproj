@@ -100,8 +100,6 @@
 	<ItemGroup>
 	  <Folder Include="Assets\Sounds\" />
 	  <Folder Include="Assets\Music\" />
-	  <Folder Include="Content\Bosses\VanillaEternity\BrainOfCthulhu\" />
-	  <Folder Include="Content\Bosses\VanillaEternity\KingSlime\" />
 	  <Folder Include="Content\Projectiles\Souls\" />
 	  <Folder Include="Content\Dusts\" />
 	  <Folder Include="Core\PModeBalance\" />
@@ -109,21 +107,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<AdditionalFiles Include="**/*.csv" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Publicize Include="Luminance" IncludeVirtualMembers="false" />
-		<Publicize Include="FargowiltasSouls" IncludeVirtualMembers="false" />
-		<Publicize Include="tModLoader" IncludeVirtualMembers="false" />
-		<Publicize Include="Fargowiltas" IncludeVirtualMembers="false" />
-		<Publicize Include="Terraria" IncludeVirtualMembers="false" />
-	</ItemGroup>
 </Project>

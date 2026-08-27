@@ -27,14 +27,19 @@ namespace FargosPhantasmMode.Content.Buffs
     public class TimeGodsTrickPlayer : ModPlayer
     {
         public bool timetrick = false;
+        public float OldTime;
+        public float TimetrickCD;
         public override void ResetEffects()
         {
             timetrick = false;
+            OldTime = Utils.GetDayTimeAs24FloatStartingFromMidnight();
         }
         public override void PostUpdateBuffs()
         {
-            FargoSoulsPlayer fp = Main.LocalPlayer.FargoSouls();
-            Player py = Main.LocalPlayer;
+            FargoSoulsPlayer fp = Player.FargoSouls();
+            Player py = Player;
+            if (TimetrickCD >= 0)
+                TimetrickCD -= Math.Abs(OldTime - Utils.GetDayTimeAs24FloatStartingFromMidnight()) + 0.002f;
             if (timetrick)
             {
                 #region 套装充能
@@ -76,7 +81,8 @@ namespace FargosPhantasmMode.Content.Buffs
                         Main.projectile[i].localAI[0] += 2;
                     }
                 }//水晶头骨血肉团
-                fp.DeviGrazeBonus += SparklingAdoration.GrazeCap(fp) / 120f;//闪心
+                if (fp.DeviGrazeBonus < SparklingAdoration.GrazeCap(fp))
+                    fp.DeviGrazeBonus += SparklingAdoration.GrazeCap(fp) / 120f;//闪心
                 fp.DeviGrazeCounter = -60;
                 fp.WretchedPouchCD += 2;//诅咒袋子
                 fp.WyvernBallsCD++;//飞龙之羽

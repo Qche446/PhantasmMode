@@ -16,12 +16,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// </summary>
     public class MutantSpear : MutantSpearSpin, IProjOwnedByBoss<MutantBoss>
     {
+        private int direction = 1;
         public override string Texture => "FargowiltasSouls/Content/Projectiles/BossWeapons/Penetrator";
         public Color GlowColor { get => (int)Projectile.ai[2] switch
         {
             0 => Color.Red, 1 => Color.Orange, 2 => Color.Yellow, 3 => Color.Green, 4 => Color.Teal, 5 => Color.Blue, 6 => Color.Purple, _ => Color.White,
         };
         }
+        public override Color? GetAlpha(Color lightColor) => base.GetAlpha(lightColor);
         public override void AI()
         {
             if (base.Projectile.localAI[1] == 0f)
@@ -81,6 +83,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     }
     public class MutantBiggestSting : MutantSpear, IProjOwnedByBoss<MutantBoss>
     {
+        private int direction = 1;
         public override string Texture => "FargowiltasSouls/Content/Items/Weapons/FinalUpgrades/TheBiggestSting";
         public override void AI()
         {
@@ -93,9 +96,50 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             NPC nPC = Main.npc[(int)base.Projectile.ai[0]];
             if (nPC.active && nPC.type == ModContent.NPCType<MutantBoss>())
             {
+                Player py = Main.player[nPC.target];
+                if (py.dead || !py.active || py == null)
+                    return;
                 base.Projectile.Center = nPC.Center;
                 direction = nPC.direction;
-                base.Projectile.rotation += 0.4586267f * base.Projectile.localAI[1];
+                base.Projectile.rotation += (py.Center - nPC.Center).ToRotation() - MathHelper.PiOver2;
+                if (base.Projectile.timeLeft % 20 == 0)
+                {
+                    SoundEngine.PlaySound(in SoundID.Item1, base.Projectile.Center);
+                }
+                base.Projectile.alpha = 0;
+            }
+            else
+            {
+                base.Projectile.Kill();
+            }
+        }
+        public override bool PreDraw(ref Color lightColor)
+        {
+            return base.PreDraw(ref lightColor);
+        }
+    }
+    public class MutantDestroyerGun : MutantSpear, IProjOwnedByBoss<MutantBoss>
+    {
+        private int direction = 1;
+        public override string Texture => "FargowiltasSouls/Content/Items/Weapons/SwarmDrops/DestroyerGun2";
+        public override void AI()
+        {
+            if (base.Projectile.localAI[1] == 0f)
+            {
+                base.Projectile.localAI[1] = ((!Main.rand.NextBool()) ? 1 : (-1));
+                base.Projectile.timeLeft = (int)base.Projectile.ai[1];
+                Projectile.scale *= 2f;
+            }
+
+            NPC nPC = Main.npc[(int)base.Projectile.ai[0]];
+            if (nPC.active && nPC.type == ModContent.NPCType<MutantBoss>())
+            {
+                Player py = Main.player[nPC.target];
+                if (py.dead || !py.active || py == null)
+                    return;
+                base.Projectile.Center = nPC.Center;
+                direction = nPC.direction;
+                base.Projectile.rotation = (py.Center - nPC.Center).ToRotation();
                 if (base.Projectile.timeLeft % 20 == 0)
                 {
                     SoundEngine.PlaySound(in SoundID.Item1, base.Projectile.Center);

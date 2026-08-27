@@ -13,7 +13,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-namespace FargosPhantasmMode.Content.Items
+namespace FargosPhantasmMode.Content.Items.Accessories
 {
     public class EridanusGuide : SoulsItem
     {
@@ -30,7 +30,7 @@ namespace FargosPhantasmMode.Content.Items
             Item.height = 12;
             Item.accessory = true;
             Item.maxStack = 1;
-            Item.rare = ItemRarityID.Gray;
+            Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 10, 0, 0);
         }
         public override void UpdateInfoAccessory(Player player)

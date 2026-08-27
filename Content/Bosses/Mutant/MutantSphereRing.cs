@@ -1,5 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
+using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.DataStructures;
@@ -9,13 +10,21 @@ using ReLogic.Content;
 using System;
 using System.IO;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class PHMutantSphereRingP2 : MutantSphereRing, IProjOwnedByBoss<MutantBoss>
-    {/*
+    {
+
+        private int ritualID = -1;
+
+        private float originalSpeed;
+
+        private bool spawned;
+        /*
         float Angle = 0;
         Vector2 direct = Vector2.Zero;
         int flag = 1;
@@ -308,10 +317,28 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return false;
             #endregion
         }
+        private void TryTimeStop()
+        {
+            if (Main.getGoodWorld && base.Projectile.hostile && !base.Projectile.friendly && Main.LocalPlayer.active && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost && FargoSoulsUtil.BossIsAlive(ref EModeGlobalNPC.mutantBoss, ModContent.NPCType<MutantBoss>()) && WorldSavingSystem.MasochistModeReal && Main.npc[EModeGlobalNPC.mutantBoss].ai[0] == -5f && base.Projectile.Colliding(base.Projectile.Hitbox, Main.LocalPlayer.FargoSouls().GetPrecisionHurtbox()))
+            {
+                if (!Main.LocalPlayer.HasBuff(ModContent.BuffType<TimeFrozenBuff>()))
+                {
+                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Accessories/ZaWarudo"), Main.LocalPlayer.Center);
+                }
+
+                Main.LocalPlayer.AddBuff(ModContent.BuffType<TimeFrozenBuff>(), 300);
+            }
+        }
 
     }
     public class PHMutantSphereRingP1 : MutantSphereRing, IProjOwnedByBoss<MutantBoss>
     {
+
+        private int ritualID = -1;
+
+        private float originalSpeed;
+
+        private bool spawned;
         //—— 特殊阶段（同轨迹、变速度）——
         public bool specialPhase;   // 阶段标志，由静态方法 EnterSpecialPhase 置位
         private bool pathReady;     // 轨迹预计算完成
@@ -511,6 +538,18 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Main.EntitySpriteDraw(value, base.Projectile.position + base.Projectile.Size / 2f - Main.screenPosition + new Vector2(0f, base.Projectile.gfxOffY), rectangle, color, base.Projectile.velocity.ToRotation() + MathF.PI / 2f, origin, base.Projectile.scale * 1.5f, SpriteEffects.None);
             return false;
             #endregion
+        }
+        private void TryTimeStop()
+        {
+            if (Main.getGoodWorld && base.Projectile.hostile && !base.Projectile.friendly && Main.LocalPlayer.active && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost && FargoSoulsUtil.BossIsAlive(ref EModeGlobalNPC.mutantBoss, ModContent.NPCType<MutantBoss>()) && WorldSavingSystem.MasochistModeReal && Main.npc[EModeGlobalNPC.mutantBoss].ai[0] == -5f && base.Projectile.Colliding(base.Projectile.Hitbox, Main.LocalPlayer.FargoSouls().GetPrecisionHurtbox()))
+            {
+                if (!Main.LocalPlayer.HasBuff(ModContent.BuffType<TimeFrozenBuff>()))
+                {
+                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Accessories/ZaWarudo"), Main.LocalPlayer.Center);
+                }
+
+                Main.LocalPlayer.AddBuff(ModContent.BuffType<TimeFrozenBuff>(), 300);
+            }
         }
     }
 }

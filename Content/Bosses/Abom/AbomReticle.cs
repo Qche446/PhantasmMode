@@ -1,4 +1,4 @@
-using FargowiltasSouls;
+﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Core.Globals;
 using Microsoft.Xna.Framework;

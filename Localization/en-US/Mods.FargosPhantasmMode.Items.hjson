@@ -1,12 +1,17 @@
 BrokenTimepiece: {
 	DisplayName: Eternity Timepiece
-	Tooltip: A broken timepiece that still remembers eternity
+	Tooltip:
+		'''
+		Slow immunity
+		"The embodiment of the world's gifts, offering you blessings for the future."
+		'''
 }
 
 ShadowveilHeart: {
 	DisplayName: Shadowveil Heart
 	Tooltip:
 		'''
+		[c/A0A0A0:能计算并显示你的擦弹次数]
 		Immune to Broken Armor
 		Provides graze ability. Grazing attacks steadily builds energy, reducing damage taken by up to 25%
 		The graze effect can be active in the vanity slot, but it will not provide damage reduction
@@ -21,5 +26,16 @@ EridanusGuide: {
 		When the Eridanus set effect is active, automatically checks weapons in your hotbar whenever you change forms
 		If a weapon matching the damage type is found, automatically switches to it
 		Works from the inventory
+		'''
+}
+
+Germ: {
+	DisplayName: “萌芽”
+	Tooltip:
+		'''
+		[c/A0A0A0:可以显示你最后伤害的一个敌人受到的减益秒伤]
+		受到的减益伤害提升50%，且减益对你造成的伤害会致死
+		将你的通用职业伤害增幅用于提高敌怪受到的减益伤害，减益可造成暴击，且生命流逝速度将受一半攻速影响
+		“恶咒或新生”
 		'''
 }

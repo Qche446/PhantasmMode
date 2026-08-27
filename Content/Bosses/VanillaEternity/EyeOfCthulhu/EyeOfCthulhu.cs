@@ -36,7 +36,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
     {
         public override int NPCType => NPCID.EyeofCthulhu;
 
-        public bool recolor = SoulConfig.Instance.BossRecolors && WorldSavingSystem.EternityMode;
+        public bool recolor = true;
         public bool DroppedSummon;
         public int TeleportDirection;
         public float AIState = 0;
@@ -46,7 +46,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public int P3AttackChange = 0;
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax *= (int)(1.2f * npc.lifeMax);
+            npc.lifeMax = (int)(1.2f * npc.lifeMax);
         }
         public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<EyeofCthulhu>().RunEmodeAI = false;
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot)
@@ -239,10 +239,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.ai[2] = 0f;
                 if (npc.ai[1] == 60)
                 {
-                    SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     for (int i = 0; i < 20; i++)
                         Dust.NewDust(npc.position, npc.width, npc.height, DustID.Vortex, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
             }
             npc.rotation += npc.ai[2];
@@ -275,16 +274,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.ai[2] = 0f;
                 if (npc.ai[1] == 60)
                 {
-                    SoundEngine.PlaySound(3, (int)npc.position.X, (int)npc.position.Y);
+                    SoundEngine.PlaySound(SoundID.Roar, npc.Center);
                     for (int i = 0; i < 2; i++)
                     {
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 8);
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 7);
-                        Gore.NewGore(npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 8);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 7);
+                        Gore.NewGore(npc.GetSource_FromThis(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6);
                     }
                     for (int i = 0; i < 20; i++)
                         Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f);
-                    SoundEngine.PlaySound(15, (int)npc.position.X, (int)npc.position.Y, 0);
                 }
             }
             npc.rotation += npc.ai[2];
@@ -522,7 +520,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.velocity.X = y;
                     npc.velocity.Y = x;
                 }
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 6 + Main.rand.Next(1, 4);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
@@ -771,7 +769,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.velocity.X = y;
                     npc.velocity.Y = x;
                 }
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 8 + Main.rand.Next(1, 7);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
@@ -945,7 +943,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
+                
                 if (FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
@@ -1055,7 +1054,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if(FargoSoulsUtil.HostCheck)
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                 ReleaseDust(npc, 100);
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
@@ -1140,7 +1139,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                     ReleaseDust(npc, 100);
                 }
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 float speed = npc.velocity.Length();
                 Vector2 veldir = npc.velocity.SafeNormalize(Vector2.Zero);
@@ -1236,7 +1235,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                     ReleaseDust(npc, 100);
                 }
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
@@ -1322,7 +1321,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                     ReleaseDust(npc, 100);
                 }
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
@@ -1410,7 +1409,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     ReleaseDust(npc, 100);
                 }
                 if ((npc.ai[1] - 80) % 20 == 0)
-                    SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                    SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
                     ScreenShakeSystem.StartShake(5);
@@ -1502,7 +1501,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
                 //ReleaseDust(npc, 100);
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 ScreenShakeSystem.StartShake(5);
                 FalseEoC.MoveType movetype = FalseEoC.MoveType.Straight;
@@ -1588,7 +1587,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             //npc.localAI[2] = Main.rand.NextFloat(0, MathHelper.TwoPi);
             if (npc.ai[1] == 80 || npc.ai[1] == 80 + 60)
             {
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 ScreenShakeSystem.StartShake(5);
                 FalseEoC.MoveType movetype = FalseEoC.MoveType.Round;
@@ -1726,7 +1725,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.Center = new Vector2(npc.localAI[0], npc.localAI[1]);
                 ReleaseDust(npc, 500);
                 ScreenShakeSystem.StartShake(10);
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
@@ -1826,7 +1825,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.velocity.Y = x;
                 }
                 #endregion
-                SoundEngine.PlaySound(36, (int)npc.position.X, (int)npc.position.Y, -1);
+                SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 if (npc.ai[2] == 0)
                     npc.localAI[0] = 5 + Main.rand.Next(0, 3);//次数
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;

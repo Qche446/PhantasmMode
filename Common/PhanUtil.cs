@@ -12,7 +12,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-
+using FargowiltasSouls.Core;
 namespace FargosPhantasmMode.Common
 {
     public static class PhanUtil
@@ -135,6 +135,9 @@ namespace FargosPhantasmMode.Common
             return points;
         }
         public static readonly FieldInfo _sbMatrixField = typeof(SpriteBatch).GetField("transformMatrix", BindingFlags.Instance | BindingFlags.NonPublic);
+        public static readonly FieldInfo _critOverride = typeof(NPC.HitModifiers).GetField("_critOverride", BindingFlags.Instance | BindingFlags.NonPublic);
+        public static readonly FieldInfo _damageLimit = typeof(NPC.HitModifiers).GetField("_damageLimit", BindingFlags.Instance | BindingFlags.NonPublic);
+        public static readonly MethodInfo SetLegacyStrike = typeof(NetMessage).GetMethod("SetLegacyStrike", BindingFlags.Static | BindingFlags.NonPublic);
         static float ColorTimer;
         /// <summary>
         /// 80
@@ -268,6 +271,13 @@ namespace FargosPhantasmMode.Common
         public static bool FloatBool(float p) => Main.rand.NextFloat(0, 1) < p;
         public static float ApplyVariance(float value, int percent) => value * (1f + Main.rand.Next(-percent, percent + 1) * 0.01f);
         public static bool IsInRange(this float x, float min, float max, bool Canmin = true, bool Canmax = false) => (Canmin && x == min) || (x > min && x < max) || (Canmax && x == max);
+        public static int Sign(this float num, bool ignoreZero = false)
+        {
+            int sign = -1;
+            if (num >= 0) sign = 1;
+            if(num == 0 && !ignoreZero) sign = 0;
+            return sign;
+        }
         #region Luminance下推自动机扩展
         // 服务器端：把整个状态栈 + 每个状态的 float[4] 写进包
         public static void WriteStack<TId>(this BinaryWriter writer, PushdownAutomata<Pstate<TId>, TId> machine) where TId : struct
@@ -335,6 +345,7 @@ namespace FargosPhantasmMode.Common
             Pstate<E> state = automata.CurrentState;
             E? nowstate = state.Identifier;
             string text1 = $"目前状态:{nowstate.Value}，";
+            /*
             if (automata.transitionTable.TryGetValue(nowstate.Value, out var valuelist))
             {
                 foreach(var info in valuelist)
@@ -343,6 +354,7 @@ namespace FargosPhantasmMode.Common
                     text1 += $"未来可能状态:{info.NewState}";
                 }
             }
+            */
             string text2 = $"目前状态方法: {automata.StateBehaviors[nowstate.Value].Method}";
             string text3 = $"目前状态ai参数: ai[0] = {state.ai[0]}, ai[1] = {state.ai[1]}, ai[2] = {state.ai[2]}, ai[3] = {state.ai[3]}";
             Utils.DrawBorderString(spriteBatch, text1, drawcenter, Color.Aqua, 1.5f);

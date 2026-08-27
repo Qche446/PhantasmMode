@@ -1,4 +1,4 @@
-using FargowiltasSouls.Content.Buffs.Boss;
+ï»¿using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,8 +15,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         public override void SetStaticDefaults()
         {
             // DisplayName.SetDefault("Frost Wave");
-            ProjectileID.Sets.TrailCacheLength[Projectile.type] = 8; // ÉèÖÃÍÏÎ²»º´æ³¤¶È
-            ProjectileID.Sets.TrailingMode[Projectile.type] = 2; // ÉèÖÃÍÏÎ²Ä£Ê½
+            ProjectileID.Sets.TrailCacheLength[Projectile.type] = 8; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½æ³¤ï¿½ï¿½
+            ProjectileID.Sets.TrailingMode[Projectile.type] = 2; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î²Ä£Ê½
         }
 
         public override void SetDefaults()
@@ -38,7 +38,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
         {
             
 
-            // Ìí¼Óº®ËªÁ£×ÓÐ§¹û
+            // ï¿½ï¿½ï¿½Óºï¿½Ëªï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             if (Main.rand.NextBool(6))
             {
                 Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height,
@@ -48,7 +48,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 dust.velocity += Projectile.velocity * 0.2f;
             }
 
-            // Ìí¼Ó±ù¾§Á£×ÓÐ§¹û
+            // ï¿½ï¿½ï¿½Ó±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             if (Main.rand.NextBool(10))
             {
                 Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height,
@@ -68,10 +68,10 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
         public override Color? GetAlpha(Color lightColor)
         {
-            return new Color(150, 200, 255, Projectile.alpha); // µ÷ÕûÎªº®ËªÀ¶É«µ÷
+            return new Color(150, 200, 255, Projectile.alpha); // ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ëªï¿½ï¿½É«ï¿½ï¿½
         }
 
-        // Ìí¼ÓÍÏÎ²»æÖÆ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½ï¿½
         public override bool PreDraw(ref Color lightColor)
         {
             Texture2D texture2D13 = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
@@ -80,7 +80,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Rectangle rectangle = new(0, y3, texture2D13.Width, num156);
             Vector2 origin2 = rectangle.Size() / 2f;
 
-            // »æÖÆÍÏÎ²
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î²
             for (int i = 0; i < Projectile.oldPos.Length; i++)
             {
                 float fade = (Projectile.oldPos.Length - i) / (float)Projectile.oldPos.Length;
@@ -90,14 +90,14 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 Main.EntitySpriteDraw(texture2D13, drawPos, rectangle, drawColor, Projectile.oldRot[i], origin2, scale, SpriteEffects.None, 0);
             }
 
-            // »æÖÆÖ÷Ìå
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Main.EntitySpriteDraw(texture2D13, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY),
                 new Rectangle?(rectangle), Projectile.GetAlpha(lightColor), Projectile.rotation, origin2, Projectile.scale, SpriteEffects.None, 0);
 
             return false;
         }
         /*
-        // Ìí¼Ó·¢¹âÐ§¹û
+        // ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
         public override void PostDraw(Color lightColor)
         {
             Texture2D texture2D13 = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
@@ -106,17 +106,17 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Rectangle rectangle = new(0, y3, texture2D13.Width, num156);
             Vector2 origin2 = rectangle.Size() / 2f;
 
-            // Ê¹ÓÃµþ¼Ó»ìºÏÄ£Ê½»æÖÆ·¢¹âÐ§¹û
+            // Ê¹ï¿½Ãµï¿½ï¿½Ó»ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
-            // ·¢¹â²ã
+            // ï¿½ï¿½ï¿½ï¿½ï¿½
             Color glowColor = new Color(100, 150, 255, 100) * 0.7f;
             Main.EntitySpriteDraw(texture2D13, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY),
                 new Rectangle?(rectangle), glowColor, Projectile.rotation, origin2, Projectile.scale * 1.2f, SpriteEffects.None, 0);
 
-            // »Ö¸´Ä¬ÈÏ»ìºÏÄ£Ê½
+            // ï¿½Ö¸ï¿½Ä¬ï¿½Ï»ï¿½ï¿½Ä£Ê½
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
