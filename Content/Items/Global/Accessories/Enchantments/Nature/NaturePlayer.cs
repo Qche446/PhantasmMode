@@ -35,16 +35,16 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         }
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            if (HasSporeCloudShoot && SporeCloudCD > 10)
+            if (HasSporeCloudShoot && SporeCloudCD > 20)
             {
                 if (Player.whoAmI == Main.myPlayer)
                 {
-                    foreach (Projectile p in FargoSoulsUtil.XWay(8, Player.GetSource_FromThis(), target.Center, ProjectileID.SporeCloud, Main.rand.Next(1, 5), FargoSoulsUtil.HighestDamageTypeScaling(Player, 20), 0f))
+                    foreach (Projectile p in FargoSoulsUtil.XWay(8, Player.GetSource_FromThis(), target.Center, ProjectileID.SporeCloud, Main.rand.Next(1, 5), FargoSoulsUtil.HighestDamageTypeScaling(Player, 10), 0f))
                     {
                         if (p == null)
                             continue;
                         p.usesIDStaticNPCImmunity = true;
-                        p.idStaticNPCHitCooldown = 10;
+                        p.idStaticNPCHitCooldown = 15;
                         p.FargoSouls().noInteractionWithNPCImmunityFrames = true;
                         p.extraUpdates += 1;
                         p.DamageType = DamageClass.Default;

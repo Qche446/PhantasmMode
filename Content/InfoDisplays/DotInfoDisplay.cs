@@ -3,6 +3,7 @@ using FargowiltasSouls;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using Microsoft.Xna.Framework;
 using System;
+using System.Linq;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -33,10 +34,8 @@ namespace FargosPhantasmMode.Content.InfoDisplays
             else
             {
                 displayColor = Color.White;
-                float speed = Main.npc[ip.targetIndex].lifeRegen;
-                if (py.HasEffect<GermDotEffect>() && speed < 0)
-                    speed *= 1 + 0.5f * (py.FargoSouls().AttackSpeed - 1);
-                result = CurrentDotDps.Format(Math.Round(Math.Abs(speed), 1));
+                float speed = ip.dotDamagePond.Sum();
+                result = CurrentDotDps.Format(Math.Round(speed, 1));
             }
             return result;
         }

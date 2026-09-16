@@ -14,7 +14,7 @@ float4 RoundSimpleDoubleColorPulse(float4 sampleColor : COLOR0, float2 coords : 
     float2 framedCoords = coords;
     float2 noiseUV = framedCoords;
     noiseUV.y *= 0.05;
-    noiseUV.x *= lifeRatio;
+    //noiseUV.x *= lifeRatio;
     float mutiplex = cos(globalTime * omiga - framedCoords.x * 6) * 0.5 + 0.5;
     
     float2 flow = float2(1, 0.5);

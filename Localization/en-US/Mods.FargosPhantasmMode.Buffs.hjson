@@ -52,3 +52,12 @@ HallowFlameBuff: {
 		"Reborn in holy flame..."
 		'''
 }
+
+FractureBuff: {
+	DisplayName: Fracture
+	Description:
+		'''
+		Lucky Horseshoe fall damage immunity is off, maximum drop speed increased to 500%, and damage reduction and movement speed are slightly reduced
+		"Although I don't know what happened, you broke a bone"
+		'''
+}

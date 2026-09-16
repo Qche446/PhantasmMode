@@ -1,5 +1,6 @@
 ﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
+using FargosPhantasmMode.Content.InfoDisplays;
 using FargosPhantasmMode.Content.Items.Accessories;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
@@ -299,6 +300,8 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             if (py.HasEffect<GermDotEffect>() && npc.lifeRegen < 0)
                 speed *= 1 + 0.5f * (py.FargoSouls().AttackSpeed - 1);
             npc.lifeRegenCount += (int)speed;
+            int totaldamage = 0;
+            var ip = py.GetModPlayer<InfoModPlayer>();
             while (npc.lifeRegenCount >= 120)
             {
                 npc.lifeRegenCount -= 120;
@@ -330,6 +333,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                     if (!Main.npc[num13].immortal)
                     {
                         Main.npc[num13].life -= num * muti;
+                        totaldamage += num * muti;
                     }
                     CombatText.NewText(new Rectangle((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height), textcolor, num * muti, dramatic: false, dot: true);
                     if (Main.npc[num13].life > 0 || Main.npc[num13].immortal)
@@ -356,6 +360,9 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                         }
                     }
                 }
+                //var ip = py.GetModPlayer<InfoModPlayer>();
+                if (ip.ShowDotsDps && npc.whoAmI == ip.targetIndex)
+                    ip.RegisterDotDamage(totaldamage);
                 return;
             }
             while (npc.lifeRegenCount <= -120)
@@ -372,6 +379,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 if (!Main.npc[num14].immortal)
                 {
                     Main.npc[num14].life -= muti;
+                    totaldamage += muti;
                 }
                 CombatText.NewText(new Rectangle((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height), textcolor, muti, dramatic: false, dot: true);
                 if (Main.npc[num14].life > 0 || Main.npc[num14].immortal)
@@ -397,6 +405,8 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                     }
                 }
             }
+            if (ip.ShowDotsDps && npc.whoAmI == ip.targetIndex)
+                ip.RegisterDotDamage(totaldamage);
         }
 
         public static float SkipFargosDotMultiplier(Func<NPC, Player, float> orig, NPC npc, Player player) => 1f;
@@ -434,7 +444,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             }
             else
             {
-                if (hasApplied)
+                if (hasApplied && !npc.FargoSouls().MutantNibble)
                 {
                     npc.lifeMax = originalLifeMax;
 
@@ -482,11 +492,11 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             if (fn.SolarFlare)
                 FireMultiplier += 0.2f;
             if (npc.onFrostBurn)
-                IceMultiplier += 0.15f;
+                IceMultiplier += 0.10f;
             if (npc.onFrostBurn2)
-                IceMultiplier += 0.15f;
+                IceMultiplier += 0.10f;
             if (Hypothermia)
-                IceMultiplier += 0.2f;
+                IceMultiplier += 0.15f;
             if (fn.TimeFrozen)
                 IceMultiplier += 0.2f;
         }

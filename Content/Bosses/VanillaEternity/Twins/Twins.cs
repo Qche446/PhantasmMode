@@ -21,6 +21,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -2525,7 +2526,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 FargoSoulsUtil.PrintLocalization($"Mods.FargowiltasSouls.NPCs.EMode.TwinsEndure", new Color(175, 75, 255), npc.FullName);
                 npc.netUpdate = true;
             }
-
+            foreach (Gore gore in Main.gore.Where(g => g.active && (g.type == 6 || g.type == 7)))
+                gore.active = false;
             Ibro.Ignite = false;
             Ibro.IgniteTimer += 9999999;
             /*

@@ -1,5 +1,6 @@
 ﻿using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using Luminance.Common.Utilities;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -12,6 +13,14 @@ namespace FargosPhantasmMode.Content.InfoDisplays
         public int GrazeCount = 0;
         public bool ShowDotsDps = false;
         public int targetIndex = -1;
+        public Queue<int> dotDamagePond = new(64);
+        public void RegisterDotDamage(int damage)
+        {
+            if (dotDamagePond.Count >= 60)
+                dotDamagePond.Dequeue();
+            dotDamagePond.Enqueue(damage);
+            //Main.NewText(damage);
+        }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {
             if (target != null && target.active)

@@ -138,6 +138,8 @@ namespace FargosPhantasmMode.Common
         public static readonly FieldInfo _critOverride = typeof(NPC.HitModifiers).GetField("_critOverride", BindingFlags.Instance | BindingFlags.NonPublic);
         public static readonly FieldInfo _damageLimit = typeof(NPC.HitModifiers).GetField("_damageLimit", BindingFlags.Instance | BindingFlags.NonPublic);
         public static readonly MethodInfo SetLegacyStrike = typeof(NetMessage).GetMethod("SetLegacyStrike", BindingFlags.Static | BindingFlags.NonPublic);
+
+        public static bool HostCheck => Main.netMode != NetmodeID.MultiplayerClient;
         static float ColorTimer;
         /// <summary>
         /// 80

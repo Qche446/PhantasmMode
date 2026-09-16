@@ -94,7 +94,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             player.setBonus = Language.GetTextValue("Mods.FargosPhantasmMode.Armor.Jungle");
             player.GetModPlayer<NaturePlayer>().HasSporeCloudShoot = true;
             player.manaCost -= 0.14f;
-            if (player.GetModPlayer<NaturePlayer>().SporeCloudCD < 20)
+            if (player.GetModPlayer<NaturePlayer>().SporeCloudCD < 30)
                 player.GetModPlayer<NaturePlayer>().SporeCloudCD++;
             base.UpdateArmorSet(player, set);
         }

@@ -21,6 +21,7 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public bool HallowFlame = false;
         public int HallowFlameLevel = 0;
         public int MaxHallowLevel = 10;
+        public bool Fracture = false;
         public static bool PModeChangdeApply => PModeWorldSavingSystem.PhantasmMode;
         public override void ResetEffects()
         {
@@ -35,6 +36,16 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 HallowFlameLevel =  MaxHallowLevel;
             HallowFlame = false;
             MaxHallowLevel = 10;
+            Fracture = false;
+        }
+        public override void PostUpdateBuffs()
+        {
+            
+        }
+        public override void PostUpdateEquips()
+        {
+            if (Fracture)
+                Player.noFallDmg = false;
         }
         public override void UpdateBadLifeRegen()
         {
