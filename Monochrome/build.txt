@@ -1,0 +1,7 @@
+displayName = Monochrome
+author = Qche
+version = 0.1
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Cache\*, Folders to Port\*, lib\*
+side = NoSync
+sortAfter = Luminance, Daybreak
+weakReferences = Luminance, Daybreak

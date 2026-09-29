@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\tModLoader.targets" />
+
+  <PropertyGroup>
+    <BuildMod Condition="'$(BuildMod)' == ''">true</BuildMod>
+	  <LangVersion>12.0</LangVersion>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>
