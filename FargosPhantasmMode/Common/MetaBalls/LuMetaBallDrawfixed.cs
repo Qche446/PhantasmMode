@@ -1,9 +1,17 @@
 ﻿using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Metaballs;
+using Monochrome.Core.Graphics.Particles;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Screen;
+using Monochrome.Core.Graphics.Shaders;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 

@@ -161,7 +161,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         public bool Equals(MonoAABB other) => Min == other.Min && Max == other.Max;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoAABB other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoAABB other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Min, Max);
@@ -290,7 +290,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => Center == other.Center && HalfExtents == other.HalfExtents && Rotation == other.Rotation;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoOBB other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoOBB other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Center, HalfExtents, Rotation);
@@ -439,7 +439,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => Center == other.Center && HalfExtents == other.HalfExtents && CornerRadius == other.CornerRadius && Rotation == other.Rotation;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoRoundedRect other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoRoundedRect other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Center, HalfExtents, CornerRadius, Rotation);

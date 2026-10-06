@@ -17,6 +17,7 @@ using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Monochrome.Common.MonoUtil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,7 +47,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public int P3AttackChange = 0;
         public override void SetDefaults(NPC npc)
         {
-            npc.lifeMax = (int)(1.2f * npc.lifeMax);
         }
         public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<EyeofCthulhu>().RunEmodeAI = false;
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot)
@@ -67,6 +67,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.TargetClosest();
 
             //ftw特性(祛华):根据某个神秘参数加速boss和boss弹幕更新
+            /*
             if (Main.getGoodWorld)
             {
                 Color light = Lighting.GetColor(npc.Center.ToTileCoordinates());
@@ -110,7 +111,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     }
                 }
             }
-            
+            */
             if (npc.alpha > 50 && !Main.getGoodWorld)
                 Lighting.AddLight(npc.Center, 0.75f, 1.35f, 1.5f);
             npc.dontTakeDamage = npc.alpha > 100;
@@ -484,7 +485,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
                 // 添加随机误差
                 targetDelta.X *= 1f + Main.rand.Next(-10, 11) * 0.01f;
-                targetDelta.Y *= 1f + Main.rand.Next(-10, 11) * 0.01f;
+                targetDelta.Y *= 1f + Main.rand.Next(-10, 11) * 0.01f * 0.5f;
 
                 float dirLength = targetDelta.Length();
                 float originalDirLength = dirLength;
@@ -493,7 +494,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.velocity.Y = targetDelta.Y * dirLength;
                 // 添加随机偏移
                 npc.velocity.X += Main.rand.Next(-20, 21) * 0.1f;
-                npc.velocity.Y += Main.rand.Next(-20, 21) * 0.1f;
+                npc.velocity.Y += Main.rand.Next(-20, 21) * 0.1f * 0.5f;
                 if (originalDirLength < 100f) // 距离较近时交换 X/Y 方向以避免太直
                 {
                     if (Math.Abs(npc.velocity.X) > Math.Abs(npc.velocity.Y))
@@ -532,11 +533,17 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     {
                         for (float j = -1; j <= 1; j += 2)
                         {
-                            double angle = i * MathHelper.TwoPi / 8 * j;
-                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
+                            double angle = i * ((float)Math.PI * 2f) / 8f * j;
+                            Vector2 EllipseVel = 200f * Vector2.UnitX.RotatedBy(angle);
                             EllipseVel *= (j + 2f) / 2f;
-                            Vector2 vel = EllipseVel / 15f;
-                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                            Vector2 vel = EllipseVel / 25f;
+                            if (j == -1f)
+                            {
+                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.8f, 2), 0f, Main.myPlayer, npc.Center.X + 12f * vel.X, npc.Center.Y + 12f * vel.Y, 40f);
+                                continue;
+                            }
+                            vel = 1f * vel.RotatedBy(-0.01);
+                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + 8f * vel, 2f * vel.RotatedBy(MonoUtil.PiOver4), ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.8f, 2), 0f, Main.myPlayer, npc.Center.X, npc.Center.Y, 40f);
                         }
                     }
                 }
@@ -733,7 +740,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
                 // 添加随机误差
                 targetDelta.X *= 1f + Main.rand.Next(-10, 11) * 0.01f;
-                targetDelta.Y *= 1f + Main.rand.Next(-10, 11) * 0.01f;
+                targetDelta.Y *= 1f + Main.rand.Next(-10, 11) * 0.01f * 0.5f;
 
                 float dirLength = targetDelta.Length();
                 float originalDirLength = dirLength;
@@ -742,7 +749,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 npc.velocity.Y = targetDelta.Y * dirLength;
                 // 添加随机偏移
                 npc.velocity.X += Main.rand.Next(-20, 21) * 0.1f;
-                npc.velocity.Y += Main.rand.Next(-20, 21) * 0.1f;
+                npc.velocity.Y += Main.rand.Next(-20, 21) * 0.1f * 0.5f;
                 if (originalDirLength < 100f) // 距离较近时交换 X/Y 方向以避免太直
                 {
                     if (Math.Abs(npc.velocity.X) > Math.Abs(npc.velocity.Y))
@@ -779,27 +786,22 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
                     for (int i = 0; i < 8; i++)
                     {
-                        for (float j = -1; j <= 1; j += 2)
-                        {
-                            double angle = i * MathHelper.TwoPi / 8 * j;
-                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                            EllipseVel *= (j + 3f) / 2f;
-                            Vector2 vel = EllipseVel / 30f;
-                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, player.Center.X, player.Center.Y, 40);
-                            j += 2;
-                        }
+                        double angle = i * ((float)Math.PI * 2f) / 8f;
+                        Vector2 EllipseVel = 200f * Vector2.UnitX.RotatedBy(angle);
+                        EllipseVel *= 1f;
+                        Vector2 vel = EllipseVel / 30f;
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.6f * vel, ModContent.ProjectileType<MoonBolt>(), 
+                            FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 1f, 2), 1f, Main.myPlayer, player.Center.X, player.Center.Y, 40f);
                     }
-                    for (int i = 0; i < 8; i++)
+                    for (int j = 0; j < 8; j++)
                     {
-                        for (float j = -1; j <= 1; j += 2)
-                        {
-                            j += 2;
-                            double angle = i * MathHelper.TwoPi / 8 * j;
-                            Vector2 EllipseVel = 200 * Vector2.UnitX.RotatedBy(angle);
-                            EllipseVel *= (j + 2f) / 3f;
-                            Vector2 vel = EllipseVel / 10f;
-                            Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
-                        }
+                        double angle2 = j * ((float)Math.PI * 2f) / 8f;
+                        Vector2 EllipseVel2 = 200f * Vector2.UnitX.RotatedBy(angle2);
+                        EllipseVel2 *= 1.5f;
+                        Vector2 vel2 = EllipseVel2 / 25f;
+                        vel2 = 1f * vel2.RotatedBy(-0.01);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + 8f * vel2, 2f * vel2.RotatedBy(MonoUtil.PiOver4), 
+                            ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 0.8f), 0f, Main.myPlayer, npc.Center.X, npc.Center.Y, 40f);
                     }
                 }
                 npc.netUpdate = true;
@@ -1062,15 +1064,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15)
             {
-                if (npc.ai[1] % 3 == 0)
+                if (npc.ai[1] % 5 == 0)
                 {
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 75);
-                    Main.projectile[p].scale *= 0.8f;
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer, npc.localAI[0], npc.localAI[1], 185 - npc.ai[1]);
+                    //Main.projectile[p].scale *= 0.8f;
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
                 }
                 if(FargoSoulsUtil.HostCheck)
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.05f * npc.velocity.RotatedBy(-MathHelper.PiOver2), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.05f * npc.velocity.RotatedBy(-MathHelper.PiOver2), ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer);
             }
             if (npc.ai[1] > 80 + 6 * 15)
             {
@@ -1153,8 +1155,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (npc.ai[1] % 3 == 0)
                 {
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 75);
-                    Main.projectile[p].scale *= 0.8f;
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 215 - npc.ai[1]);
+                    //Main.projectile[p].scale *= 0.8f;
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
                 }
@@ -1243,9 +1245,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15 && FargoSoulsUtil.HostCheck)
             {
-                if (npc.ai[1] % 3 == 0)
+                if (npc.ai[1] % 4 == 0)
                 {
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 75);
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 185 - npc.ai[1]);
                     Main.projectile[p].scale *= 0.8f;
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
@@ -1329,10 +1331,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 15 * 8 && FargoSoulsUtil.HostCheck)
             {
-                if (npc.ai[1] % 3 == 0)
+                if (npc.ai[1] % 5 == 0)
                 {
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 100);
-                    Main.projectile[p].scale *= 0.8f;
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 220 - npc.ai[1]);
+                    //Main.projectile[p].scale *= 0.8f;
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
                 }
@@ -1419,7 +1421,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (npc.ai[1] % 3 == 0)
                 {
-                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1, Main.myPlayer, npc.localAI[0], npc.localAI[1], 65);
+                    int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer, npc.localAI[0], npc.localAI[1], 195 - npc.ai[1]);
                     Main.projectile[p].scale *= 0.8f;
                     Main.projectile[p].width = 6;
                     Main.projectile[p].height = 6;
@@ -1832,7 +1834,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 43);
-                    FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
+                    //FargoSoulsUtil.XWay(8, npc.GetSource_FromThis(), npc.Center, ModContent.ProjectileType<BloodScythe>(), 1.5f, FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0);
                     /*
                     for (int i = 0; i < 8; i++)
                     {
@@ -1876,15 +1878,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.velocity.Y = 0f;
                 npc.rotation += npc.localAI[1];
                 float i = npc.ai[1] - 60f;
-                if (FargoSoulsUtil.HostCheck)
+                if (FargoSoulsUtil.HostCheck && i <= 0)
                 {
-                    for (float j = -1; j <= 1; j += 2)
+                    int limit = (Main.getGoodWorld ? 1 : 0);
+                    for (float j = -1f; j <= (float)limit; j += 2f)
                     {
-                        double angle = i * MathHelper.TwoPi / 20 * j;
-                        Vector2 EllipseVel = new(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
-                        EllipseVel *= (j + 2f) / 2f;
+                        double angle = i * ((float)Math.PI * 2f) / 15f * j;
+                        Vector2 EllipseVel = new(150f * (float)Math.Cos(angle) * (1f - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
+                        EllipseVel *= (j + 4f) / 4f;
                         Vector2 vel = EllipseVel.RotatedBy(npc.localAI[2]) / 10f;
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, npc.Center.X + 12 * vel.X, npc.Center.Y + 12 * vel.Y, 40);
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 1f, 2), 1f, Main.myPlayer, npc.Center.X + 12f * vel.X, npc.Center.Y + 12f * vel.Y, 40f);
                     }
                 }
             }
@@ -2292,7 +2295,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public override void SafeModifyHitByProjectile(NPC npc, Projectile projectile, ref NPC.HitModifiers modifiers)
         {
             if (projectile.type == ProjectileID.ThornChakram)
-                modifiers.FinalDamage *= 0.75f;
+                modifiers.FinalDamage *= 0.85f;
             base.SafeModifyHitByProjectile(npc, projectile, ref modifiers);
         }
     }

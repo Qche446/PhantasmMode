@@ -1,111 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\tModLoader.targets" />
-
-	<!-- 定义Mods文件夹路径变量 -->
+	
 	<PropertyGroup>
-		<ModsFolder>$(USERPROFILE)\Documents\My Games\Terraria\tModLoader\Mods</ModsFolder>
-	  <UserSecretsId>e7ff75d2-70e6-46ca-9358-e08ea683f1c6</UserSecretsId>
-  </PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <FileAlignment>8192</FileAlignment>
+		<LangVersion>preview</LangVersion>
+		<TargetFramework>net8.0</TargetFramework>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <FileAlignment>8192</FileAlignment>
-	</PropertyGroup>
+	
 	<ItemGroup>
-	  <AdditionalFiles Remove="Content\Buffs\Global\新文件夹\**" />
-	  <AdditionalFiles Remove="Content\Buffs\新文件夹\**" />
-	  <AdditionalFiles Remove="Content\MiniBossBar\**" />
-	  <Compile Remove="Content\Buffs\Global\新文件夹\**" />
-	  <Compile Remove="Content\Buffs\新文件夹\**" />
-	  <Compile Remove="Content\MiniBossBar\**" />
-	  <EmbeddedResource Remove="Content\Buffs\Global\新文件夹\**" />
-	  <EmbeddedResource Remove="Content\Buffs\新文件夹\**" />
-	  <EmbeddedResource Remove="Content\MiniBossBar\**" />
-	  <None Remove="Content\Buffs\Global\新文件夹\**" />
-	  <None Remove="Content\Buffs\新文件夹\**" />
-	  <None Remove="Content\MiniBossBar\**" />
-	</ItemGroup>
-	<ItemGroup>
-	  <AdditionalFiles Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
-	  <AdditionalFiles Remove="Assets\AutoloadedEffects\Shaders\Items\ShadowveilHeart.fx" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Remove="assets\autoloadedeffects\shaders\AbomSkyEffect.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\BigTentacle.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\BossBars\FireBarShader.fx" />
-	  <None Remove="assets\autoloadedeffects\shaders\BurnText.fx" />
-	  <None Remove="assets\autoloadedeffects\shaders\projectiles\BossBarShader.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\Projectiles\MoonTrailShader.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\Projectiles\ShockWaveShader.fx" />
-	  <None Remove="assets\autoloadedeffects\shaders\PungentAuraProj.fx" />
-	  <None Remove="Assets\AutoloadedEffects\Shaders\ShadowFlame.fx" />
-	  <None Remove="Assets\ExtraTextures\Noise\Neurons2.png" />
-	  <None Remove="Assets\ExtraTextures\Noise\UniverseNoise.png" />
-	  <None Remove="Content\Bosses\VanillaEternity\Twins\DarkStar_Glow.png" />
-	  <None Remove="Content\Bosses\VanillaEternity\Twins\SpazmatismGlowLine.png" />
-	  <None Remove="Content\Buffs\NanoErosionBuff.png" />
-	  <None Remove="Content\Buffs\PlaceholderBuff.png" />
-	  <None Remove="Content\Buffs\PlaceholderDebuff.png" />
-	  <None Remove="Content\Sky\MutantSky.png" />
-	  <None Remove="Content\Sky\MutantSky2.png" />
-	  <None Remove="Content\Sky\MutantSky_April.png" />
-	  <None Remove="Content\Sky\MutantStatic.png" />
-	  <None Remove="Content\UI\PhantasmIcon.png" />
-	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Buffs.hjson" />
-	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Projectiles.hjson" />
-	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.SpecialEnhance.hjson" />
-	  <None Remove="Localization\en-US\Mods.FargosPhantasmMode.Toggler.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\ActiveSkills.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Armor.hjson" />
-	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Buffs.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Enchantments.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Items.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\Masomode.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\NPCs.hjson" />
-	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Projectiles.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\SpecialEnhance.hjson" />
-	  <None Remove="Localization\zh-Hans_Mods.FargosPhantasmMode\Toggler.hjson" />
-	  <None Remove="localization\zh-hans_mods.fargosphantasmmode\UI.hjson" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!-- 使用变量路径 -->
 		<Reference Include="Fargowiltas">
-		  <HintPath>Fargowiltas.dll</HintPath>
+			<HintPath>lib\Fargowiltas.dll</HintPath>
+			<Private>false</Private>
 		</Reference>
 		<Reference Include="FargowiltasSouls">
-			<HintPath>$(ModsFolder)\FargowiltasSouls.dll</HintPath>
+			<HintPath>lib\FargowiltasSouls.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-
 		<Reference Include="Luminance">
-			<HintPath>$(ModsFolder)\Luminance.dll</HintPath>
+			<HintPath>lib\Luminance.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-
-		<!-- 如果Luminance有XML文档文件 -->
-		<Reference Include="Luminance">
-			<HintPath>$(ModsFolder)\Luminance.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-
-		<!-- 将XML文件作为内容包含 -->
-		<Content Include="$(ModsFolder)\Luminance.xml" Condition="Exists('$(ModsFolder)\Luminance.xml')">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>Luminance.xml</Link>
-		</Content>
+		<ProjectReference Include="..\Monochrome\Monochrome.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Assets\Sounds\" />
-	  <Folder Include="Assets\Music\" />
-	  <Folder Include="Content\Projectiles\Souls\" />
-	  <Folder Include="Content\Dusts\" />
-	  <Folder Include="Core\PModeBalance\" />
-	  <Folder Include="lib\" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<AdditionalFiles Include="**/*.csv" />
 	</ItemGroup>

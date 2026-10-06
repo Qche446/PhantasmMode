@@ -1,9 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\tModLoader.targets" />
+	<Import Project="..\tModLoader.targets" />
 
-  <PropertyGroup>
-    <BuildMod Condition="'$(BuildMod)' == ''">true</BuildMod>
-	  <LangVersion>12.0</LangVersion>
-	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>preview</LangVersion>
+		<TargetFramework>net8.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="Luminance">
+			<HintPath>lib\Luminance.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+	<PropertyGroup>
+		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == ''">powershell</MonochromePowerShell>
+		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == 'powershell' AND Exists('$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe')">$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe</MonochromePowerShell>
+	</PropertyGroup>
+	<Target Name="CompileMonochromeShaders" BeforeTargets="CoreCompile" Condition="'$(MonochromeShaderCompile)' != 'false'">
+		<Exec Command="&quot;$(MonochromePowerShell)&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Tools\CompileMonochromeShaders.ps1&quot; -CompilerPath &quot;$(MonochromeShaderCompiler)&quot;"
+		      StandardOutputImportance="low" StandardErrorImportance="high" />
+	</Target>
 </Project>

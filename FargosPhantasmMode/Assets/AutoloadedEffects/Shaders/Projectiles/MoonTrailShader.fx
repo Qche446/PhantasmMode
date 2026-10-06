@@ -1,4 +1,4 @@
-﻿sampler cutoffNoise : register(s1);
+sampler cutoffNoise : register(s1);
 
 float globalTime;
 float lifetimeRatio;

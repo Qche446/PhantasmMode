@@ -102,7 +102,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         public bool Equals(MonoRay other) => Origin == other.Origin && Direction == other.Direction && Length == other.Length;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoRay other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoRay other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Origin, Direction, Length);

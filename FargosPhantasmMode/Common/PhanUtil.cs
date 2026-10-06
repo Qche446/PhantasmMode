@@ -1,18 +1,12 @@
 ﻿using FargowiltasSouls;
 using Luminance.Common.StateMachines;
 using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using FargowiltasSouls.Core;
+using Monochrome.Common.MonoUtil;
 namespace FargosPhantasmMode.Common
 {
     public static class PhanUtil
@@ -141,6 +135,10 @@ namespace FargosPhantasmMode.Common
 
         public static bool HostCheck => Main.netMode != NetmodeID.MultiplayerClient;
         static float ColorTimer;
+        static void A()
+        {
+
+        }
         /// <summary>
         /// 80
         /// </summary>

@@ -1,8 +1,3 @@
-## Monochrome 的忽略规则
-##
-## 仓库根是 ModSources，这份文件只作用于 Monochrome/ 子树
-## （FargosPhantasmMode/.gitignore 是另一份，各管各的）。
-
 # 构建产物
 [Bb]in/
 [Oo]bj/
@@ -12,8 +7,10 @@
 *.user
 *.suo
 *.userprefs
+docs/
 
-# 注意：以下这些是【要提交】的，不要加进来
-#   lib/        第三方 DLL 引用（与 FargosPhantasmMode/lib 保持一致的做法）
-#   docs/       设计文档（构建蓝图等）
-#   Assets/ Localization/ Core/ Common/   模组内容
+# 游戏内自检的报告产物（每次 /monocore selftest 都会重写它）
+Monochrome-CoreSelfTest.txt
+
+# 命令参数的临时诊断产物（每次 /monocore 调用都会重写它）
+Monochrome-CommandArgs.txt

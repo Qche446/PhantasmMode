@@ -22,15 +22,19 @@ namespace Monochrome.Common.MonoUtil
             }
             return result;
         }
-
-        /// <summary>
-        /// 单位X矢量的简写
-        /// </summary>
-        public static Vector2 UX => Vector2.UnitX;
-        /// <summary>
-        /// 单位Y矢量的简写
-        /// </summary>
-        public static Vector2 UY => Vector2.UnitY;
+        /*
+        extension(Vector2 vec)
+        {
+            /// <summary>
+            /// 单位X矢量的简写
+            /// </summary>
+            public static Vector2 UX => Vector2.UnitX;
+            /// <summary>
+            /// 单位Y矢量的简写
+            /// </summary>
+            public static Vector2 UY => Vector2.UnitY;
+        }
+        */
         /// <summary>
         /// 计算两二维矢量夹角
         /// </summary>

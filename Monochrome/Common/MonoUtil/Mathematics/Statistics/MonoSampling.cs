@@ -41,7 +41,8 @@ namespace Monochrome.Common.MonoUtil
         /// <param name="items">候选元素。</param>
         /// <param name="weights">与元素一一对应的权重。</param>
         /// <param name="random">随机流。</param>
-        public static T WeightedPick<T>(IReadOnlyList<T> items, ReadOnlySpan<float> weights, ref MonoRandom random)
+        /// <returns>按权重选中的元素；<paramref name="items"/> 为 null 或空、或权重全部为 0 时返回 <see langword="default"/>。</returns>
+        public static T? WeightedPick<T>(IReadOnlyList<T> items, ReadOnlySpan<float> weights, ref MonoRandom random)
         {
             if (items is null || items.Count == 0)
                 return default;
@@ -244,7 +245,7 @@ namespace Monochrome.Common.MonoUtil
             if (minimumDistance <= MonoUtil.Epsilon || bounds.Size.X <= 0f || bounds.Size.Y <= 0f)
                 return points;
 
-            MonoRandom random = new(seed);
+            MonoRandom random = new((ulong)seed);
             float cellSize = minimumDistance / MathF.Sqrt(2f);
             int gridWidth = Math.Max(1, (int)MathF.Ceiling(bounds.Size.X / cellSize));
             int gridHeight = Math.Max(1, (int)MathF.Ceiling(bounds.Size.Y / cellSize));
@@ -367,7 +368,7 @@ namespace Monochrome.Common.MonoUtil
             count = Math.Max(count, 0);
             Vector2[] points = new Vector2[count];
             Vector2 size = bounds.Size;
-            MonoRandom random = new(seed);
+            MonoRandom random = new((ulong)seed);
 
             for (int i = 0; i < count; i++)
             {
@@ -408,7 +409,7 @@ namespace Monochrome.Common.MonoUtil
         {
             count = Math.Max(count, 0);
             Vector2[] points = new Vector2[count];
-            MonoRandom random = new(seed);
+            MonoRandom random = new((ulong)seed);
             for (int i = 0; i < count; i++)
                 points[i] = center + random.NextVector2InCircle(radius);
             return points;
@@ -424,7 +425,7 @@ namespace Monochrome.Common.MonoUtil
         {
             count = Math.Max(count, 0);
             Vector2[] points = new Vector2[count];
-            MonoRandom random = new(seed);
+            MonoRandom random = new((ulong)seed);
             float innerSquared = innerRadius * innerRadius;
             float outerSquared = outerRadius * outerRadius;
 

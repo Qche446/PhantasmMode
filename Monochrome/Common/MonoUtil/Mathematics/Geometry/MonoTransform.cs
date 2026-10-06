@@ -29,13 +29,9 @@ namespace Monochrome.Common.MonoUtil
         BottomRight,
     }
 
-    /// <summary>
-    /// 坐标变换：世界 / 屏幕 / UI / 瓦片，以及局部坐标系、矩阵栈、锚点、镜像。
-    /// <para>
-    /// tML 里有 4 套坐标系，混用是「特效画错位置」的最常见根因。所有转换集中在这里，
-    /// 其它地方不要再手写 <c>- Main.screenPosition</c> 之类的散装运算。
-    /// </para>
-    /// </summary>
+    //坐标变换：世界 / 屏幕 / UI / 瓦片，以及局部坐标系、矩阵栈、锚点、镜像。
+    //tML 里有 4 套坐标系，所有转换集中在这里，
+    //其它地方不要再手写 - Main.screenPosition之类的散装运算。
     public static partial class MonoUtil
     {
         #region 基础空间转换

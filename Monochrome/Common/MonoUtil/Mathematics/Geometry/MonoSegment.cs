@@ -146,7 +146,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         public bool Equals(MonoSegment other) => Start == other.Start && End == other.End;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoSegment other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoSegment other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Start, End);

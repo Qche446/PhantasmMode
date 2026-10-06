@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-
 using static Monochrome.Common.MonoUtil.MonoUtil;
 
 namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
@@ -168,7 +167,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => Center == other.Center && Radius == other.Radius && StartAngle == other.StartAngle && SweepAngle == other.SweepAngle;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoArc other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoArc other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Center, Radius, StartAngle, SweepAngle);

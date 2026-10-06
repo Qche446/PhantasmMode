@@ -21,7 +21,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Statistics
             for (int i = 0; i < PermutationSize; i++)
                 source[i] = (byte)i;
 
-            MonoRandom random = new(seed);
+            MonoRandom random = new((ulong)seed);
             for (int i = PermutationSize - 1; i > 0; i--)
             {
                 int j = random.NextInt(i + 1);

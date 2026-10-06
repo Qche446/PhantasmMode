@@ -19,6 +19,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
     /// </summary>
     public class MoonBolt : ModProjectile, IPixelatedPrimitiveRenderer
     {
+        private readonly int Maxspeed = 24;
         public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.PhantasmalBolt;
         public override void SetDefaults()
         {
@@ -85,6 +86,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             else if (Projectile.localAI[0] > Projectile.ai[2] + 1 && Projectile.localAI[0] < Projectile.ai[2] + 51)
             {
                 Projectile.velocity *= 1.04f;
+                if (base.Projectile.velocity.Length() > (float)Maxspeed)
+                {
+                    base.Projectile.velocity = Maxspeed * base.Projectile.velocity.SafeNormalize(Vector2.Zero);
+                }
             }
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
 

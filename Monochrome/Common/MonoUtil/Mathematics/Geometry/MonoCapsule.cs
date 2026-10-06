@@ -121,7 +121,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         public bool Equals(MonoCapsule other) => Start == other.Start && End == other.End && Radius == other.Radius;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoCapsule other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoCapsule other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Start, End, Radius);

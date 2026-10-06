@@ -357,6 +357,71 @@ namespace Monochrome.Common.MonoUtil
 
         #endregion
 
+        #region 常驻委托表
+        /// <summary>
+        /// 「类型 + 方向」→ 已缓存的委托。<b>它的唯一目的是让缓动可以当 <c>Func&lt;float,float&gt;</c> 传出去却不分配。</b>
+        /// <para>
+        /// 补间、时间轴这类消费者的签名是 <c>Func&lt;float,float&gt;</c>，而<see cref="MonoEaseKind"/> 与
+        /// <see cref="MonoEaseMode"/> 是两个 4 字节的枚举。每次补间都写
+        /// <c>ease: t =&gt; Evaluate(kind, mode, t)</c> 会包一个闭包——那是每帧每补间一次分配，
+        /// 正好踩在本库的零分配纪律上。
+        /// </para>
+        /// <para>
+        /// 表在静态构造里一次性建好，之后只读；<b>它不含 <c>overshoot</c></b>，
+        /// 用的是 <see cref="InBack(float,float)"/> 的默认回弹强度。要自定义回弹强度就用
+        /// <c>Apply(...)</c> 或自己写 lambda。
+        /// </para>
+        /// </summary>
+        /// <param name="kind">缓动类型。</param>
+        /// <param name="mode">缓动方向。<c>InOutSoft</c> 按 <c>InOut</c> 处理（本表没有"更软的 InOut"这个变体）。</param>
+        /// <returns>可以直接传进补间/时间轴的委托。恒不为 null。</returns>
+        public static Func<float, float> Ease(MonoEaseKind kind, MonoEaseMode mode) => EaseTable[(int)kind, (int)mode];
+
+        /// <summary>
+        /// 默认缓动（<c>Linear</c>）：<b>补间不传缓动时用它，而时间轴通道的 <c>null</c> 也是同一个意思</b>
+        /// ——全库的"不做缓动"只有一个语义。
+        /// <para>
+        /// 它<b>就是表里 <c>(Linear, In)</c> 那一格本身</b>，不是一个另外写出来的 lambda——
+        /// 写 <c>ease: t =&gt; t</c> 会每次新建一个闭包对象，而这里是一个静态字段，传多少次都是同一个引用。
+        /// 字段在<b>静态构造函数</b>里赋值（不能在这里写初始化式：那会形成静态初始化循环）。
+        /// </para>
+        /// </summary>
+        public static readonly Func<float, float> LinearEase;
+
+        /// <summary>已缓存的缓动委托。索引是 <c>[类型, 方向]</c>，两维都按枚举值排。</summary>
+        private static readonly Func<float, float>[,] EaseTable;
+
+        /// <summary>
+        /// 建表并挑出默认缓动。
+        /// <para>
+        /// 它<b>必须是静态构造函数</b>：<see cref="LinearEase"/> 是 <c>static readonly</c>，只能在静态构造函数或字段
+        /// 初始化式里赋值，普通的静态方法（哪怕只被调用一次）都不行（CS0198）。
+        /// </para>
+        /// </summary>
+        static MonoUtil()
+        {
+            int kinds = Enum.GetValues<MonoEaseKind>().Length;
+            int modes = Enum.GetValues<MonoEaseMode>().Length;
+            Func<float, float>[,] table = new Func<float, float>[kinds, modes];
+
+            for (int k = 0; k < kinds; k++)
+            {
+                for (int m = 0; m < modes; m++)
+                {
+                    MonoEaseKind kind = (MonoEaseKind)k;
+                    MonoEaseMode mode = (MonoEaseMode)m;
+                    table[k, m] = t => Evaluate(kind, mode, t);
+                }
+            }
+
+            EaseTable = table;
+
+            // 默认缓动复用表里那一格，而不是再包一个等价但不相同的委托。
+            LinearEase = table[(int)MonoEaseKind.Linear, (int)MonoEaseMode.In];
+        }
+
+        #endregion
+
         #region 分派
         /// <summary>按类型与方向分派到具体缓动函数。</summary>
         /// <param name="kind">缓动类型。</param>

@@ -15,20 +15,13 @@ using FargowiltasSouls.Content.Bosses.TrojanSquirrel;
 using static FargowiltasSouls.FargowiltasSouls;
 using Luminance.Assets;
 using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
 using static Terraria.ModLoader.ModContent;
 using FargowiltasSouls.Content.Bosses.Champions.Life;
 using FargowiltasSouls.Content.Bosses.Champions.Shadow;
 using FargowiltasSouls.Content.Bosses.Champions.Spirit;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
 using FargowiltasSouls.Content.Bosses.Champions.Cosmos;
-using Terraria.DataStructures;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Solar;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Vortex;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Nebula;
@@ -106,7 +99,7 @@ namespace FargosPhantasmMode.Content.Bossbar
                 [NPCType<SpiritChampion>()] = BaseBarStyle(EModeColor, () => Color.Black, 3),
                 [NPCType<WillChampion>()] = BaseBarStyle(EModeColor, () => Color.Gold, 3),
                 [NPCType<CosmosChampion>()] = BaseBarStyle(() => Color.Purple, PhanUtil.CosmoColor, 5),
-                [NPCType<AbomBoss>()] = BaseBarStyle(PhanUtil.CosmoColor, EModeColor, 6),
+                [NPCType<AbomBoss>()] = BaseBarStyle(Color.Purple, Color.Gold, 6),
                 [NPCType<MutantBoss>()] = new(MutantBossBar),
             };
 

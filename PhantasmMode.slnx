@@ -1,24 +1,4 @@
 <Solution>
-  <!--
-    工作区解决方案：两个模组都直接位于 ModSources 下，作为彼此独立的模组存在。
-
-    FargosPhantasmMode : 主模组。本身是一个合法的 tModLoader 模组，
-                         可独立编译、打包与发布。
-
-    Monochrome         : 库模组。同样是合法的独立模组，可独立编译；
-                         其主要用途是【被复用】——其他模组需要它的功能时，
-                         把源码复制到自己的目录下使用，而不是通过
-                         build.txt 的 modReferences 建立硬依赖。
-                         FargosPhantasmMode\Monochrome\ 就是这样一个副本目录。
-
-    为什么两个模组必须是 ModSources 的直接子目录：
-      tModLoader 的 ModCompile.FindModSources() 会枚举 ModSources 下
-      【所有】一级子目录，而 Build(string modFolder) 在目录缺少 build.txt 时
-      会直接用【文件夹名】当模组名继续编译。因此任何位于 ModSources 下、
-      但没有 build.txt 的一级子目录（例如从前的容器目录 PhantasmMode）都会
-      成为一个"空壳假模组"。把真正的模组直接放在 ModSources 下，
-      文件夹名即模组名，身份不会错位。
-  -->
   <Project Path="FargosPhantasmMode/FargosPhantasmMode.csproj" />
   <Project Path="Monochrome/Monochrome.csproj" />
 </Solution>

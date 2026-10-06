@@ -353,7 +353,7 @@ namespace Monochrome.Common.MonoUtil
         /// <param name="value">待归一化的矢量。</param>
         /// <param name="fallback">退化时返回的替代矢量，建议传单位矢量。</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 SafeNormalize(Vector2 value, Vector2 fallback = default)
+        internal static Vector2 SafeNormalize(Vector2 value, Vector2 fallback = default)
         {
             float lengthSquared = value.LengthSquared();
             if (lengthSquared <= EpsilonSqr)
@@ -368,7 +368,7 @@ namespace Monochrome.Common.MonoUtil
         /// <param name="to">终点。</param>
         /// <param name="fallback">退化时返回的替代矢量。</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 SafeDirectionTo(Vector2 from, Vector2 to, Vector2 fallback = default)
+        internal static Vector2 SafeDirectionTo(Vector2 from, Vector2 to, Vector2 fallback = default)
             => SafeNormalize(to - from, fallback);
 
         /// <summary>

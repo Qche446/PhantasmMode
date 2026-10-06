@@ -117,7 +117,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         public bool Equals(MonoCircle other) => Center == other.Center && Radius == other.Radius;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoCircle other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoCircle other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Center, Radius);

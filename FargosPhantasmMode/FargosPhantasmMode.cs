@@ -1,4 +1,4 @@
-﻿using Terraria;
+using Terraria;
 using Microsoft.Xna.Framework;
 using FargosPhantasmMode.Assets.ExtraTextures;
 using FargosPhantasmMode.Content.Render;
@@ -16,10 +16,13 @@ using Terraria.ID;
 using static Terraria.GameContent.Creative.CreativePowers;
 using Luminance.Common.Utilities;
 using FargosPhantasmMode.Core.Systems;
+using Monochrome.Core.Graphics.Shaders;
 
 
 namespace FargosPhantasmMode
 {
+    // 声明本模组的着色器归 Monochrome 管：加载期进注册表，/monoshader reload 会把编好的 .fxc 写回源目录。
+    [MonoShaderScope]
     public class FargosPhantasmMode : Mod
     {
         internal static FargosPhantasmMode Instance;

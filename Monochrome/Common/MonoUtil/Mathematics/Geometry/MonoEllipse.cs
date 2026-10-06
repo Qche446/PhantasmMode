@@ -195,7 +195,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => Center == other.Center && RadiusX == other.RadiusX && RadiusY == other.RadiusY && Rotation == other.Rotation;
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoEllipse other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoEllipse other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Center, RadiusX, RadiusY, Rotation);

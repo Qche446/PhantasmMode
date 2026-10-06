@@ -332,21 +332,21 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => Transformed(v => pivot + (v - pivot) * scale);
 
         /// <summary>凸包（Andrew 单调链）。返回的多边形为逆时针（数学意义）。</summary>
-        public MonoPolygon ConvexHull() => MonoUtil.ConvexHull(_vertices);
+        public MonoPolygon ConvexHull() => MonoUtil.Polygon.ConvexHull(_vertices);
 
         /// <summary>耳切三角化。返回的数组每三个索引构成一个三角形（索引指向本多边形的顶点）。</summary>
-        public int[] Triangulate() => MonoUtil.Triangulate(_vertices);
+        public int[] Triangulate() => MonoUtil.Polygon.Triangulate(_vertices);
 
         /// <summary>内缩（<paramref name="distance"/> 为正）或外扩（为负）。</summary>
         /// <param name="distance">偏移距离。</param>
-        public MonoPolygon Offset(float distance) => MonoUtil.OffsetPolygon(_vertices, distance);
+        public MonoPolygon Offset(float distance) => MonoUtil.Polygon.OffsetPolygon(_vertices, distance);
 
         /// <summary>重采样：在周长上均匀取 <paramref name="count"/> 个点，适合做平滑与绘制。</summary>
         /// <param name="count">目标点数。</param>
-        public MonoPolygon Resample(int count) => MonoUtil.ResamplePolygon(_vertices, count);
+        public MonoPolygon Resample(int count) => MonoUtil.Polygon.ResamplePolygon(_vertices, count);
 
         /// <summary>用 Chaikin 细分做一次圆滑处理。</summary>
-        public MonoPolygon Smoothed() => MonoUtil.ChaikinSmooth(_vertices, 1);
+        public MonoPolygon Smoothed() => MonoUtil.Polygon.ChaikinSmooth(_vertices, 1);
 
         /// <summary>把多边形拆成边段数组（便于绘制与逐边检测）。</summary>
         public MonoSegment[] ToEdges()
@@ -430,7 +430,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
             => new(arc.ToPolyline(segments), false);
 
         /// <inheritdoc/>
-        public bool Equals(MonoPolygon other)
+        public bool Equals(MonoPolygon? other)
         {
             if (other is null || other._vertices.Length != _vertices.Length)
                 return false;
@@ -443,7 +443,7 @@ namespace Monochrome.Common.MonoUtil.Mathematics.Geometry
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is MonoPolygon other && Equals(other);
+        public override bool Equals(object? obj) => obj is MonoPolygon other && Equals(other);
 
         /// <inheritdoc/>
         public override int GetHashCode()

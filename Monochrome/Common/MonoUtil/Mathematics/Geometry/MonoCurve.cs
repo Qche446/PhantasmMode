@@ -2,14 +2,8 @@ using Monochrome.Common.MonoUtil.Mathematics.Geometry;
 
 namespace Monochrome.Common.MonoUtil
 {
-    /// <summary>
-    /// 曲线：二次/三次贝塞尔、Catmull-Rom、Hermite、B 样条，全部带弧长参数化。
-    /// </summary>
     public static partial class MonoUtil
     {
-        /// <summary>
-        /// 曲线工厂与通用工具。
-        /// </summary>
         /// <summary>三次 Hermite 基函数求值（Berry 形式）。</summary>
         /// <param name="p0">起点。</param>
         /// <param name="m0">起点切线。</param>
@@ -63,7 +57,7 @@ namespace Monochrome.Common.MonoUtil
     /// </summary>
     public abstract class MonoCurve
     {
-        private float[] _arcLengthTable;
+        private float[] _arcLengthTable = [];
         private int _arcLengthSteps;
         private float _totalLength;
 
@@ -144,7 +138,7 @@ namespace Monochrome.Common.MonoUtil
         public void EnsureArcLengthTable(int steps = DefaultArcLengthSteps)
         {
             steps = Math.Max(steps, 2);
-            if (_arcLengthTable is not null && _arcLengthSteps == steps)
+            if (_arcLengthTable.Length > 0 && _arcLengthSteps == steps)
                 return;
 
             _arcLengthTable = new float[steps + 1];
@@ -652,7 +646,7 @@ namespace Monochrome.Common.MonoUtil
         /// <param name="points">路点，至少 2 个。</param>
         /// <param name="tangents">与路点一一对应的切线（未归一化即可，长度影响插值形状）。</param>
         /// <param name="copy">是否复制输入数组。</param>
-        public MonoHermiteSpline(Vector2[] points, Vector2[] tangents, bool copy = true)
+        public MonoHermiteSpline(Vector2[] points, Vector2[]? tangents, bool copy = true)
         {
             if (points is null || points.Length == 0)
             {
