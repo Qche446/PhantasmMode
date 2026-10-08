@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Items.Accessories;
+using FargosPhantasmMode.Content.Items.Accessories;
 using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
@@ -18,8 +18,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public bool DotCrit = false;
         public bool DotCanDie = false;
         public bool Sublimation = false;
-        public bool HallowFlame = false;
-        public int HallowFlameLevel = 0;
         public int MaxHallowLevel = 10;
         public bool Fracture = false;
         public static bool PModeChangdeApply => PModeWorldSavingSystem.PhantasmMode;
@@ -28,13 +26,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             DotCrit = false;
             DotCanDie = false;
             Sublimation = false;
-            if (!HallowFlame)
-                HallowFlameLevel = 0;
-            else if (HallowFlameLevel < 1)
-                HallowFlameLevel = 1;
-            else if (HallowFlameLevel > MaxHallowLevel)
-                HallowFlameLevel =  MaxHallowLevel;
-            HallowFlame = false;
             MaxHallowLevel = 10;
             Fracture = false;
         }
@@ -65,8 +56,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             }
             if (Sublimation)
                 DamageOverTime(50, false);
-            if (HallowFlame)
-                DamageOverTime((int)MathHelper.Min(HallowFlameLevel * 10, Player.HasEffect<SpiritTornadoEffect>() ? 60 : 50), false);
 
 
 
@@ -104,19 +93,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                     Main.dust[d].velocity.Y -= 1;
                     Main.dust[d].velocity *= 1.5f;
                     Main.dust[d].noGravity = true;
-                }
-            }
-            if (HallowFlame)
-            {
-                for (int i = 0; i < MathHelper.Min(HallowFlameLevel, 4); i++)
-                {
-                    if (Main.rand.NextBool(8))
-                    {
-                        int d = Dust.NewDust(Player.position, Player.width, Player.height, DustID.HallowedTorch, Player.velocity.X * 0.4f, Player.velocity.Y * 0.4f, 0, new Color(220, 255, 220), 2.5f);
-                        Main.dust[d].velocity.Y -= 1;
-                        Main.dust[d].velocity *= 1.5f;
-                        Main.dust[d].noGravity = true;
-                    }
                 }
             }
         }

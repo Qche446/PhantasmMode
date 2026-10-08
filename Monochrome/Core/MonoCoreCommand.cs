@@ -422,7 +422,7 @@ public sealed class MonoCoreCommand : ModCommand
         output.Append("\n\n").Append(MonoScheduler.Describe());
         output.Append("\n").Append(MonoTween.Describe());
         output.Append("\n").Append(MonoLog.Describe());
-        output.Append("\n").Append(MonoSelfTest.IsRunning ? "自检：采样进行中……" : "自检：用 /mono core selftest 跑，/mono core last 看重放。");
+        output.Append("\n").Append(MonoSelfTest.IsRunning ? "自检：采样进行中……" : "自检：用 /monocore selftest 跑，/monocore last 看重放。");
         output.Append("\n\n").Append(MonoAllocProbe.Describe());
         return output.ToString();
     }

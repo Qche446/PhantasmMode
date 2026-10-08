@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Common.Graphics.Particles;
@@ -11,11 +11,14 @@ using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Monochrome.Core.Net;
 using System;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
 {
@@ -43,6 +46,21 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
             else
                 npc.lifeMax = (int)(1.1f * npc.lifeMax);
         }
+        /// <summary>
+        /// 基类不再统一写 <c>localAI</c>，本类自己声明要那四格——FSS 的 <c>KingSlime.SendExtraAI</c>
+        /// 只写 <c>DeathTimer</c>，这四格只有本模组在写。外加 <see cref="SuperSpecialJump"/>：
+        /// 客户端不再自己推进"超级跳"的分支，它得知道权威端把这一步切到了哪一边。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            WithLocalAI(MonoNet.Fields<NPC>("fpm.kingSlime"))
+                .Bool("superSpecialJump",
+                    static npc => npc.GetGlobalNPC<P_KingSlime>().SuperSpecialJump,
+                    static (npc, value) => npc.GetGlobalNPC<P_KingSlime>().SuperSpecialJump = value);
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
+
         public override bool SafePreAI(NPC npc)
         {
             var Eslime = npc.GetGlobalNPC<KingSlime>();
@@ -94,10 +112,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                                 Main.npc[slime].ai[0] = Math.Sign(player.Center.X - npc.Center.X);
                                 Main.npc[slime].velocity.X = Main.rand.NextFloat(10, 16) * 0.4f * -npc.HorizontalDirectionTo(player.Center);
                             }
-                            if (Main.netMode == NetmodeID.Server)
-                            {
-                                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, slime);
-                            }
+                            // 速度与 ai[0] 是刷完之后才赋的：让这一只自己把改好的值发出去
+                            // （新 NPC 本身由原版的 NPC.NewNPC 广播，不必再手发一包）
+                            Main.npc[slime].netUpdate = true;
                         }
                     }
                 }
@@ -649,21 +666,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                         npc.netUpdate = true;
                         npc.TargetClosest();
                     }
-                    if (Main.netMode == NetmodeID.MultiplayerClient && npc.ai[0] >= 60f)
-                    {
-                        if (!SuperSpecialJump)
-                        {
-                            npc.ai[1] = 0f;
-                            SuperSpecialJump = true;
-                        }
-                        else
-                        {
-                            npc.ai[1]++;
-                            SuperSpecialJump = false;
-                        }
-                        npc.ai[0] = 0f;
-                        npc.TargetClosest();
-                    }
+                    // 状态机只由权威端推进；客户端靠同步下来的 ai 值与 SendExtraAI 里的 SuperSpecialJump 跟随。
 
                     for (int i = 0; i < 10; i++)
                     {
@@ -724,12 +727,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                         npc.ai[1] = npc.ai[3] = 0;
                         npc.TargetClosest();
                         npc.ai[0] = -120;
-                    }
-                    if (npc.ai[3] > SuperSpecialJumpWindupTimer + 3.5f * Waittime && Main.netMode == NetmodeID.MultiplayerClient)
-                    {
-                        npc.ai[1] = npc.ai[3] = 0;
-                        npc.TargetClosest();
-                        npc.ai[0] = -120;
+                        // 少了这一句，改了 ai 也不会下发，客户端会一直停在放大状态。
+                        npc.netUpdate = true;
                     }
                     break;
                 default:
@@ -906,8 +905,14 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     targetPos.X, targetPos.Y, teleportThreshold);
             }
         }
+        /// <summary>
+        /// 生成一列史莱姆刺。<b>权威生成，只在权威端跑</b>：过去这里没有端侧门，客户端会各刷一份再自己同步上去。
+        /// </summary>
         private static void SpawnConicalSlimeSpikes(NPC npc, Vector2 spawnPos, float angle, int extraTimeleft)
         {
+            if (!FargoSoulsUtil.HostCheck)
+                return;
+
             int num = 3;
             int GapX = 100;
             int projType = ModContent.ProjectileType<SlimeBallHostile>();

@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature;
@@ -59,8 +59,6 @@ namespace FargosPhantasmMode.Content.Items.Global
                 {
                     //Main.NewText("HallowFlame true");
                     player.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 45 * 60);
-                    if (player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel < 1)
-                        player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel = 1;
                 }
             }
         }

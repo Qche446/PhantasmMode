@@ -31,6 +31,10 @@ namespace FargosPhantasmMode
         public override void Load()
         {
             ModLoader.TryGetMod("FargowiltasSouls", out FargoMod);
+
+            // 请求的注册与服务端处理。放在 Load 里是因为它必须在任何世界开始之前就绪。
+            PModeNet.Register();
+
             On_FilterManager.EndCapture += FilterManager_EndCapture;
             Rt = new ManagedRenderTarget(true,
                 (width, heigth) => new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight));
@@ -81,120 +85,6 @@ namespace FargosPhantasmMode
             #endregion
 
             orig(self, finalTexture, screenTarget1, screenTarget2, clearColor);
-        }
-        internal enum PacketID : byte
-        {
-            ActivePhamtasmMode,
-            CactusDrop,
-        }
-        public override void HandlePacket(BinaryReader reader, int whoAmI)
-        {
-            byte data = reader.ReadByte();
-            if (Enum.IsDefined(typeof(PacketID), data))
-            {
-                switch ((PacketID)data)
-                {
-                    case PacketID.CactusDrop:
-                        if (Main.netMode == NetmodeID.Server)
-                        {
-                            int playerWhoAmI = reader.ReadByte();
-                            int npcWhoAmI = reader.ReadByte();
-                            bool isHeart = reader.ReadBoolean();
-                            if (playerWhoAmI >= 0 && playerWhoAmI < Main.maxPlayers && npcWhoAmI >= 0 && npcWhoAmI < Main.maxNPCs)
-                            {
-                                NPC npc = Main.npc[npcWhoAmI];
-                                if (npc.active)
-                                    Item.NewItem(Main.player[playerWhoAmI].GetSource_OnHit(npc), npc.Hitbox, isHeart ? ItemID.Heart : ItemID.Star);
-                            }
-                        }
-                        break;
-                    case PacketID.ActivePhamtasmMode:
-                        {
-                            Player player = FargoSoulsUtil.PlayerExists(reader.ReadByte());
-                            int diff = reader.ReadByte();
-                            if (Main.netMode == NetmodeID.Server)
-                            {
-                                string toggle = diff switch
-                                {
-                                    3 => "Phantasm",
-                                    2 => "Master",
-                                    1 => "Expert",
-                                    0 => "None",
-                                    _ => "None"
-                                };
-                                if (diff != 0)
-                                {
-                                    bool changed = false;
-                                    if (Main.GameModeInfo.IsJourneyMode)
-                                    {
-                                        float value = diff >= 2 ? 1f : 0.66f;
-                                        var slider = CreativePowerManager.Instance.GetPower<DifficultySliderPower>();
-                                        typeof(CreativePowers.DifficultySliderPower).GetMethod("SetValueKeyboardForced", Utilities.UniversalBindingFlags).Invoke(slider, [value]);
-                                    }
-                                    else
-                                    {
-                                        switch (diff)
-                                        {
-                                            case 1:
-                                                if (Main.GameMode != GameModeID.Expert)
-                                                    changed = true;
-                                                Main.GameMode = GameModeID.Expert;
-                                                break;
-                                            case 2:
-                                                if (Main.GameMode != GameModeID.Master)
-                                                    changed = true;
-                                                Main.GameMode = GameModeID.Master;
-                                                break;
-                                            case 3:
-                                                if (Main.GameMode != GameModeID.Master)
-                                                    changed = true;
-                                                Main.GameMode = GameModeID.Master;
-                                                break;
-                                        }
-                                    }
-                                    if (changed)
-                                        FargoSoulsUtil.PrintLocalization($"Mods.Fargowiltas.Items.ModeToggle.{toggle}", new Color(175, 75, 255));
-                                }
-
-                                WorldSavingSystem.ShouldBeEternityMode = diff != 0;
-                                PModeWorldSavingSystem.CanPlayPhantasm = diff == 3;
-                                if (diff != 0)
-                                {
-                                    WorldSavingSystem.SpawnedDevi = true;
-                                }
-
-                                NetMessage.SendData(MessageID.WorldData); //sync world
-                            }
-                            else
-                            {
-                                string mode;
-                                float volume = 0.5f;
-
-                                switch (diff)
-                                {
-                                    case 1:
-                                        mode = "Emode";
-                                        break;
-                                    case 2:
-                                        mode = "Maso";
-                                        break;
-                                    case 3:
-                                        mode = "Phantasm";
-                                        break;
-                                    default:
-                                        mode = "Deactivate";
-                                        volume = 1;
-                                        break;
-                                }
-                                if (diff != 3)
-                                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + mode) with { Volume = volume });
-                                else
-                                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Maso") with { Volume = volume });
-                            }
-                        }
-                        break;
-                }
-            }
         }
     }
 }

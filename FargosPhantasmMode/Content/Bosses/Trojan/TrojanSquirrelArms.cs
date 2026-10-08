@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Global;
+using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.Champions.Timber;
@@ -9,6 +9,7 @@ using Luminance.Common.Utilities;
 using Luminance.Core.Sounds;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.IO;
 using System.Linq;
@@ -36,18 +37,22 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
             if (Main.getGoodWorld && npc.scale > 1)
                 npc.scale -= 0.6f;
         }
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            binaryWriter.Write(npc.scale);
-            binaryWriter.Write(body is NPC ? body.whoAmI : -1);
-            bitWriter.WriteBit(Ghost);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            npc.scale = binaryReader.ReadSingle();
-            body = FargoSoulsUtil.NPCExists(binaryReader.ReadInt32());
-            Ghost = bitReader.ReadBit();
-        }
+        /// <summary>
+        /// 表里没有基类那四格 <c>localAI</c>：原来的实现就没调 <c>base.SendExtraAI</c>，迁移保持原样。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            MonoNet.Fields<NPC>("fpm.trojanSquirrelArms")
+                .Float("scale", static npc => npc.scale, static (npc, value) => npc.scale = value)
+                .Int("body", static npc => Index(Self(npc).body), static (npc, value) => Self(npc).body = FargoSoulsUtil.NPCExists(value))
+                .Bool("ghost", static npc => Self(npc).Ghost, static (npc, value) => Self(npc).Ghost = value);
+
+        private static P_TrojanSquirrelArms Self(NPC npc) => npc.GetGlobalNPC<P_TrojanSquirrelArms>();
+
+        private static int Index(NPC npc) => npc is null ? -1 : npc.whoAmI;
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
             if (source is EntitySource_Parent parent && parent.Entity is NPC sourceNPC)

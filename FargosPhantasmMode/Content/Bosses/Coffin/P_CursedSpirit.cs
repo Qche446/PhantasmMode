@@ -57,6 +57,39 @@ public class P_CursedSpirit : PModeNPCBehaviour
 		spirit = Utilities.As<CursedSpirit>(npc);
 	}
 
+	/// <summary>
+	/// 把"玩家挣脱咬击"结算到服务端的那只 CursedSpirit 上。
+	/// <para>
+	/// 挣脱的依据是客户端的连打计数，服务端推不出来，只能由被咬的客户端上报。
+	/// 结算内容与本地解除那段一致，与 FSS 自己的 <c>SyncCursedSpiritRelease</c> 服务端分支同义。
+	/// </para>
+	/// </summary>
+	/// <param name="spiritIndex">CursedSpirit 的 NPC 下标。</param>
+	/// <param name="victimWhoAmI">被咬玩家的编号。</param>
+	/// <returns>确实结算了才返回 true。</returns>
+	public static bool TryApplyRelease(int spiritIndex, int victimWhoAmI)
+	{
+		if ((uint)spiritIndex >= Main.maxNPCs || (uint)victimWhoAmI >= Main.maxPlayers)
+			return false;
+
+		NPC npc = Main.npc[spiritIndex];
+		if (!npc.active || npc.ModNPC is not CursedSpirit cursedSpirit)
+			return false;
+
+		Player victim = Main.player[victimWhoAmI];
+		cursedSpirit.BittenPlayer = -1;
+		cursedSpirit.BiteTimer = -90;
+		npc.velocity = -Utilities.SafeDirectionTo((Entity)npc, victim.Center) * 12f;
+		victim.immune = true;
+		victim.immuneTime = Math.Max(victim.immuneTime, 30);
+		victim.hurtCooldowns[0] = Math.Max(victim.hurtCooldowns[0], 30);
+		victim.hurtCooldowns[1] = Math.Max(victim.hurtCooldowns[1], 30);
+		npc.netUpdate = true;
+		cursedSpirit.Timer = 0f;
+		cursedSpirit.AI3 = 0f;
+		return true;
+	}
+
 	public override bool SafePreAI(NPC npc)
 	{
 		NPC owner = FargoSoulsUtil.NPCExists(Owner, new int[1] { ModContent.NPCType<CursedCoffin>() });
@@ -114,18 +147,10 @@ public class P_CursedSpirit : PModeNPCBehaviour
 						npc.netUpdate = true;
 						Timer = 0f;
 						AI3 = 0f;
-						if (Main.netMode == NetmodeID.Server)
-						{
-							NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-						}
-						if (Main.netMode != NetmodeID.SinglePlayer)
-						{
-							ModPacket netMessage = base.Mod.GetPacket();
-							netMessage.Write((byte)2);
-							netMessage.Write((byte)npc.whoAmI);
-							netMessage.Write((byte)victim.whoAmI);
-							netMessage.Send();
-						}
+						// 挣脱的依据是客户端连打计数，服务端推不出来，所以由客户端上报、服务端复核后结算。
+						// 服务端自己走到这里时上面已经把状态改完了，不必再发。
+						if (Main.netMode == NetmodeID.MultiplayerClient)
+							FargosPhantasmMode.Core.Systems.PModeNet.ReleaseCursedSpirit.Send((byte)npc.whoAmI);
 					}
 					return false;
 				}

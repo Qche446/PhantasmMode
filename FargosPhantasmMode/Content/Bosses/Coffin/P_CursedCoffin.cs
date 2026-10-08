@@ -13,6 +13,7 @@ using FargowiltasSouls.Core.Systems;
 using Luminance.Common.StateMachines;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
+using Monochrome.Core.Net;
 using ReLogic.Content;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -80,33 +81,37 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
             }
         }
 
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            binaryWriter.Write(LastAttackChoice);
-            binaryWriter.Write(Phase);
-            binaryWriter.Write(Timer);
-            binaryWriter.WriteVector2(LockVector1);
-            List<EntityAIState<BehaviorStates>> stateStack = [.. (StateMachine?.StateStack ?? new Stack<EntityAIState<BehaviorStates>>())];
-            binaryWriter.Write(stateStack.Count);
-            for (int i = stateStack.Count - 1; i >= 0; i--)
-            {
-                binaryWriter.Write((byte)stateStack[i].Identifier);
-            }
-        }
+        /// <summary>
+        /// 表里没有基类那四格 <c>localAI</c>：原来的实现就没调 <c>base.SendExtraAI</c>，而 FSS 的
+        /// <c>CursedCoffin.SendExtraAI</c> 自己写了它们，迁移保持原样。状态栈是变长的，走 <c>Custom</c>。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            MonoNet.Fields<NPC>("fpm.cursedCoffin")
+                .Byte("lastAttackChoice", static npc => Self(npc).LastAttackChoice, static (npc, value) => Self(npc).LastAttackChoice = value)
+                .Byte("phase", static npc => Self(npc).Phase, static (npc, value) => Self(npc).Phase = value)
+                .Float("timer", static npc => Self(npc).Timer, static (npc, value) => Self(npc).Timer = value)
+                .Vector2("lockVector1", static npc => Self(npc).LockVector1, static (npc, value) => Self(npc).LockVector1 = value)
+                .Custom("stateStack",
+                    static (writer, npc) =>
+                    {
+                        List<EntityAIState<BehaviorStates>> stack = [.. (Self(npc).StateMachine?.StateStack ?? new Stack<EntityAIState<BehaviorStates>>())];
+                        writer.Write(stack.Count);
+                        for (int i = stack.Count - 1; i >= 0; i--)
+                            writer.Write((byte)stack[i].Identifier);
+                    },
+                    static (reader, npc) =>
+                    {
+                        Self(npc).StateMachine.StateStack.Clear();
+                        int count = reader.ReadInt32();
+                        for (int i = 0; i < count; i++)
+                            Self(npc).StateMachine.StateStack.Push(Self(npc).StateMachine.StateRegistry[(BehaviorStates)reader.ReadByte()]);
+                    });
 
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            LastAttackChoice = binaryReader.ReadByte();
-            Phase = binaryReader.ReadByte();
-            Timer = binaryReader.ReadSingle();
-            LockVector1 = binaryReader.ReadVector2();
-            StateMachine.StateStack.Clear();
-            int stateStackCount = binaryReader.ReadInt32();
-            for (int i = 0; i < stateStackCount; i++)
-            {
-                StateMachine.StateStack.Push(StateMachine.StateRegistry[(BehaviorStates)binaryReader.ReadByte()]);
-            }
-        }
+        private static P_CursedCoffin Self(NPC npc) => npc.GetGlobalNPC<P_CursedCoffin>();
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
 
         public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {

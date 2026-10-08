@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using Fargowiltas.Items;
 using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls;
@@ -14,6 +14,7 @@ using Terraria.ModLoader;
 using Luminance.Common.Utilities;
 using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Content.Buffs;
+using Monochrome.Content.Status;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit
 {
@@ -68,11 +69,12 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spiri
         }
         public override void ModifyHitNPCBoth(Player player, NPC npc, ref NPC.HitModifiers modifiers, DamageClass damageClass)
         {
-            var pp = player.GetModPlayer<PModeBuffPlayer>();
-            if (player.GetModPlayer<PModeBuffPlayer>().HallowFlame)
+            MonoBuffSet set = player.MonoBuffs();
+            if (set.Has<HallowFlameBuff>())
             {
+                int level = (int)(set.Data<HallowFlameBuff>()?.Ai[0] ?? 1f);
                 npc.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 480);
-                npc.GetGlobalNPC<PModeGlobalBuffNPC>().HallowFlameLevel = pp.HallowFlameLevel;
+                npc.MonoBuffs().GetOrCreateData<HallowFlameBuff>().Ai[0] = level;
             }
         }
     }

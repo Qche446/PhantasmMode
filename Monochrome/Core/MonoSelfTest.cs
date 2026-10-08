@@ -495,6 +495,7 @@ public static class MonoSelfTest
             RecordSubscriptionSemantics(subscribersNow);
             RecordSchedulerAndTween(tweenCalls);
             RecordLifecycle(rejectedBefore, rejectedAfter);
+            RecordNet();
 
             // 订阅是我们自己挂的，必须自己摘（总线的弱订阅目标里就有 this）。
             // 逐条退订，不用 MonoEventBus.Clear()——那个 API 会清掉总线上别人的订阅。
@@ -724,6 +725,60 @@ public static class MonoSelfTest
             Check("主机：自动注册扫描真的枚举到了类型（不是空转）",
                 MonoServiceHost.AutoRegisterCandidates >= 1,
                 $"扫描过 {MonoServiceHost.AutoRegisterCandidates} 个候选类型，自动注册新增 {MonoServiceHost.AutoRegistered} 个");
+        }
+
+        /// <summary>
+        /// 网络层的现场检查。编解码、拒写、未知 id 的处置都在离线台里跑过了，这里只补两件离线证明不了的：
+        /// 真运行时字段表注册上了没有，以及路上有没有出现过对不上的东西。
+        /// </summary>
+        private void RecordNet()
+        {
+            int channels = Net.MonoNet.Channels.Count;
+            int fields = 0;
+
+            // 字段可能有 0 个（没有消费者注册）。这里要证的是表<b>自洽</b>：每个字段都能按 id 原样找回来。
+            bool selfConsistent = channels > 0;
+            for (int c = 0; c < channels; c++)
+            {
+                IReadOnlyList<Net.MonoNetFieldBase> list = Net.MonoNet.Channels[c].Fields;
+                fields += list.Count;
+
+                for (int f = 0; f < list.Count; f++)
+                {
+                    if (!ReferenceEquals(list[f], Net.MonoNet.Channels[c].Find(list[f].Id)))
+                        selfConsistent = false;
+                }
+            }
+
+            Check("网络：字段表自洽（每个字段都能按 id 原样找回来）",
+                selfConsistent,
+                $"通道 {channels} 条、字段 {fields} 个，字段表哈希 0x{Net.MonoNet.RegistryHash:X8}");
+
+            Check("网络：没有收到过不认识的通道 / 字段 / 消息 id",
+                Net.MonoNet.UnknownChannels == 0 && Net.MonoNet.UnknownFields == 0 && Net.MonoNet.UnknownMessages == 0,
+                $"未知通道 {Net.MonoNet.UnknownChannels}、未知字段 {Net.MonoNet.UnknownFields}、未知消息 {Net.MonoNet.UnknownMessages}");
+
+            Check("网络：没有非权威端的世界级写入被拒",
+                Net.MonoNet.RefusedWrites == 0,
+                $"拒写计数 {Net.MonoNet.RefusedWrites}（单人下恒为 0，多人下客户端也不该写世界状态）");
+
+            // 实体字段表是每个类型一个静态字段。同一张表被建两次不会报错，只会让诊断各记各的流量，
+            // 所以在这里把它当"表自洽"的一部分盯住。
+            int tables = Net.MonoNet.Tables.Count;
+            int tableFields = 0;
+            bool tablesWellFormed = true;
+            for (int i = 0; i < tables; i++)
+            {
+                Net.MonoNetFieldsBase table = Net.MonoNet.Tables[i];
+                tableFields += table.FieldCount;
+
+                if (table.FieldCount == 0 || table.ShapeHash == 0)
+                    tablesWellFormed = false;
+            }
+
+            Check("网络：实体字段表没有重复登记，且每张表都有字段",
+                tablesWellFormed && Net.MonoNet.DuplicateTables == 0,
+                $"字段表 {tables} 张、共 {tableFields} 格，重复登记 {Net.MonoNet.DuplicateTables} 次");
         }
 
         // ── 报告 ─────────────────────────────────────────────────────────────

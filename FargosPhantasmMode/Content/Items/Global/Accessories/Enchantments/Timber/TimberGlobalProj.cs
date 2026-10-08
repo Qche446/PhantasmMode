@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Core.Systems;
@@ -9,6 +9,7 @@ using FargowiltasSouls.Content.Projectiles.Minions;
 using FargowiltasSouls.Content.Projectiles.Souls;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using Microsoft.Xna.Framework;
+using Monochrome.Content.Status;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Timbe
                         {
                             npc.AddBuff(buff, f ? 720 : 360);
                             if (buff == ModContent.BuffType<HallowFlameBuff>())
-                                npc.GetGlobalNPC<PModeGlobalBuffNPC>().HallowFlameLevel = player.GetModPlayer<PModeBuffPlayer>().HallowFlameLevel;
+                                npc.MonoBuffs().GetOrCreateData<HallowFlameBuff>().Ai[0] = player.MonoBuffs().Data<HallowFlameBuff>()?.Ai[0] ?? 1f;
                         }
                     }
                 }

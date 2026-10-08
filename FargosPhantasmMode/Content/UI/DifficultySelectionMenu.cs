@@ -1,4 +1,4 @@
-﻿using Fargowiltas.Projectiles;
+using Fargowiltas.Projectiles;
 using FargowiltasSouls.Content.NPCs;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.UI;
@@ -73,21 +73,19 @@ namespace FargosPhantasmMode.Content.UI
         private static void AddStopPhantasm(Action orig)
         {
             orig.Invoke();
+
+            // 单机没有对端可发，而且这一档的语义与多人不同：多人是"切到受虐档"，单机只是关掉闸门，
+            // 所以这里保留单机分支，不把它并进请求。
             if (Main.netMode == NetmodeID.SinglePlayer)
             {
                 PModeWorldSavingSystem.CanPlayPhantasm = false;
+                return;
             }
-            else
-            {
-                if (PModeWorldSavingSystem.CanPlayPhantasm)
-                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Deactivate") with { Volume = 0.5f });
 
-                var netMessage = FargosPhantasmMode.Instance.GetPacket();
-                netMessage.Write((byte)FargosPhantasmMode.PacketID.ActivePhamtasmMode);
-                netMessage.Write((byte)Main.LocalPlayer.whoAmI);
-                netMessage.Write((byte)2); // 0 = disable emode
-                netMessage.Send();
-            }
+            if (PModeWorldSavingSystem.CanPlayPhantasm)
+                SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Deactivate") with { Volume = 0.5f });
+
+            PModeNet.SetDifficulty.Send(2);
         }
         private static void UIMutantFixed(Action<UIOncomingMutant, SpriteBatch> orig, UIOncomingMutant self, SpriteBatch spriteBatch)
         {

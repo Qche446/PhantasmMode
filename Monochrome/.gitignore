@@ -9,8 +9,5 @@
 *.userprefs
 docs/
 
-# 游戏内自检的报告产物（每次 /monocore selftest 都会重写它）
 Monochrome-CoreSelfTest.txt
-
-# 命令参数的临时诊断产物（每次 /monocore 调用都会重写它）
 Monochrome-CommandArgs.txt

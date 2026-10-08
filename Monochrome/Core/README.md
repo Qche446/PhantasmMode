@@ -13,7 +13,7 @@ Monochrome 的 L1 核心：子系统注册表、事件总线、对象池、确�
 > **本次交付的验证状态（读之前先知道）**
 >
 > - **编译已验证。** `dotnet build Monochrome/Monochrome.csproj` **0 错误 0 警告**；
->   `Monochrome.CoreTests` **80/80 通过**（`dotnet run --project Monochrome.CoreTests`）。
+>   `Monochrome.CoreTests` **101/101 通过**（`dotnet run --project Monochrome.CoreTests`）。
 >   > 构建时要加 `-p:BuildMod=false`：tML 的打包步骤要写 `Mods/*.tmod`，那个目录在当前文件沙箱之外。
 >   > 这是**打包**（把 .dll 封成 .tmod）被挡住，不是编译失败——看 `bin/Debug/net8.0/Monochrome.dll` 有没有被刷新即可。
 > - **重复实现已合并。** 本层原有一份 13 条曲线的缓动副表与一份独立的 PCG32 生成器，与 `Common/MonoUtil` 重复。
@@ -55,6 +55,8 @@ Monochrome 的 L1 核心：子系统注册表、事件总线、对象池、确�
   - [5.8 MonoTween / MonoEaseKind —— 补间与缓动](#58-monotween--monoeasekind--补间与缓动)
   - [5.9 MonoLog —— 日志](#59-monolog--日志)
   - [5.10 一个完整的接线（可参照案例）](#510-一个完整的接线可参照案例)
+  - [5.11 MonoNet —— 世界级字段的下发](#511-mononet--世界级字段的下发)
+  - [5.12 网络层的边界（这一版做什么、不做什么）](#512-网络层的边界这一版做什么不做什么)
 - [6. 零分配是怎么做到的](#6-零分配是怎么做到的)
 - [7. 验收](#7-验收)
   - [7.1 离线验收台](#71-离线验收台monochromecoretests)
@@ -131,14 +133,14 @@ Monochrome/Core/
 ├─ MonoEase.cs                  MonoTween（池化补间；缓动曲线本身在 MonoUtil，本文件不再自带一份）
 ├─ MonoLog.cs                   分级日志 + 环形缓冲 + MonoLogInterpolatedStringHandler
 ├─ MonoCoreCommand.cs           /monocore 诊断 + 自检入口（处理器，不是 ModCommand）
-├─ MonoCoreCommand.cs            /monocore（核心层诊断 + 自检）
-├─ MonoCoreCommand.cs           /monocore（核心层诊断 + 自检）
+├─ Physics/                     L2 物理求解器的宿主：MonoPhysicsSystem + MonoRopeRenderer（见 Physics/README.md）
 └─ Graphics/                    L4 表现层（命名空间 Monochrome.Core.Graphics.*，见它自己的 README）
 ```
 
-**本层只有三个 `ModSystem`**：`MonoFrameSystem`、`MonoEventBusSystem`、`MonoSchedulerSystem`。
+**帧钩子集中在三个 `ModSystem`**：`MonoFrameSystem`、`MonoEventBusSystem`、`MonoSchedulerSystem`。
 它们各自负责一件"只有帧钩子拿得到"的事（时钟推进 / 事件派发 / 低频清理），除此之外什么都没有。
 `MonoServiceHost` 是第四个，它不碰帧钩子，只驱动 `IMonoService` 的生命周期。
+网络与物理各自还有自己的系统（`MonoNetSystem`、`MonoPhysicsSystem`），见 §5.11 与 [`Physics/README.md`](Physics/README.md)。
 
 **tML 按类型的 `FullName` 给 `ModSystem` 排序，没有顺序 API**，所以"谁先跑"不能靠设计意图去保证。
 帧起点上的几件事彼此有依赖，于是它们全部写在 `MonoFrameSystem.PreUpdateEntities` 一个方法里，顺序由
@@ -233,6 +235,10 @@ Monochrome/Core/
 | 把一个数值平滑推到目标 | `MonoTween.Spawn(...)`（§5.8） |
 | 挑一条缓动曲线 | `MonoEaseKind` + `MonoEaseMode`（曲线本体在 `MonoUtil`，见 §5.8） |
 | 分级日志 / 诊断导出 | `MonoLog`（§5.9） |
+| 一个世界级标志位要同步给所有客户端 | `MonoNet.WorldFlag<T>(...)`（§5.11） |
+| 实体的自定义字段要过网（`SendExtraAI` 那对方法体） | `MonoNet.Fields<TEntity>(...)`（§5.11） |
+| 看网络层的账本 / 连通性 | `/mononet stat` / `/mononet tables` / `/mononet ping`（§5.11） |
+| 网络层这一版做什么、不做什么 | §5.12 |
 
 ---
 
@@ -665,6 +671,84 @@ public sealed class ShowDirector : IMonoService
 
 ---
 
+### 5.11 MonoNet —— 世界级字段的下发
+
+**它解决的是"为了一个标志位发了整份世界数据"。** 注册一个字段，权威端写它，值变时才产生流量：
+
+```csharp
+private static readonly MonoNetField<bool> phantasm = MonoNet.WorldFlag("fpm.phantasmMode", false);
+
+public static bool PhantasmMode { get => phantasm.Value; set => phantasm.Value = value; }
+```
+
+- **只在权威端生效**（单人 或 服务端）。客户端写它会被拒绝：值不变、计一次 `RefusedWrites`、记一条日志（只记第一条，之后只计数）。世界状态由服务端决定，客户端只接收。
+- **值变才发，一帧一包**。同一帧里改多个字段合成一个包；写同一个值不产生任何流量。
+- **加入时补齐**：客户端加入世界时随世界数据（`ModSystem.NetSend`）拿到全量，并带一份字段表哈希；对不上会明确警告，而不是安静地按 id 硬读。
+- **id 由名字算出**（FNV-1a 折成 16 位）：注册得晚只会让对端报一次"不认识的 id"，不会让 id 整体错位。撞 id 在注册时当场抛。
+- **收到不认识的通道或字段时整包放弃**并计数：不知道那个值的宽度，续读只会读到垃圾。
+- **值变化可以订阅**：`field.OnChanged = (oldValue, newValue) => ...`。本地写入与收到下发值都会触发（后者只在值真的不同时）；写同值、被拒的写入、换世界复位、加入时那份全量都不触发。它是同步回调，别在里面做重活。它与发送无关——表现层要跟着状态走就挂它，不必自己缓存上一次的值。
+- **恢复已知状态用 `SetSilently`**：读档、换世界复位这类"不是刚发生的变化"直接放值进去——不通知、也不入队（否则一进世界就会播一次报、还发一轮多余的包）。
+
+**注册点必须在世界数据下发之前。** 字段写在静态字段里，而静态初始化是惰性的——在自己的 `Load()` 里触发一次（`_ = myFlag;`），否则中途加入的客户端会收不到。
+
+**实体自己的字段不归它管**：`ai` / `localAI` 走 `netUpdate`，模组自定义字段走 `SendExtraAI`（`GlobalNPC` 的普通字段不会自动过网）——`SendExtraAI` 那对方法体用下面的字段表写。
+
+**请求（客户端→服务端）**：`MonoNet.Request<T>(name, write, read)` 注册一条上行请求，再挂 `Validate`（复核，参数是**传输层给出的真实发送者**与载荷）与 `OnServer`（复核通过后执行）。
+`request.Send(payload)` 在单机直接走一遍复核与执行、在多人由客户端发给服务端、在服务端会被拒绝并计数——所以消费者不必再写"单机分支"。
+**没挂复核时一律拒绝**；确实要放行就显式写 `Validate = static (_, _) => true;`。载荷里不再需要"我是谁"那个字段，发送者由传输层给出。
+
+**实体字段表**：`MonoNet.Fields<TEntity>(name)` 建一张表，替掉手写的一对 `SendExtraAI` / `ReceiveExtraAI` 方法体。
+
+```csharp
+private static P_KingSlime Self(NPC npc) => npc.GetGlobalNPC<P_KingSlime>();
+
+private static readonly MonoNetFields<NPC> Fields =
+    MonoNet.Fields<NPC>("fpm.kingSlime")
+        .Float("localAI0", n => n.localAI[0], (n, v) => n.localAI[0] = v)
+        .Bool("superSpecialJump", n => Self(n).SuperSpecialJump, (n, v) => Self(n).SuperSpecialJump = v);
+
+public override void SendExtraAI(NPC npc, BitWriter bits, BinaryWriter w) => Fields.Write(npc, w);
+public override void ReceiveExtraAI(NPC npc, BitReader bits, BinaryReader r) => Fields.Read(npc, r);
+```
+
+- 可用类型：`Bool` / `Byte` / `Int` / `Float` / `Vector2`，变长载荷（列表、状态栈）走 `Custom(write, read)`。`bool` 占一个字节——`ModNPC` 侧的 `SendExtraAI` 没有 `BitWriter`，统一走字节才能一张 API 覆盖四类实体。
+- **声明顺序就是协议**：加字段只能加在末尾。两张表顺序写反不会报编译错，只会读出交叉错位的值——所以这条被验收台单独钉住。
+- 表写成 `private static readonly`，`get` / `set` 指向那个实体的状态；**每个类型只该建一次**，重复建会被计数（`/mononet stat` 与游戏内自检都会盯它）。
+- **每次同步都写全部字段**，没有脏检查：tML 没有"这次是全量"的标记，只写变化的部分会让中途加入的人拿到旧值。
+- `ShapeHash` 由各字段类型按声明顺序算出（与值、名字无关）。表不参与加入世界那份全量，所以两端的表长得一不一样，只能靠 `/mononet tables` 对照形状哈希看出来。
+
+诊断：`/mononet stat`（通道账本、请求计数、拒写与未知计数、字段表汇总、上次 ping）、`/mononet fields`（世界级字段的 id 与当前值）、`/mononet requests`（请求清单）、`/mononet tables`（实体字段表：形状哈希、流量、逐格声明顺序）、`/mononet ping`（传输通路冒烟，仅开发期）。
+
+---
+
+### 5.12 网络层的边界（这一版做什么、不做什么）
+
+**四片的契约**（用法见 §5.11，需求依据见 [`docs/网络现场盘点.md`](../docs/网络现场盘点.md)）：
+
+| 片 | 负责什么 | 入口 | 关键约束 |
+|---|---|---|---|
+| 世界字段 | 服务端权威的世界级状态下行 | `MonoNet.WorldFlag<T>` | 值变才发、一帧一包；非权威端写被拒；加入时随世界数据补齐 |
+| 请求 | 客户端 → 服务端的意图上行 | `MonoNet.Request<T>` | 复核是硬门槛（没挂 = 一律拒绝）；单机走同一条复核与执行路径 |
+| 实体字段表 | 实体的 extra-AI 声明 | `MonoNet.Fields<TEntity>` | 声明一次、读写共用；声明顺序就是协议；`bool` 占一个字节 |
+| 门与表现 | 谁生成、谁表现（消费者侧约定） | — | 权威状态与生成只在权威端；尘埃 / 粒子 / 音效各端本地放 |
+
+**门该把关在哪**（消费者最容易写错的一条）：
+
+- **权威状态与生成只在权威端做**：`FargoSoulsUtil.HostCheck` 或 `Main.netMode != NetmodeID.MultiplayerClient`。客户端本地生成会以物主身份把它同步上去，同一颗弹幕于是在别人屏幕上出现两份。
+- **纯表现不能包在权威端守卫里**：尘埃、粒子、音效、屏幕震动都是本地效果，包进去纯客户端就看不到也听不到；它们该用 `if (!Main.dedServ)`。
+- **改了字段让原版替你发**：`npc.netUpdate = true` / `projectile.netUpdate = true`，不要另外手发 `SendData(SyncNPC)` / `SendData(SyncProjectile)`（那会和同一帧的 `netUpdate` 重复）。注意原版载荷的覆盖面：`defense`、`GivenName` 都不在 `SyncNPC` 里，前者要自己进字段表，后者走消息 56。
+
+**明确不做**（写下来是为了下一轮不再重新讨论）：
+
+- 通用 Snapshot：加入世界那份全量交给 tML 的 `ModSystem.NetSend` / `NetReceive` 与世界数据，不另造一套。
+- 发送去重队列 / 通用 RPC：一个变更发几包属于消费者侧的规范问题，库不替它猜。
+- 客户端预测与回滚。
+- 实体字段表的脏掩码：tML 没有"这次是全量"的标记，只写变化会让中途加入的人拿到旧值。
+- 位域字段：统一走字节，一张表才能同时覆盖 `ModNPC`（拿不到 `BitWriter`）与 `GlobalNPC`。
+- 把实体字段表的形状哈希并进加入时的协议哈希：代价是每张表都要在 `Load` 里触发一次注册；形状哈希只放在 `/mononet tables` 里供两端对照。
+
+---
+
 ## 6. 零分配是怎么做到的
 
 | 位置 | 手法 |
@@ -707,7 +791,7 @@ dotnet run --project Monochrome.CoreTests
 > `Monochrome.CoreTests` 是**兄弟目录工程**（不是 `Tools/` 下的脚本）——理由与"分析器必须放兄弟目录"一样：
 > SDK 风格工程的默认 Compile glob 是 `**/*.cs`，放进 `Monochrome/` 里会被编进 `Monochrome.dll`（类型重复）。
 > 它需要**显式引用 FNA**（`lib/FNA.dll`）：`Monochrome.csproj` 的 FNA 来自 `tMLMod.targets` 里的私有引用，
-> 不会流到兄弟工程。当前状态是 **80/80 通过**。
+> 不会流到兄弟工程。当前状态是 **101/101 通过**。
 
 它覆盖五类**能在没有游戏的情况下证明**的性质：
 
@@ -739,6 +823,8 @@ dotnet run --project Monochrome.CoreTests
 | `Delay(n)` 的时基是**游戏 tick** 而不是帧 | 定格时该停的没停 |
 | 每帧分配 | `/monocore alloc` 的量级 |
 | `IMonoService` 五阶段真的被驱动过 | **注册表恒为 0 也会"看起来正常"** |
+| 世界级字段真的注册上了、路上没有对不上的 id | 注册漏了只表现为"客户端收不到那个标志位" |
+| 实体字段表没有重复登记、每张表都有字段 | 同一个类型建了两张表不报错，只是诊断各记各的流量 |
 
 **推进点不是订阅，而是直接写在 `MonoFrameSystem.PreUpdateEntities` 里**——那是游戏每帧本来就会走的路。
 如果自检靠订阅总线来推进自己，就会变成"用被测对象测试被测对象"：总线一旦全哑，自检只会卡死，

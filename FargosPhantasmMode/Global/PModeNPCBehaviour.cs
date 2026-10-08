@@ -1,11 +1,10 @@
-﻿using FargosPhantasmMode.Core.Systems;
+using FargosPhantasmMode.Core.Systems;
+using Monochrome.Core.Net;
 using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
-using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Global
 {
@@ -58,26 +57,21 @@ namespace FargosPhantasmMode.Global
             SafePostAI(npc);
             return;
         }
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-
-            binaryWriter.Write(npc.localAI[0]);
-            binaryWriter.Write(npc.localAI[1]);
-            binaryWriter.Write(npc.localAI[2]);
-            binaryWriter.Write(npc.localAI[3]);
-            //binaryWriter.Write(AIState);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
-
-            npc.localAI[0] = binaryReader.ReadSingle();
-            npc.localAI[1] = binaryReader.ReadSingle();
-            npc.localAI[2] = binaryReader.ReadSingle();
-            npc.localAI[3] = binaryReader.ReadSingle();
-            //AIState = binaryReader.ReadSingle();
-        }
+        /// <summary>
+        /// 把 <c>localAI[0..3]</c> 加进一张实体字段表。
+        /// <para>
+        /// <b>底层的 ModNPC 自己已经写过这四格的类型不要调它</b>：AbomBoss 与 CursedSpirit 的
+        /// <c>SendExtraAI</c> 已经写了 <c>localAI[0..3]</c>，MutantBoss 写了 <c>[0..2]</c>
+        /// （它那一格的 <c>[3]</c> 只有本模组在写，得留着）。
+        /// </para>
+        /// </summary>
+        /// <param name="table">要追加字段的表。</param>
+        protected static MonoNetFields<NPC> WithLocalAI(MonoNetFields<NPC> table)
+            => table
+                .Float("localAI0", static npc => npc.localAI[0], static (npc, value) => npc.localAI[0] = value)
+                .Float("localAI1", static npc => npc.localAI[1], static (npc, value) => npc.localAI[1] = value)
+                .Float("localAI2", static npc => npc.localAI[2], static (npc, value) => npc.localAI[2] = value)
+                .Float("localAI3", static npc => npc.localAI[3], static (npc, value) => npc.localAI[3] = value);
 
         public virtual void ModifyHitByAnything(NPC npc, Player player, ref NPC.HitModifiers modifiers) { }
 
@@ -133,15 +127,9 @@ namespace FargosPhantasmMode.Global
         }
 
 
-        protected static void NetSync(NPC npc, bool onlySendFromServer = true)
-        {
-            if (onlySendFromServer && Main.netMode != NetmodeID.Server)
-                return;
+        // 这里原来有个 NetSync 助手（服务端手发一包 SyncNPC）。它和"置 netUpdate"是同一件事的两条路，
+        // 每次状态变更都被调用一次，于是同一个变更常常发两包；现在统一只走 `npc.netUpdate = true`。
 
-            //npc.GetGlobalNPC<NewEModeGlobalNPC>().NetSync(npc);
-            if (Main.netMode != NetmodeID.SinglePlayer)
-                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-        }
         /*
         /// <summary>
         /// Checks if loading sprites is necessary and does it if so.

@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls.Core.Globals;
@@ -6,6 +6,7 @@ using FargowiltasSouls.Core.Systems;
 using Luminance.Common.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using ReLogic.Content;
 using System;
 using System.IO;
@@ -43,14 +44,16 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         private readonly int HoldFrames = 10;   // 静止帧数（可调）
         private const float Accel = 0.02f;   // 每帧倍率增量（可调）
         private const float MaxMul = 1.5f;     // 最大倍率（可调）
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(specialPhase);
-        }
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            specialPhase = reader.ReadBoolean();
-        }
+        /// <summary>本类只带一个 <c>specialPhase</c>，写读由字段表统一（原来的实现没调 base，迁移保持原样）。</summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.mutantSphereRingP2")
+                .Bool("specialPhase", static p => Self(p).specialPhase, static (p, value) => Self(p).specialPhase = value);
+
+        private static PHMutantSphereRingP2 Self(Projectile projectile) => (PHMutantSphereRingP2)projectile.ModProjectile;
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
         /// <summary>
         /// 让所有存活的 PHMutantSphereRing 进入特殊阶段：保持原轨迹，先静止再加速到最大速度。
         /// MutantBoss 在技能中途调用。幂等：重复调用无副作用。
@@ -60,8 +63,10 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 if (Main.projectile[i].active && Main.projectile[i].ModProjectile is PHMutantSphereRingP2 ring)
+                {
                     ring.specialPhase = true;
-                Main.projectile[i].netUpdate = true;
+                    Main.projectile[i].netUpdate = true;
+                }
             }
         }
 
@@ -349,14 +354,16 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         private readonly int HoldFrames = 10;   // 静止帧数（可调）
         private const float Accel = 0.035f;   // 每帧倍率增量（可调）
         private const float MaxMul = 3f;     // 最大倍率（可调）
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(specialPhase);
-        }
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            specialPhase = reader.ReadBoolean();
-        }
+        /// <summary>本类只带一个 <c>specialPhase</c>，写读由字段表统一（原来的实现没调 base，迁移保持原样）。</summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.mutantSphereRingP1")
+                .Bool("specialPhase", static p => Self(p).specialPhase, static (p, value) => Self(p).specialPhase = value);
+
+        private static PHMutantSphereRingP1 Self(Projectile projectile) => (PHMutantSphereRingP1)projectile.ModProjectile;
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
         /// <summary>
         /// 让所有存活的 PHMutantSphereRing 进入特殊阶段：保持原轨迹，先静止再加速到最大速度。
         /// MutantBoss 在技能中途调用。幂等：重复调用无副作用。
@@ -366,8 +373,10 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 if (Main.projectile[i].active && Main.projectile[i].ModProjectile is PHMutantSphereRingP1 ring)
+                {
                     ring.specialPhase = true;
-                Main.projectile[i].netUpdate = true;
+                    Main.projectile[i].netUpdate = true;
+                }
             }
         }
         public override void SetDefaults()

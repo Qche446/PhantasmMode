@@ -1,23 +1,16 @@
-﻿using FargosPhantasmMode.Global;
+using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Particles;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.TrojanSquirrel;
-using FargowiltasSouls.Content.Bosses.VanillaEternity;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using System;
-using System.IO;
+using Monochrome.Core.Net;
 using System.Linq;
-using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent.ItemDropRules;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Content.Bosses.Trojan
@@ -41,20 +34,23 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
             if (Main.getGoodWorld && npc.scale > 1)
                 npc.scale -= 0.6f;
         }
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write(npc.scale);
-            binaryWriter.Write(head is NPC ? head.whoAmI : -1);
-            binaryWriter.Write(arms is NPC ? arms.whoAmI : -1);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            npc.scale = binaryReader.ReadSingle();
-            head = FargoSoulsUtil.NPCExists(binaryReader.ReadInt32());
-            arms = FargoSoulsUtil.NPCExists(binaryReader.ReadInt32());
-        }
+        /// <summary>
+        /// 基类不再统一写 <c>localAI</c>，本类自己声明要那四格——FSS 的 <c>TrojanSquirrel.SendExtraAI</c>
+        /// 只写 <c>scale</c>，这四格只有本模组在写。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            WithLocalAI(MonoNet.Fields<NPC>("fpm.trojanSquirrel"))
+                .Float("scale", static npc => npc.scale, static (npc, value) => npc.scale = value)
+                .Int("head", static npc => Index(Self(npc).head), static (npc, value) => Self(npc).head = FargoSoulsUtil.NPCExists(value))
+                .Int("arms", static npc => Index(Self(npc).arms), static (npc, value) => Self(npc).arms = FargoSoulsUtil.NPCExists(value));
+
+        private static P_TrojanSquirrel Self(NPC npc) => npc.GetGlobalNPC<P_TrojanSquirrel>();
+
+        private static int Index(NPC npc) => npc is null ? -1 : npc.whoAmI;
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
         {
             LeadingConditionRule rule = new(new Conditions.NotExpert());

@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Global;
+using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.BossBars;
@@ -25,7 +25,9 @@ using Terraria.ModLoader.IO;
 using FargowiltasSouls.Content.Buffs.Boss;
 using System.Collections.Generic;
 using FargosPhantasmMode.Common;
+using Monochrome.Common.MonoUtil;
 using static FargosPhantasmMode.Common.IDelegateStateMachine;
+using Monochrome.Common.MonoUtil.Entities;
 
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {
@@ -337,12 +339,16 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     Main.dust[d].noGravity = true;
                     Main.dust[d].velocity *= 4f;
                 }
-                Main.bloodMoon = false;
-                Main.dayTime = true;
-                Main.time = 27000;
-                Main.eclipse = true; 
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.WorldData);
+                // 拨时间与开日食只做一次，且只在权威端做：客户端等 WorldData 下来。
+                if (npc.ai[1] == 121 && FargoSoulsUtil.HostCheck)
+                {
+                    Main.bloodMoon = false;
+                    Main.dayTime = true;
+                    Main.time = 27000;
+                    Main.eclipse = true;
+                    if (Main.netMode == NetmodeID.Server)
+                        NetMessage.SendData(MessageID.WorldData);
+                }
 
                 npc.localAI[3] = 2; //进P2
                 int heal = (int)(npc.lifeMax / 90 * Main.rand.NextFloat(1f, 1.5f));
@@ -460,16 +466,12 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                         float speed = 20;
                         float offset = npc.ai[2] % 2 == 0 ? 0 : 0.5f;
 
-                        if (FargoSoulsUtil.HostCheck && npc.HasPlayerTarget)
+                        if (npc.HasPlayerTarget)
                         {
-                            for (int i = 0; i < max; i++)
-                            {
-                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center,
-                                    npc.SafeDirectionTo(player.Center).RotatedBy(MathHelper.TwoPi / max * (i + offset)) * speed,
-                                    ModContent.ProjectileType<AbomScytheFlaming>(),
-                                    FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer,
-                                    baseDelay, baseDelay + extendedDelay, ai2: npc.target);
-                            }
+                            MonoShot.Ring(npc, npc.Center, max, ModContent.ProjectileType<AbomScytheFlaming>(),
+                                MonoShot.ScaledDamage(npc.defDamage), speed,
+                                rotation: npc.SafeDirectionTo(player.Center).ToRotation() + MathHelper.TwoPi / max * offset,
+                                ai0: baseDelay, ai1: baseDelay + extendedDelay, ai2: npc.target);
                         }
                     }
                     else // P1阶段
@@ -481,12 +483,12 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                         float speed = 30f;
                         float offset = 0.5f;
 
-                        if (FargoSoulsUtil.HostCheck && npc.HasPlayerTarget)
+                        if (npc.HasPlayerTarget)
                         {
-                            for (int i = 0; i < max; i++)
-                            {
-                                Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, npc.SafeDirectionTo(player.Center).RotatedBy(MathHelper.TwoPi / max * (i + offset)) * speed, ModContent.ProjectileType<AbomScytheFlaming>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, baseDelay, baseDelay + extendedDelay, ai2: npc.target);
-                            }
+                            MonoShot.Ring(npc, npc.Center, max, ModContent.ProjectileType<AbomScytheFlaming>(),
+                                MonoShot.ScaledDamage(npc.defDamage), speed,
+                                rotation: npc.SafeDirectionTo(player.Center).ToRotation() + MathHelper.TwoPi / max * offset,
+                                ai0: baseDelay, ai1: baseDelay + extendedDelay, ai2: npc.target);
                         }
                     }
                     SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
@@ -990,25 +992,16 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
 
                 SoundEngine.PlaySound(SoundID.Item27, npc.Center);
                 for (int index1 = 0; index1 < 30; ++index1)
-                {
-                    int index2 = Dust.NewDust(npc.position, npc.width, npc.height, DustID.Snow, 0.0f, 0.0f, 0, new Color(), 1f);
-                    Main.dust[index2].noGravity = true;
-                    Main.dust[index2].noLight = true;
-                    Main.dust[index2].velocity *= 5f;
-                }
+                    MonoDust.Spawn(npc.position, npc.width, npc.height, DustID.Snow, velocityScale: 5f, noGravity: true, noLight: true);
             }
             if (npc.localAI[3] == 2 && npc.ai[1] % 45 == 0 && npc.ai[1] >= 60)
             {
-                for (int i = -2; i <= 2; i++)
+                for (int j = -1; j <= 1; j += 2)
                 {
-                    for (int j = -1; j <= 1; j += 2)
-                    {
-                        Vector2 desiredPosition = npc.Center + j * Vector2.UnitX * 1100;
-                        Vector2 direction = Main.player[npc.target].Center - desiredPosition;
-                        direction /= direction.Length();
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), desiredPosition, direction.RotatedBy(i * MathHelper.Pi / 10) * 8, ModContent.ProjectileType<AbomFrostWave>(), npc.damage / 4, 0, npc.target);
-                    }
-
+                    Vector2 desiredPosition = npc.Center + j * Vector2.UnitX * 1100;
+                    float aim = (Main.player[npc.target].Center - desiredPosition).ToRotation();
+                    MonoShot.Arc(npc, desiredPosition, 5, ModContent.ProjectileType<AbomFrostWave>(), npc.damage / 4, 8f,
+                        from: aim - MathHelper.Pi / 5, to: aim + MathHelper.Pi / 5, owner: npc.target);
                 }
             }
             if (++npc.ai[1] > 420)
@@ -1061,9 +1054,11 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     npc.ai[2] = npc.ai[1] + 22;
                     npc.netUpdate = true;
                 }
+                // 音效各端本地放（条件里去掉 HostCheck；生成仍然只在权威端）
+                if (Math.Abs(npc.ai[1] - npc.ai[2]) < 0.5f && npc.ai[2] > 0)
+                    SoundEngine.PlaySound(SoundID.Item8, npc.Center);
                 if (FargoSoulsUtil.HostCheck && Math.Abs(npc.ai[1] - npc.ai[2]) < 0.5f && npc.ai[2] > 0)
                 {
-                    SoundEngine.PlaySound(SoundID.Item8, npc.Center);
                     int scytheCount = 6; 
                     if (npc.localAI[3] > 1) 
                         scytheCount += 2;
@@ -1474,8 +1469,9 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     if (p != Main.maxProjectiles)
                     {
                         Main.projectile[p].localAI[1] = npc.whoAmI;
-                        if (Main.netMode == NetmodeID.Server)
-                            NetMessage.SendData(MessageID.SyncProjectile, number: p);
+                        // FSS 的 GlowLine.SendExtraAI 本来就写 localAI[0]/[1]，这个手发包是多余的；
+                        // 让弹幕自己把改好的 localAI 发出去。
+                        Main.projectile[p].netUpdate = true;
                     }
                 }
                 else // 第二轮循环快速预警
@@ -1487,8 +1483,9 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     if (p != Main.maxProjectiles)
                     {
                         Main.projectile[p].localAI[1] = npc.whoAmI;
-                        if (Main.netMode == NetmodeID.Server)
-                            NetMessage.SendData(MessageID.SyncProjectile, number: p);
+                        // FSS 的 GlowLine.SendExtraAI 本来就写 localAI[0]/[1]，这个手发包是多余的；
+                        // 让弹幕自己把改好的 localAI 发出去。
+                        Main.projectile[p].netUpdate = true;
                     }
                     // 生成红色预警环
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center,
@@ -1543,19 +1540,13 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                     ai0 *= MathHelper.ToRadians(270) / 120; // 更快的旋转速度
                     vel = npc.SafeDirectionTo(player.Center).RotatedBy(-ai0 * 60);
                 }
-                else if (npc.ai[1] == 90 && FargoSoulsUtil.HostCheck)
+                else if (npc.ai[1] == 90)
                 {
                     npc.netUpdate = true;
                     npc.velocity = Vector2.Zero;
 
-                    //SoundEngine.PlaySound(SoundID.Roar, npc.Center);
-
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel,
-                        ModContent.ProjectileType<AbomSword3>(),
-                        FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f * 3 / 8),
-                        0f, Main.myPlayer, 3 * ai0, npc.whoAmI); // 旋转速度×3
-
-                    // 快速旋转的特殊音效和效果
+                    // 演出（音效、尘埃）各端本地放：原来整段挂在 HostCheck 上，
+                    // 纯客户端这一支既听不到音也看不到尘。
                     SoundEngine.PlaySound(FargosSoundRegistry.StyxGazer with { Volume = 2.0f, Pitch = -0.3f }, npc.Center);
                     for (int i = 0; i < 20; i++)
                     {
@@ -1563,6 +1554,14 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                             DustID.GemTopaz, 0f, 0f, 0, default, 3f);
                         Main.dust[d].noGravity = true;
                         Main.dust[d].velocity *= 6f;
+                    }
+
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel,
+                            ModContent.ProjectileType<AbomSword3>(),
+                            FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f * 3 / 8),
+                            0f, Main.myPlayer, 3 * ai0, npc.whoAmI); // 旋转速度×3
                     }
                 }
 
@@ -1635,8 +1634,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 if (p != Main.maxProjectiles)
                 {
                     Main.projectile[p].localAI[1] = npc.whoAmI;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncProjectile, number: p);
+                    // FSS 的 GlowLine.SendExtraAI 本来就写 localAI[0]/[1]，这个手发包是多余的。
+                    Main.projectile[p].netUpdate = true;
                 }
             }
 
@@ -1783,8 +1782,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 if (p != Main.maxProjectiles)
                 {
                     Main.projectile[p].localAI[1] = npc.whoAmI;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncProjectile, number: p);
+                    // FSS 的 GlowLine.SendExtraAI 本来就写 localAI[0]/[1]，这个手发包是多余的。
+                    Main.projectile[p].netUpdate = true;
                 }
             }
             if (npc.ai[1] == 90)
@@ -1878,8 +1877,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 if (p != Main.maxProjectiles)
                 {
                     Main.projectile[p].localAI[1] = npc.whoAmI;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncProjectile, number: p);
+                    // FSS 的 GlowLine.SendExtraAI 本来就写 localAI[0]/[1]，这个手发包是多余的。
+                    Main.projectile[p].netUpdate = true;
                 }
             }
 
@@ -2225,14 +2224,6 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                 FargoSoulsUtil.ClearHostileProjectiles(2, npc.whoAmI);
             }
             return false;
-        }
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
         }
         #endregion
         #region 贺贺

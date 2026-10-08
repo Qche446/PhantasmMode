@@ -1,4 +1,3 @@
-﻿using FargosPhantasmMode.Content.Bossbar;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
@@ -10,36 +9,40 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Buffs.Souls;
-using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using ReLogic.Utilities;
 using System;
 using System.Collections.Generic;
-using Terraria;
-using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
-using Terraria.GameContent.Creative;
-using Terraria.Graphics.Effects;
-using Terraria.ID;
 using Terraria.Localization;
-using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class MutantBossOverride : PModeNPCBehaviour
     {
+        /// <summary>
+        /// FSS 的 <c>MutantBoss.SendExtraAI</c> 只写 <c>localAI[0..2]</c>，而本模组拿 <c>localAI[3]</c>
+        /// 当阶段标记（脱战判定与攻击随机器都读它），所以这一格是本模组独有的、必须自己发。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            MonoNet.Fields<NPC>("fpm.mutantBoss")
+                .Float("localAI3", static npc => npc.localAI[3], static (npc, value) => npc.localAI[3] = value);
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
+
         #region 字段或属性等
         public bool playerInvulTriggered;
         public SlotId? TelegraphSound = null;
@@ -662,8 +665,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearSpin>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, 240); // 250);
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearSpin>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, 240); // 250);
-                    TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantUnpredictive with { Volume = 2f }, NPC.Center);
                 }
+                // 预警音是给玩家听的，各端本地放（原来关在 HostCheck 里，纯客户端听不到）
+                TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantUnpredictive with { Volume = 2f }, NPC.Center);
 
                 EdgyBossText(NPC, GFBQuote(4));
             }
@@ -1185,8 +1189,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 if (FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearSpin>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, 180); // + 60);
-                    TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantPredictive with { Volume = 8f }, NPC.Center);
                 }
+                // 预警音各端本地放（理由同上一处）
+                TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantPredictive with { Volume = 8f }, NPC.Center);
 
                 EdgyBossText(NPC, GFBQuote(9));
             }
@@ -1567,8 +1572,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 if (FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<MutantSpearSpin>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, NPC.whoAmI, 180);// + (WorldSavingSystem.MasochistMode ? 10 : 20));
-                    TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantUnpredictive with { Volume = 2f }, NPC.Center);
                 }
+                // 预警音各端本地放（理由同上一处）
+                TelegraphSound = SoundEngine.PlaySound(FargosSoundRegistry.MutantUnpredictive with { Volume = 2f }, NPC.Center);
 
                 EdgyBossText(NPC, GFBQuote(14));
             }
@@ -1977,14 +1983,16 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 }
             }
             */
-            if (FargoSoulsUtil.HostCheck)
+            int projType = NPC.ai[0] == 30 ? ModContent.ProjectileType<MutantFishron>() : ModContent.ProjectileType<MutantShadowHand>();
+            if (projType == ModContent.ProjectileType<MutantFishron>())
             {
-                int projType = NPC.ai[0] == 30 ? ModContent.ProjectileType<MutantFishron>() : ModContent.ProjectileType<MutantShadowHand>();
-                if (projType == ModContent.ProjectileType<MutantFishron>())
+                int fishronDelay = 40;
+                int maxtime = WorldSavingSystem.MasochistModeReal ? 5 : 3;
+                if (NPC.ai[1] % fishronDelay == 0 && NPC.ai[1] < fishronDelay * maxtime)
                 {
-                    int fishronDelay = 40;
-                    int maxtime = WorldSavingSystem.MasochistModeReal ? 5 : 3;
-                    if (NPC.ai[1] % fishronDelay == 0 && NPC.ai[1] < fishronDelay * maxtime)
+                    // 权威生成只在权威端跑；下面的尘埃是纯表现，各端各撒一份
+                    // （原来整段包在 HostCheck 里，客户端这里一点冰尘都看不到）。
+                    if (FargoSoulsUtil.HostCheck)
                     {
                         for (int i = 0; i < 2; i++)
                         {
@@ -1993,33 +2001,36 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                             Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, projType, FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, targetpos.X, targetpos.Y);
                             Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, projType, FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, targetpos2.X, targetpos2.Y);
                         }
-                        for (int i = 0; i < 30; i++)
-                        {
-                            int d = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceTorch, 0f, 0f, 0, default, 3f);
-                            Main.dust[d].noGravity = true;
-                            Main.dust[d].noLight = true;
-                            Main.dust[d].velocity *= 12f;
-                        }
+                    }
+                    for (int i = 0; i < 30; i++)
+                    {
+                        int d = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceTorch, 0f, 0f, 0, default, 3f);
+                        Main.dust[d].noGravity = true;
+                        Main.dust[d].noLight = true;
+                        Main.dust[d].velocity *= 12f;
                     }
                 }
-                else
+            }
+            else
+            {
+                int shadowdelay = 10;
+                int maxtime = WorldSavingSystem.MasochistModeReal ? 20 : 12;
+                if (NPC.ai[1] % shadowdelay == 0 && NPC.ai[1] < shadowdelay * maxtime)
                 {
-                    int shadowdelay = 10;
-                    int maxtime = WorldSavingSystem.MasochistModeReal ? 20 : 12;
-                    if (NPC.ai[1] % shadowdelay == 0 && NPC.ai[1] < shadowdelay * maxtime)
+                    if (FargoSoulsUtil.HostCheck)
                     {
                         for (int i = -1; i <= 1; i += 2)
                         {
                             Vector2 targetpos = i * 450 * Vector2.UnitX.RotatedBy(NPC.ai[2]);
                             Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, projType, FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage), 0f, Main.myPlayer, targetpos.X, targetpos.Y);
                         }
-                        for (int i = 0; i < 30; i++)
-                        {
-                            int d = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceTorch, 0f, 0f, 0, default, 3f);
-                            Main.dust[d].noGravity = true;
-                            Main.dust[d].noLight = true;
-                            Main.dust[d].velocity *= 12f;
-                        }
+                    }
+                    for (int i = 0; i < 30; i++)
+                    {
+                        int d = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceTorch, 0f, 0f, 0, default, 3f);
+                        Main.dust[d].noGravity = true;
+                        Main.dust[d].noLight = true;
+                        Main.dust[d].velocity *= 12f;
                     }
                 }
             }
@@ -2309,7 +2320,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.Center += Vector2.UnitX * 1200f / timeToMove * NPC.localAI[1]; //move along with the movement已修改1000>1200
 
                 }
-                if (NPC.ai[2] > masoMovingRainAttackTime + 30 + 40 && NPC.ai[2] % 40 == 0)
+                if (NPC.ai[2] > masoMovingRainAttackTime + 30 + 40 && NPC.ai[2] % 40 == 0 && FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, NPC.SafeDirectionTo(player.Center) * 20f, ModContent.ProjectileType<PHMutantSlimeSpearThrown>(), FargoSoulsUtil.ScaledProjectileDamage(NPC.defDamage, 0.8f), 0f, Main.myPlayer);
                 }
@@ -3001,7 +3012,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 int offset = Main.getGoodWorld ? 250 : 350;
                 int maxX = Main.getGoodWorld ? 2 : 1;
                 
-                if (timer % delay == 0)
+                if (timer % delay == 0 && FargoSoulsUtil.HostCheck)
                 {
                     for (int i = -maxX; i <= maxX; i++)
                     {
@@ -3013,7 +3024,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     }
                     npc.netUpdate = true;
                 }
-                if (timer % delay == delay / 2)
+                if (timer % delay == delay / 2 && FargoSoulsUtil.HostCheck)
                 {
                     for (int i = -maxX; i <= maxX; i++)
                     {
@@ -3080,7 +3091,9 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             if (npc.ai[1] == 1)
             {
-                Projectile.NewProjectile(npc.GetSource_FromThis(), LieFlightPos, Vector2.Zero, ModContent.ProjectileType<LifeTpTelegraph>(), 0, 0f, Main.myPlayer, -60, npc.whoAmI);
+                // 权威生成：这一颗过去没有端侧门，客户端也会自己刷一份
+                if (FargoSoulsUtil.HostCheck)
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), LieFlightPos, Vector2.Zero, ModContent.ProjectileType<LifeTpTelegraph>(), 0, 0f, Main.myPlayer, -60, npc.whoAmI);
                 const int max = 16;
                 for (int i = 0; i < max; i++)
                 {
@@ -3106,9 +3119,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 FargoSoulsUtil.ScreenshakeRumble(30);
 
                 //telegraph nukes
-                for (int i = 0; i < 16; i++)
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), LieFlightPos, Vector2.Zero, ModContent.ProjectileType<BloomLine>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, 1, i * MathHelper.Pi / 4f);
+                    for (int i = 0; i < 16; i++)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), LieFlightPos, Vector2.Zero, ModContent.ProjectileType<BloomLine>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, 1, i * MathHelper.Pi / 4f);
+                    }
                 }
             }
             if (npc.ai[1] >= StartTime + 60 && (npc.ai[1] - (StartTime + 60)) % 3 == 0 && npc.ai[1] < StartTime + 60 + 47) //nukes
@@ -3150,10 +3166,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantDestroyerGun>(), 0, 0, Main.myPlayer, npc.whoAmI, 180, 0);
                 npc.netUpdate = true;
             }
-            if (npc.ai[1] == 180 && FargoSoulsUtil.HostCheck)
+            if (npc.ai[1] == 180)
             {
+                // 演出（震动、音效）各端本地放；下面的权威生成才需要门
                 ScreenShakeSystem.StartShake(5);
                 SoundEngine.PlaySound(SoundID.NPCDeath13, npc.Center);
+            }
+            if (npc.ai[1] == 180 && FargoSoulsUtil.HostCheck)
+            {
                 Vector2 vel = npc.DirectionFrom(player.Center) * 40f;
                 int current = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<JormungandrHead>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer, 
                     player.whoAmI, 60 * 10, 0);
@@ -3270,7 +3290,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
 
             // 360帧后结束发射，等待60帧后选择下一招
-            if (npc.ai[1] == 420 + 120)
+            if (npc.ai[1] == 420 + 120 && FargoSoulsUtil.HostCheck)
             {
                 for (int i = 0; i <= 6; i++)
                 {
@@ -3868,9 +3888,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     {
                         Main.npc[n].homeless = true;
                         if (TownNPCName != default)
+                        {
                             Main.npc[n].GivenName = TownNPCName;
-                        if (Main.netMode == NetmodeID.Server)
-                            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n);
+                            // 名字走的是 UniqueTownNPCInfoSyncRequest（SyncNPC 不带 GivenName），
+                            // 而原版那条是在 NPC 刚建好时发的——名字是之后才赋的，得补发一条。
+                            if (Main.netMode == NetmodeID.Server)
+                                NetMessage.SendData(MessageID.UniqueTownNPCInfoSyncRequest, -1, -1, null, n);
+                        }
                     }
                 }
                 EdgyBossText(NPC, GFBQuote(33));
@@ -4040,9 +4064,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                             {
                                 Main.npc[n].homeless = true;
                                 if (TownNPCName != default)
+                                {
                                     Main.npc[n].GivenName = TownNPCName;
-                                if (Main.netMode == NetmodeID.Server)
-                                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n);
+                                    // 名字走的是 UniqueTownNPCInfoSyncRequest（SyncNPC 不带 GivenName），
+                                    // 而原版那条是在 NPC 刚建好时发的——名字是之后才赋的，得补发一条。
+                                    if (Main.netMode == NetmodeID.Server)
+                                        NetMessage.SendData(MessageID.UniqueTownNPCInfoSyncRequest, -1, -1, null, n);
+                                }
                             }
                         }
                     }
@@ -4202,6 +4230,8 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         private void SpawnSphereRing(NPC NPC, int max, float speed, int damage, float rotationModifier, float offset = 0)
         {
+            // 音效各端本地放：它原来写在下面那句"客户端提前 return"之后，纯客户端永远听不到。
+            SoundEngine.PlaySound(SoundID.Item84, NPC.Center);
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             float rotation = 2f * (float)Math.PI / max;
             int type = ModContent.ProjectileType<PHMutantSphereRingP1>();
@@ -4214,6 +4244,8 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         }
         private void SpawnPHSphereRing(NPC NPC, int max, float speed, int damage, float velmodifier, float offset = 0)
         {
+            // 音效各端本地放（理由同 SpawnSphereRing）。
+            SoundEngine.PlaySound(SoundID.Item84, NPC.Center);
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             float rotation = 2f * (float)Math.PI / max;
             int type = ModContent.ProjectileType<PHMutantSphereRingP2>();
@@ -4222,7 +4254,6 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 Vector2 vel = speed * Vector2.UnitY.RotatedBy(rotation * i + offset);
                 Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, vel, type, damage, 0f, Main.myPlayer, velmodifier * NPC.spriteDirection, speed);
             }
-            SoundEngine.PlaySound(SoundID.Item84, NPC.Center);
         }
 
         private bool Phase2Check(NPC NPC)
@@ -4409,11 +4440,14 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         {
             SoundEngine.PlaySound(SoundID.Item92, npc.Center);
             int type = ModContent.ProjectileType<WillJavelin3>();
-            for (int i = 0; i < max; i++)
+            if (FargoSoulsUtil.HostCheck)
             {
-                float angle = offset + (float)Math.PI * 2 / max * i;
-                Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos + 450 * Vector2.UnitX.RotatedBy(angle), Vector2.Zero,
-                    type, npc.defDamage / 4, 0f, Main.myPlayer, omiga, angle + (float)Math.PI, ai2: -delay);
+                for (int i = 0; i < max; i++)
+                {
+                    float angle = offset + (float)Math.PI * 2 / max * i;
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos + 450 * Vector2.UnitX.RotatedBy(angle), Vector2.Zero,
+                        type, npc.defDamage / 4, 0f, Main.myPlayer, omiga, angle + (float)Math.PI, ai2: -delay);
+                }
             }
         }
         private void SpawnCursedFlamesWall(NPC npc, Vector2 spawnCenter, float Angle = MathHelper.PiOver2)

@@ -1,4 +1,6 @@
+using System.IO;
 using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Net;
 using Monochrome.Core.Services;
 
 namespace Monochrome
@@ -18,6 +20,39 @@ namespace Monochrome
 
 			// 实验
 			//MonoServiceHost.Register<MonoLifecycleProbe>();
+		}
+
+		/// <summary>
+		/// Monochrome 自己的包。消息 id 是<b>本模组的包空间</b>：所有消费者共用它，
+		/// 所以新增消息要在 <see cref="MonoNetSystem"/> 里登记一个常量，并在这里接上分支。
+		/// </summary>
+		/// <param name="reader">包体，已经跳过 mod id。</param>
+		/// <param name="whoAmI">发送者编号。</param>
+		public override void HandlePacket(BinaryReader reader, int whoAmI)
+		{
+			byte messageId = reader.ReadByte();
+			switch (messageId)
+			{
+				case MonoNetSystem.MsgWorldFlags:
+					MonoNetSystem.HandleWorldFlags(reader, whoAmI);
+					break;
+
+				case MonoNetSystem.MsgPing:
+					MonoNetSystem.HandlePing(reader, whoAmI);
+					break;
+
+				case MonoNetSystem.MsgPong:
+					MonoNetSystem.HandlePong(reader);
+					break;
+
+				case MonoNetSystem.MsgRequest:
+					MonoNetSystem.HandleRequest(reader, whoAmI);
+					break;
+
+				default:
+					MonoNet.NoteUnknownMessage(messageId, whoAmI);
+					break;
+			}
 		}
 
 		/// <summary>

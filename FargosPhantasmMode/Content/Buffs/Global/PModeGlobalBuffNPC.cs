@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
 using FargosPhantasmMode.Content.InfoDisplays;
 using FargosPhantasmMode.Content.Items.Accessories;
@@ -32,8 +32,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
         public bool NanoErosion = false;
         
         public bool Sublimation = false;
-        public bool HallowFlame = false;
-        public int HallowFlameLevel = 0;
 
         public float PosionMultiplier = 1f;
         public float FireMultiplier = 1f;
@@ -418,11 +416,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
             Hypothermia = false;
             NanoErosion = false;
             Sublimation = false;
-            if (!HallowFlame)
-                HallowFlameLevel = 0;
-            else if (HallowFlameLevel < 1)
-                HallowFlameLevel = 1;
-            HallowFlame = false;
 
             PosionMultiplier = 1f;
             FireMultiplier = 1f;
@@ -541,13 +534,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 if (damage < 5)
                     damage = 5;
             }
-            if (HallowFlame)//圣炎 20 * level dps
-            {
-                int a = Main.LocalPlayer.ForceEffect<HallowFlameEffect>() ? 8 : 4;
-                DamageOverTime(a * 10 * HallowFlameLevel);
-                if (damage < a * HallowFlameLevel)
-                    damage = a * HallowFlameLevel;
-            }
         }
         public static float DoTMultiplier(NPC npc, Player player)
         {
@@ -592,19 +578,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                     Main.dust[d].noGravity = true;
                 }
             }
-            if (HallowFlame)
-            {
-                for (int i = 0; i < MathHelper.Min(HallowFlameLevel, 4); i++)
-                {
-                    if (Main.rand.NextBool(4))
-                    {
-                        int d = Dust.NewDust(npc.position, npc.width, npc.height, DustID.HallowedTorch, npc.velocity.X * 0.4f, npc.velocity.Y * 0.4f, 0, new Color(220, 255, 220), 2.5f);
-                        Main.dust[d].velocity.Y -= 1;
-                        Main.dust[d].velocity *= 1.5f;
-                        Main.dust[d].noGravity = true;
-                    }
-                }
-            }
         }
         public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
         {
@@ -612,12 +585,6 @@ namespace FargosPhantasmMode.Content.Buffs.Global
                 modifiers.Defense.Flat -= 20;
             if (Sublimation)
                 modifiers.Defense.Flat -= 15;
-            if (HallowFlame)
-            {
-                modifiers.Defense.Flat -= 4 * HallowFlameLevel;
-                float a = Main.LocalPlayer.FargoSouls().MutantPresence ? 0.005f : 0.01f;
-                modifiers.FinalDamage *= 1f + a * HallowFlameLevel;
-            }
             if (Hypothermia)
             {
                 modifiers.FinalDamage *= 1.05f;

@@ -1,10 +1,11 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.IO;
 using Terraria;
@@ -118,20 +119,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             DelegateMethods.v3_1 = new Vector3(1f, 0.6f, 0.2f);
             Utils.PlotTileLine(Projectile.Center, Projectile.Center + Projectile.velocity * 4f, 40f, DelegateMethods.CastLightOpen);
         }
-        public override void SendExtraAI(BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(binaryWriter);
-            binaryWriter.Write(Projectile.localAI[0]);
-            binaryWriter.Write(Projectile.localAI[1]);
-            binaryWriter.Write(Projectile.localAI[2]);
-        }
-        public override void ReceiveExtraAI(BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(binaryReader);
-            Projectile.localAI[0] = binaryReader.ReadSingle();
-            Projectile.localAI[1] = binaryReader.ReadSingle();
-            Projectile.localAI[2] = binaryReader.ReadSingle();
-        }
+        /// <summary>本类只带三个 <c>localAI</c> 格，写读由字段表统一。</summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.moonBolt")
+                .Float("localAI0", static p => p.localAI[0], static (p, value) => p.localAI[0] = value)
+                .Float("localAI1", static p => p.localAI[1], static (p, value) => p.localAI[1] = value)
+                .Float("localAI2", static p => p.localAI[2], static (p, value) => p.localAI[2] = value);
+
+        public override void SendExtraAI(BinaryWriter binaryWriter) => Fields.Write(Projectile, binaryWriter);
+
+        public override void ReceiveExtraAI(BinaryReader binaryReader) => Fields.Read(Projectile, binaryReader);
         public float WidthFunction(float completionRatio)
         {
             float baseWidth = Projectile.scale * Projectile.width * 1.3f;

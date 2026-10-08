@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Core.Systems;
+using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.Champions.Terra;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
@@ -55,23 +55,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Life
         }
         public static void CactusDropItem(Player player, NPC npc)
         {
-            if (player.HasEffect<CactusEffect>())
-            {
-                bool isHeart = Main.rand.NextBool();
-                if (Main.netMode == NetmodeID.SinglePlayer)
-                {
-                    Item.NewItem(player.GetSource_OnHit(npc), npc.Hitbox, isHeart ? ItemID.Heart : ItemID.Star);
-                }
-                else if (Main.netMode == NetmodeID.MultiplayerClient)
-                {
-                    var netMessage = FargosPhantasmMode.FargoMod.GetPacket();
-                    netMessage.Write((byte)global::FargosPhantasmMode.FargosPhantasmMode.PacketID.CactusDrop);
-                    netMessage.Write((byte)player.whoAmI);
-                    netMessage.Write((byte)npc.whoAmI);
-                    netMessage.Write(isHeart);
-                    netMessage.Send();
-                }
-            }
+            if (!player.HasEffect<CactusEffect>())
+                return;
+
+            // 单机与多人同一条路：请求在权威端复核后执行。载荷里不再需要"我是谁"——传输层会给出。
+            PModeNet.CactusDrop.Send(new PModeNet.CactusDropPayload((byte)npc.whoAmI, Main.rand.NextBool()));
         }
     }
     public class CactusNeedleGlobalProj : GlobalProjectile

@@ -6,6 +6,7 @@ using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.IO;
 using System.Linq;
@@ -31,18 +32,22 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
                 npc.scale -= 0.6f;
         }
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot) => !Ghost;
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            binaryWriter.Write(npc.scale);
-            binaryWriter.Write(body is NPC ? body.whoAmI : -1);
-            bitWriter.WriteBit(Ghost);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            npc.scale = binaryReader.ReadSingle();
-            body = FargoSoulsUtil.NPCExists(binaryReader.ReadInt32());
-            Ghost = bitReader.ReadBit();
-        }
+        /// <summary>
+        /// 表里没有基类那四格 <c>localAI</c>：原来的实现就没调 <c>base.SendExtraAI</c>，迁移保持原样。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            MonoNet.Fields<NPC>("fpm.trojanSquirrelHead")
+                .Float("scale", static npc => npc.scale, static (npc, value) => npc.scale = value)
+                .Int("body", static npc => Index(Self(npc).body), static (npc, value) => Self(npc).body = FargoSoulsUtil.NPCExists(value))
+                .Bool("ghost", static npc => Self(npc).Ghost, static (npc, value) => Self(npc).Ghost = value);
+
+        private static P_TrojanSquirrelHead Self(NPC npc) => npc.GetGlobalNPC<P_TrojanSquirrelHead>();
+
+        private static int Index(NPC npc) => npc is null ? -1 : npc.whoAmI;
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
             if (source is EntitySource_Parent parent && parent.Entity is NPC sourceNPC)
@@ -138,9 +143,10 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
                 float max = MathHelper.SmoothStep(5f, 15f, prog);
                 for (int i = 0; i < max; i++)
                 {
+                    // 炮击音各端本地放（原来关在 HostCheck 里，纯客户端听不到）；生成仍只在权威端
+                    SoundEngine.PlaySound(FargosSoundRegistry.TrojanCannon, pos);
                     if (FargoSoulsUtil.HostCheck)
                     {
-                        SoundEngine.PlaySound(FargosSoundRegistry.TrojanCannon, pos);
                         float detal = MathHelper.SmoothStep(0.5f, 2.5f, prog);
                         Projectile.NewProjectile(npc.GetSource_FromThis(), pos, distance + Main.rand.NextVector2Square(-detal, detal),
                             ModContent.ProjectileType<TrojanAcorn>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer);
@@ -262,9 +268,10 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
                 float max = MathHelper.SmoothStep(5f, 15f, prog);
                 for (int i = 0; i < max; i++)
                 {
+                    // 炮击音各端本地放（理由同上一处）
+                    SoundEngine.PlaySound(FargosSoundRegistry.TrojanCannon, pos);
                     if (FargoSoulsUtil.HostCheck)
                     {
-                        SoundEngine.PlaySound(FargosSoundRegistry.TrojanCannon, pos);
                         float detal = MathHelper.SmoothStep(0.5f, 2.2f, prog);
                         Projectile.NewProjectile(npc.GetSource_FromThis(), pos, distance + Main.rand.NextVector2Square(-detal, detal),
                             ModContent.ProjectileType<TrojanAcorn>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f, Main.myPlayer);

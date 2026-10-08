@@ -1,17 +1,9 @@
-﻿using FargowiltasSouls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.Audio;
-using Terraria.ID;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using static FargosPhantasmMode.Core.Systems.PModeWorldSavingSystem;
 using static FargowiltasSouls.Core.Systems.WorldSavingSystem;
 using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
 
 namespace FargosPhantasmMode.Core.Systems
 {
@@ -19,26 +11,19 @@ namespace FargosPhantasmMode.Core.Systems
     {
         public override void PostUpdateWorld()
         {
+            // 世界级开关只由权威端改，客户端从 MonoNet 收。原先客户端也自己算一遍，再被整份 WorldData 覆盖。
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+                return;
+
             if (!PhantasmMode && EternityMode && MasochistModeReal && CanPlayPhantasm && !Utilities.AnyBosses())
             {
+                // 赋值本身就把新值发出去了（值变才发），播报写在字段的 OnChanged 里，两端各播一次。
                 PhantasmMode = true;
-                FargoSoulsUtil.PrintLocalization($"Mods.{Mod.Name}.UI.PhantasmOn", new Color(51, 255, 191, 0));
-                if (Main.getGoodWorld)
-                    FargoSoulsUtil.PrintLocalization($"Mods.{Mod.Name}.UI.PhantasmFTWWarning", new Color(51, 255, 191, 0));
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.WorldData);
-                if (!Main.dedServ)
-                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/DifficultyMaso") with { Volume = 0.5f }, Main.LocalPlayer.Center);
             }
+
             if (PhantasmMode && !(MasochistModeReal && CanPlayPhantasm))
-            {
                 PhantasmMode = false;
-                FargoSoulsUtil.PrintLocalization($"Mods.{Mod.Name}.UI.PhantasmOff", new Color(51, 255, 191, 0));
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.WorldData);
-                if (!Main.dedServ)
-                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/DifficultyDeactivate"), Main.LocalPlayer.Center);
-            }
+
             if (!MasochistModeReal)
                 CanPlayPhantasm = false;
         }

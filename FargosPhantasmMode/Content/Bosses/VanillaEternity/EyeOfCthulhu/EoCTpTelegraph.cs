@@ -1,6 +1,7 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.IO;
 using Terraria;
@@ -32,20 +33,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             Projectile.ignoreWater = true;
             Projectile.alpha = 0;
         }
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(Projectile.localAI[0]);
-            writer.Write(Projectile.localAI[1]);
-            //writer.Write(Projectile.localAI[2]);
-            base.SendExtraAI(writer);
-        }
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            Projectile.localAI[0] = reader.Read();
-            Projectile.localAI[1] = reader.Read();
-            //Projectile.localAI[2] = reader.Read();
-            base.ReceiveExtraAI(reader);
-        }
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.eoCTpTelegraph")
+                .Float("localAI0", static p => p.localAI[0], static (p, value) => p.localAI[0] = value)
+                .Float("localAI1", static p => p.localAI[1], static (p, value) => p.localAI[1] = value);
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
+
         public override void AI()
         {
             if (Projectile.localAI[0] == 0)
@@ -124,20 +120,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             Projectile.ignoreWater = true;
             Projectile.alpha = 0;
         }
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(Projectile.localAI[0]);
-            writer.Write(Projectile.localAI[1]);
-            //writer.Write(Projectile.localAI[2]);
-            base.SendExtraAI(writer);
-        }
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            Projectile.localAI[0] = reader.Read();
-            Projectile.localAI[1] = reader.Read();
-            //Projectile.localAI[2] = reader.Read();
-            base.ReceiveExtraAI(reader);
-        }
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.superEoCTpTelegraph")
+                .Float("localAI0", static p => p.localAI[0], static (p, value) => p.localAI[0] = value)
+                .Float("localAI1", static p => p.localAI[1], static (p, value) => p.localAI[1] = value);
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
+
         public override void AI()
         {
             if (Projectile.localAI[0] == 0)

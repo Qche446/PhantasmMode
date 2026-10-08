@@ -9,6 +9,9 @@ Monochrome 是面向 tModLoader 内容模组的图形与特效基础库，主要
 | 怎么把一个特效写出来（最短路径） | 本文件 |
 | 图形系统每个部件的作用、原理、调用顺序、性能红线、已知缺口 | [`Core/Graphics/README.md`](Core/Graphics/README.md) |
 | 核心层：子系统生命周期、事件总线、对象池、确定性随机、时钟与调度、日志 | [`Core/README.md`](Core/README.md) |
+| 物理模块：绳索求解器、参数指南、这一版做什么不做什么 | [`Core/Physics/README.md`](Core/Physics/README.md) |
+| 蠕虫段链：布局描述、走链导航、体节跟随与头部移动 | [`Content/Worms/README.md`](Content/Worms/README.md) |
+| 状态 / Buff 系统：层数、每实体数据、实体级钩子、图标角标 | [`Content/Status/README.md`](Content/Status/README.md) |
 | 整个库的设计蓝图：分层、模块清单、优先级、工程规范、反模式 | [`docs/构建蓝图.md`](docs/构建蓝图.md) |
 | 数学与几何工具 | [`Common/MonoUtil/`](Common/MonoUtil/)（每类都有 XML 注释，IDE 里直接看） |
 

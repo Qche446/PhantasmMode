@@ -1,9 +1,10 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.IO;
 using Terraria;
@@ -36,16 +37,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
             Projectile.hostile = true;
         }
         public override bool CanHitPlayer(Player target) => State == 2;
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            State = reader.ReadSingle();
-            Timer = reader.ReadSingle();
-        }
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(State);
-            writer.Write(Timer);
-        }
+        /// <summary>本类的 <c>State</c> / <c>Timer</c> 就是 <c>localAI[0]</c> / <c>[1]</c>，写读由字段表统一。</summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.kingSlimeSword")
+                .Float("state", static p => p.localAI[0], static (p, value) => p.localAI[0] = value)
+                .Float("timer", static p => p.localAI[1], static (p, value) => p.localAI[1] = value);
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
         public override void AI()
         {
             NPC slimeboss = FargoSoulsUtil.NPCExists(Projectile.ai[0], NPCID.KingSlime);
@@ -70,19 +70,19 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
             }
             */
         }
+        /// <summary>
+        /// 死亡时撒尘埃。纯表现，各端本地撒（原来包在 HostCheck 里，纯客户端看不到）。
+        /// </summary>
         public override void OnKill(int timeLeft)
         {
-            if (FargoSoulsUtil.HostCheck)
+            for (int i = 0; i < 20; i++)
             {
-                for (int i = 0; i < 20; i++)
-                {
-                    int randdistance = Main.rand.Next(200, 600);
-                    float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
-                    Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
-                    int d = Dust.NewDust(Projectile.Center, 0, 0, DustID.TintableDust, vel.X, vel.Y, 150, new Color(0, 80, 255, 80));
-                    Main.dust[d].noGravity = true;
-                    Main.dust[d].scale = Main.rand.NextFloat(1.2f, 1.5f);
-                }
+                int randdistance = Main.rand.Next(200, 600);
+                float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
+                Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
+                int d = Dust.NewDust(Projectile.Center, 0, 0, DustID.TintableDust, vel.X, vel.Y, 150, new Color(0, 80, 255, 80));
+                Main.dust[d].noGravity = true;
+                Main.dust[d].scale = Main.rand.NextFloat(1.2f, 1.5f);
             }
         }
         public override bool PreDraw(ref Color lightColor)

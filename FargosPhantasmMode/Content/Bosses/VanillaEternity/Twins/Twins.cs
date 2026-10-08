@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Bossbar;
+using FargosPhantasmMode.Content.Bossbar;
 using FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
@@ -18,6 +18,8 @@ using Luminance.Core.Graphics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Common.MonoUtil;
+using Monochrome.Core.Net;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -332,30 +334,23 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     bro.ai[1] = bro.ai[2] = bro.ai[3] = bro.localAI[0] = bro.localAI[1] = bro.localAI[2] = bro.localAI[3] = 0;
                     IPTwins Ibro = GetIPTwins(bro);
                     Ibro.AIState = TwinsAtt.RollingShoot;
+                    bro.netUpdate = true;   // 兄弟的 ai/localAI/状态也改了，得让它自己发出去
                 }
 
                 npc.netUpdate = true;
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                NetSync(npc);
             }
             if (npc.ai[1] == 30 && FargoSoulsUtil.HostCheck)
             {
-                float num = 4;
-                for (int i = 0; i < num; i++)
-                {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), Vector2.UnitX.RotatedBy(i * MathHelper.TwoPi / num),
-                        ModContent.ProjectileType<TwinCurvedLaser>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0, Main.myPlayer,
-                        npc.whoAmI, 180, 1.2f * npc.localAI[0]);
-                }
+                int num = 4;
+                Vector2 shootPos = ShootPos(npc);
+                int laserType = ModContent.ProjectileType<TwinCurvedLaser>();
+                int laserDamage = MonoShot.ScaledDamage(npc.damage);
+                MonoShot.Ring(npc, shootPos, num, laserType, laserDamage, 1f,
+                    ai0: npc.whoAmI, ai1: 180f, ai2: 1.2f * npc.localAI[0], gated: false);
                 if (Main.getGoodWorld)
                 {
-                    for (int i = 0; i < num; i++)
-                    {
-                        Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), Vector2.UnitX.RotatedBy(i * MathHelper.TwoPi / num),
-                            ModContent.ProjectileType<TwinCurvedLaser>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0, Main.myPlayer,
-                            npc.whoAmI, 360, 1.2f * npc.localAI[0]);
-                    }
+                    MonoShot.Ring(npc, shootPos, num, laserType, laserDamage, 1f,
+                        ai0: npc.whoAmI, ai1: 360f, ai2: 1.2f * npc.localAI[0], gated: false);
                 }
                 npc.netUpdate = true;
             }
@@ -372,9 +367,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     if (!Main.dedServ)
                         SoundEngine.PlaySound(FargosSoundRegistry.TwinsDeathray with { Volume = 2f }, npc.Center);
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] <= 390f)
@@ -384,9 +376,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[1] == 390)
                 {
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] < 450f)
@@ -397,7 +386,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (++npc.ai[1] > 450)
             {
                 ChooseAttack(npc);
-                NetSync(npc);
+                npc.netUpdate = true;
             }
             #endregion
         }
@@ -550,9 +539,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<GlowRing>(), 0, 0f, Main.myPlayer, npc.whoAmI, npc.type);
                 SoundEngine.PlaySound(FargosSoundRegistry.TwinsWarning with { Volume = 4f }, npc.Center);
                 npc.netUpdate = true;
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                NetSync(npc);
             }
             if (npc.ai[1] == 30 && FargoSoulsUtil.HostCheck)
             {
@@ -590,9 +576,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     if (!Main.dedServ)
                         SoundEngine.PlaySound(FargosSoundRegistry.TwinsDeathray with { Volume = 2f }, npc.Center);
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] <= 390f)
@@ -602,9 +585,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[1] == 390)
                 {
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] < 450f)
@@ -616,7 +596,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 npc.defense -= 20;
                 ChooseAttack(npc);
-                NetSync(npc);
+                npc.netUpdate = true;   // defense 不在 SyncNPC 载荷里，靠字段表的 defense 那一格带过去
             }
             #endregion
         }
@@ -2100,9 +2080,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
                 SoundEngine.PlaySound(FargosSoundRegistry.TwinsWarning with { Volume = 4f }, npc.Center);
                 npc.netUpdate = true;
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                NetSync(npc);
             }
             if (npc.ai[1] == 30f)
             {
@@ -2128,9 +2105,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, speed, ModContent.ProjectileType<RetinazerDeathray>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f / 3), 0f, Main.myPlayer, 0f, npc.whoAmI);
                     }
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] <= 390f)
@@ -2144,9 +2118,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[1] == 390)
                 {
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] < 450f)
@@ -2382,9 +2353,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
                 SoundEngine.PlaySound(LensEject with { Volume = 4f }, npc.Center);
                 npc.netUpdate = true;
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                NetSync(npc);
             }
             if (npc.ai[1] == 30f)
             {
@@ -2413,9 +2381,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, speed, ModContent.ProjectileType<RetinazerDeathray>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage, 4f / 3), 0f, Main.myPlayer, 0f, npc.whoAmI);
                     }
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] <= 390f)
@@ -2429,9 +2394,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 if (npc.ai[1] == 390)
                 {
                     npc.netUpdate = true;
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npc.whoAmI);
-                    NetSync(npc);
                 }
             }
             else if (npc.ai[1] < 450f)
@@ -2805,31 +2767,27 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             //return new Color(255, drawColor.G / 2, drawColor.B / 2);
         }
 
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            AuraRadius = binaryReader.ReadSingle();
-            AuraOpacity = binaryReader.ReadSingle();
-            Phaseinit = binaryReader.Read7BitEncodedInt();
-            Phase = binaryReader.Read7BitEncodedInt();
-            AIState = (TwinsAtt)binaryReader.Read7BitEncodedInt();
-            Ignite = bitReader.ReadBit();
-            IgniteTimer = binaryReader.Read7BitEncodedInt();
-            Ghost = bitReader.ReadBit();
-        }
+        /// <summary>
+        /// 基类不再统一写 <c>localAI</c>，本类自己声明要那四格——FSS 的 Twins <c>SendExtraAI</c>
+        /// 写的是它自己的那几个字段，这四格只有本模组在写。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            WithLocalAI(MonoNet.Fields<NPC>("fpm.retinazer"))
+                .Float("auraRadius", static npc => Self(npc).AuraRadius, static (npc, value) => Self(npc).AuraRadius = value)
+                .Float("auraOpacity", static npc => Self(npc).AuraOpacity, static (npc, value) => Self(npc).AuraOpacity = value)
+                .Int("defense", static npc => npc.defense, static (npc, value) => npc.defense = value)   // SyncNPC 载荷里没有 defense，只能靠这一格带过去
+                .Int("phaseInit", static npc => Self(npc).Phaseinit, static (npc, value) => Self(npc).Phaseinit = value)
+                .Int("phase", static npc => Self(npc).Phase, static (npc, value) => Self(npc).Phase = value)
+                .Int("aiState", static npc => (int)Self(npc).AIState, static (npc, value) => Self(npc).AIState = (TwinsAtt)value)
+                .Bool("ignite", static npc => Self(npc).Ignite, static (npc, value) => Self(npc).Ignite = value)
+                .Int("igniteTimer", static npc => Self(npc).IgniteTimer, static (npc, value) => Self(npc).IgniteTimer = value)
+                .Bool("ghost", static npc => Self(npc).Ghost, static (npc, value) => Self(npc).Ghost = value);
 
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write(AuraRadius);
-            binaryWriter.Write(AuraOpacity);
-            binaryWriter.Write7BitEncodedInt(Phaseinit);
-            binaryWriter.Write7BitEncodedInt(Phase);
-            binaryWriter.Write7BitEncodedInt((int)AIState);
-            bitWriter.WriteBit(Ignite);
-            binaryWriter.Write7BitEncodedInt(IgniteTimer);
-            bitWriter.WriteBit(Ghost);
-        }
+        private static P_Retinazer Self(NPC npc) => npc.GetGlobalNPC<P_Retinazer>();
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         #endregion
         #region 绘制
         public void DrawAura(NPC npc, SpriteBatch spriteBatch, Vector2 position)
@@ -3034,27 +2992,25 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             //return new Color(drawColor.R / 2, 255, drawColor.B / 2);
         }
 
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            Phaseinit = binaryReader.Read7BitEncodedInt();
-            Phase = binaryReader.Read7BitEncodedInt();
-            AIState = (TwinsAtt)binaryReader.Read7BitEncodedInt();
-            Ignite = bitReader.ReadBit();
-            IgniteTimer = binaryReader.Read7BitEncodedInt();
-            Ghost = bitReader.ReadBit();
-        }
+        /// <summary>
+        /// 基类不再统一写 <c>localAI</c>，本类自己声明要那四格——FSS 的 Twins <c>SendExtraAI</c>
+        /// 写的是它自己的那几个字段，这四格只有本模组在写。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            WithLocalAI(MonoNet.Fields<NPC>("fpm.spazmatism"))
+                .Int("defense", static npc => npc.defense, static (npc, value) => npc.defense = value)   // SyncNPC 载荷里没有 defense，只能靠这一格带过去
+                .Int("phaseInit", static npc => Self(npc).Phaseinit, static (npc, value) => Self(npc).Phaseinit = value)
+                .Int("phase", static npc => Self(npc).Phase, static (npc, value) => Self(npc).Phase = value)
+                .Int("aiState", static npc => (int)Self(npc).AIState, static (npc, value) => Self(npc).AIState = (TwinsAtt)value)
+                .Bool("ignite", static npc => Self(npc).Ignite, static (npc, value) => Self(npc).Ignite = value)
+                .Int("igniteTimer", static npc => Self(npc).IgniteTimer, static (npc, value) => Self(npc).IgniteTimer = value)
+                .Bool("ghost", static npc => Self(npc).Ghost, static (npc, value) => Self(npc).Ghost = value);
 
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write7BitEncodedInt(Phaseinit);
-            binaryWriter.Write7BitEncodedInt(Phase);
-            binaryWriter.Write7BitEncodedInt((int)AIState);
-            bitWriter.WriteBit(Ignite);
-            binaryWriter.Write7BitEncodedInt(IgniteTimer);
-            bitWriter.WriteBit(Ghost);
-        }
+        private static P_Spazmatism Self(NPC npc) => npc.GetGlobalNPC<P_Spazmatism>();
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         #endregion
     }
 }

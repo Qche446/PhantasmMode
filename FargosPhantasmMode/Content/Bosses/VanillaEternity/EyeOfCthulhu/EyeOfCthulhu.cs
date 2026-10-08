@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Bossbar;
+using FargosPhantasmMode.Content.Bossbar;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
@@ -16,8 +16,11 @@ using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Monochrome.Common.MonoUtil;
+using Monochrome.Common.MonoUtil.Entities;
+using Monochrome.Core.Net;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -310,11 +313,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             Movement(npc, targetCenter, speed, accel);
             if (npc.ai[1] % 60 == 0)
             {
-                int n = NPC.NewNPC(npc.GetSource_FromAI(), (int)npc.Center.X, (int)npc.Center.Y, NPCID.ServantofCthulhu);
-                if (n != Main.maxNPCs)
+                // 只由权威端刷：客户端也刷一只的话，服务端同步下来的那只到了就变成两只。
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n);
+                    // 新 NPC 由原版在 NPC.NewNPC 里自己广播，这里不必再手发一包
+                    NPC.NewNPC(npc.GetSource_FromAI(), (int)npc.Center.X, (int)npc.Center.Y, NPCID.ServantofCthulhu);
                 }
                 for (float i = 1; i < 5; i += 1.5f)
                 {
@@ -1064,7 +1067,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15)
             {
-                if (npc.ai[1] % 5 == 0)
+                if (npc.ai[1] % 5 == 0 && FargoSoulsUtil.HostCheck)
                 {
                     int p = Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 0.03f * npc.velocity, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer, npc.localAI[0], npc.localAI[1], 185 - npc.ai[1]);
                     //Main.projectile[p].scale *= 0.8f;
@@ -1220,8 +1223,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.localAI[2] -= 60 * MathF.PI / 180f;
                     spawnPos = new Vector2(npc.localAI[0], npc.localAI[1]) + 693 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                     Vector2 vel = Vector2.UnitX.RotatedBy(npc.localAI[2] + 150 * MathF.PI / 180f);
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
-                    -50, (int)movetype, 3 * 15);
+                    // 只把生成关进权威端：上面几行算的是本端也要用的 localAI / spawnPos
+                    if (FargoSoulsUtil.HostCheck)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, 80 * vel, ModContent.ProjectileType<FalseEoC>(), 0, 0, Main.myPlayer,
+                        -50, (int)movetype, 3 * 15);
+                    }
                 }
                 if (FargoSoulsUtil.HostCheck)
                 {
@@ -2003,92 +2010,83 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 FargoSoulsUtil.ScreenshakeRumble(7f); // 强烈屏幕震动
                 SoundEngine.PlaySound(FargosSoundRegistry.MutantKSKill, npc.Center); // 终结音效
-                for (double i = 0; i < 40; i++)
+                // 这一波 124 颗弹幕过去没有端侧门，客户端会各刷一份再自己同步上来；
+                // 演出（音效、震动）留在门外，各端本地放。
+                if (FargoSoulsUtil.HostCheck)
                 {
-                    double angle = i * MathHelper.PiOver2 / 10;
-                    Vector2 target = npc.Center + new Vector2(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
-                    Vector2 targetV = (npc.Center.X - target.X) * Vector2.UnitX / 1500;
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), target, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+                    for (double i = 0; i < 40; i++)
+                    {
+                        double angle = i * MathHelper.PiOver2 / 10;
+                        Vector2 target = npc.Center + new Vector2(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 300f * (float)Math.Sin(angle));
+                        Vector2 targetV = (npc.Center.X - target.X) * Vector2.UnitX / 1500;
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), target, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+                    }
+                    for (double i = 0; i < 60; i++)
+                    {
+                        double angle = i * MathHelper.PiOver2 / 15;
+                        Vector2 target = npc.Center + new Vector2(225f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 450f * (float)Math.Sin(angle));
+                        Vector2 targetV = (npc.Center.X - target.X) * Vector2.UnitX / 1500;
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), target, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+                    }
+                    for (double i = 0; i < 24; i++)
+                    {
+                        double angle = i * MathHelper.PiOver2 / 6;
+                        Vector2 Center = npc.Center + new Vector2(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 75f * (float)Math.Sin(angle));
+                        Vector2 targetV = (npc.Center.X - Center.X) * Vector2.UnitX / 1500;
+                        Projectile.NewProjectile(npc.GetSource_FromThis(), Center, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+                    }
+
+                    // 世界状态只由权威端改（血月是原版世界数据的一部分），客户端等下发
+                    Main.bloodMoon = false;
                 }
-                for (double i = 0; i < 60; i++)
-                {
-                    double angle = i * MathHelper.PiOver2 / 15;
-                    Vector2 target = npc.Center + new Vector2(225f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 450f * (float)Math.Sin(angle));
-                    Vector2 targetV = (npc.Center.X - target.X) * Vector2.UnitX / 1500;
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), target, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
-                }
-                for (double i = 0; i < 24; i++)
-                {
-                    double angle = i * MathHelper.PiOver2 / 6;
-                    Vector2 Center = npc.Center + new Vector2(150f * (float)Math.Cos(angle) * (1 - 0.15f * (float)Math.Sin(angle) * (float)Math.Sin(angle)), 75f * (float)Math.Sin(angle));
-                    Vector2 targetV = (npc.Center.X - Center.X) * Vector2.UnitX / 1500;
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), Center, targetV, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
-                }
-                Main.bloodMoon = false;
                 npc.localAI[3] = 1;
             }
         }
 
         #endregion
         #region 辅助方法
-        
         private static void FancyFireballs(NPC npc, int repeats)
         {
-            if (FargoSoulsUtil.HostCheck)
-            {
-                float modifier = 0;
-                for (int i = 0; i < repeats; i++)
-                    modifier = MathHelper.Lerp(modifier, 1f, 0.08f);
+            float modifier = 0;
+            for (int i = 0; i < repeats; i++)
+                modifier = MathHelper.Lerp(modifier, 1f, 0.08f);
 
-                float distance = 1400 * (1f - modifier);
-                float rotation = MathHelper.TwoPi * modifier;
-                const int max = 6;
-                for (int i = 0; i < max; i++)
-                {
-                    int d = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.SnowSpray, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
-                    int p = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(-rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.Vortex, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
-                    Main.dust[d].noGravity = true;
-                    Main.dust[d].scale = 1.5f - 0.8f * modifier;
-                    Main.dust[p].noGravity = true;
-                    Main.dust[p].scale = 1.5f - 0.8f * modifier;
-                }
+            float distance = 1400 * (1f - modifier);
+            float rotation = MathHelper.TwoPi * modifier;
+            const int max = 6;
+            for (int i = 0; i < max; i++)
+            {
+                int d = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.SnowSpray, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
+                int p = Dust.NewDust(npc.Center + distance * Vector2.UnitX.RotatedBy(-rotation + MathHelper.TwoPi / max * i), 0, 0, DustID.Vortex, npc.velocity.X * 0.3f, npc.velocity.Y * 0.3f, 150);
+                Main.dust[d].noGravity = true;
+                Main.dust[d].scale = 1.5f - 0.8f * modifier;
+                Main.dust[p].noGravity = true;
+                Main.dust[p].scale = 1.5f - 0.8f * modifier;
             }
         }
         private static void ReleaseDust(NPC npc, int num = 2)
         {
-            if (FargoSoulsUtil.HostCheck)
+            for (int i = 0; i < num; i++)
             {
-                for (int i = 0; i < num; i++)
-                {
-                    int randdistance = Main.rand.Next(200, 600);
-                    float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
-                    Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
-                    int d = Dust.NewDust(npc.Center, 0, 0, DustID.SnowSpray, vel.X, vel.Y, 150);
-                    Main.dust[d].noGravity = true;
-                    Main.dust[d].scale = Main.rand.NextFloat(1.2f, 1.5f);
-                }
-                for (int i = 0; i < num; i++)
-                {
-                    int randdistance = Main.rand.Next(50, 600);
-                    float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
-                    Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 5;
-                    Vector2 spawnPos = npc.Center + vel / 10;
-                    int p = Dust.NewDust(spawnPos, 0, 0, DustID.Vortex, vel.X, vel.Y, 150);
-                    Main.dust[p].noGravity = true;
-                    Main.dust[p].scale = Main.rand.NextFloat(1.2f, 1.5f);
-                }
+                int randdistance = Main.rand.Next(200, 600);
+                float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
+                Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 10;
+                MonoDust.At(npc.Center, DustID.SnowSpray, vel, alpha: 150, scale: Main.rand.NextFloat(1.2f, 1.5f), noGravity: true);
+            }
+            for (int i = 0; i < num; i++)
+            {
+                int randdistance = Main.rand.Next(50, 600);
+                float randangle = Main.rand.NextFloat(0, 2 * MathF.PI);
+                Vector2 vel = randdistance * Vector2.UnitX.RotatedBy(randangle) / 5;
+                Vector2 spawnPos = npc.Center + vel / 10;
+                MonoDust.At(spawnPos, DustID.Vortex, vel, alpha: 150, scale: Main.rand.NextFloat(1.2f, 1.5f), noGravity: true);
             }
         }
         private static void ShootBackMoonBolt(NPC npc, int num)
         {
-            for (int i = 0; i < num; i++)
-            {
-                float angle = Main.rand.NextFloat(-MathHelper.PiOver4, MathHelper.PiOver4);
-                Vector2 vel = npc.velocity.RotatedBy(angle);
-                Vector2 targetPos = npc.Center - 10 * npc.velocity;
-                if (FargoSoulsUtil.HostCheck)
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, vel, ModContent.ProjectileType<MoonBolt>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer, targetPos.X, targetPos.Y, 40);
-            }
+            Vector2 targetPos = npc.Center - 10 * npc.velocity;
+            MonoShot.Spread(npc, npc.Center, num, ModContent.ProjectileType<MoonBolt>(), MonoShot.ScaledDamage(npc.defDamage),
+                npc.velocity, MathHelper.PiOver4, knockBack: 1f, ai0: targetPos.X, ai1: targetPos.Y, ai2: 40f);
         }
         private void RecordLast()
         {
@@ -2260,22 +2258,22 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             return true;
         }
-        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
-        {
-            base.SendExtraAI(npc, bitWriter, binaryWriter);
-            binaryWriter.Write7BitEncodedInt(TeleportDirection);
-            binaryWriter.Write7BitEncodedInt(HyperTime);
-            binaryWriter.Write7BitEncodedInt(P3AttackChange);
-            binaryWriter.Write(AIState);
-        }
-        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
-        {
-            base.ReceiveExtraAI(npc, bitReader, binaryReader);
-            TeleportDirection = binaryReader.Read7BitEncodedInt();
-            HyperTime = binaryReader.Read7BitEncodedInt();
-            P3AttackChange = binaryReader.Read7BitEncodedInt();
-            AIState = binaryReader.ReadSingle();
-        }
+        /// <summary>
+        /// 基类不再统一写 <c>localAI</c>，本类自己声明要那四格——FSS 的 <c>EyeOfCthulhu.SendExtraAI</c>
+        /// 写的是它自己的另外几个字段，这四格只有本模组在写。
+        /// </summary>
+        private static readonly MonoNetFields<NPC> Fields =
+            WithLocalAI(MonoNet.Fields<NPC>("fpm.eyeOfCthulhu"))
+                .Int("teleportDirection", static npc => Self(npc).TeleportDirection, static (npc, value) => Self(npc).TeleportDirection = value)
+                .Int("hyperTime", static npc => Self(npc).HyperTime, static (npc, value) => Self(npc).HyperTime = value)
+                .Int("p3AttackChange", static npc => Self(npc).P3AttackChange, static (npc, value) => Self(npc).P3AttackChange = value)
+                .Float("aiState", static npc => Self(npc).AIState, static (npc, value) => Self(npc).AIState = value);
+
+        private static P_EyeOfCthulhu Self(NPC npc) => npc.GetGlobalNPC<P_EyeOfCthulhu>();
+
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
+
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
         #endregion
         public override bool CheckDead(NPC npc)
         {

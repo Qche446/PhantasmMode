@@ -1,7 +1,8 @@
-﻿using FargosPhantasmMode.Content.Buffs;
+using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -273,21 +274,21 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
 
         private static float Cross(Vector2 first, Vector2 second) => first.X * second.Y - first.Y * second.X;
 
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(Projectile.localAI[0]);
-            writer.Write(Projectile.localAI[1]);
-            writer.Write(Projectile.localAI[2]);
-            writer.Write(localAI3);
-        }
+        /// <summary>
+        /// 三个 <c>localAI</c> 格加本类自己的 <see cref="localAI3"/>，写读由字段表统一。
+        /// </summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.ksGuider")
+                .Float("localAI0", static p => p.localAI[0], static (p, value) => p.localAI[0] = value)
+                .Float("localAI1", static p => p.localAI[1], static (p, value) => p.localAI[1] = value)
+                .Float("localAI2", static p => p.localAI[2], static (p, value) => p.localAI[2] = value)
+                .Float("localAI3", static p => Self(p).localAI3, static (p, value) => Self(p).localAI3 = value);
 
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            Projectile.localAI[0] = reader.ReadSingle();
-            Projectile.localAI[1] = reader.ReadSingle();
-            Projectile.localAI[2] = reader.ReadSingle();
-            localAI3 = reader.ReadSingle();
-        }
+        private static KSGuider Self(Projectile projectile) => (KSGuider)projectile.ModProjectile;
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
         public override void OnHitPlayer(Player py, Player.HurtInfo info)
         {
             py.AddBuff(ModContent.BuffType<FractureBuff>(), 60 * 10);

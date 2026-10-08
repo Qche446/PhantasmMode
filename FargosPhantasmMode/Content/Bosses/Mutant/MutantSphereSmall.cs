@@ -1,9 +1,10 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Net;
 using ReLogic.Content;
 using System;
 using System.IO;
@@ -21,14 +22,16 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         public int waittime = 85;
         bool SpecialPhase = false;
         int SpecialTimer = 0;
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(SpecialPhase);
-        }
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            SpecialPhase = reader.ReadBoolean();
-        }
+        /// <summary>本类只带一个 <c>SpecialPhase</c>，写读由字段表统一（原来的实现没调 base，迁移保持原样）。</summary>
+        private static readonly MonoNetFields<Projectile> Fields =
+            MonoNet.Fields<Projectile>("fpm.mutantSphereSmall")
+                .Bool("specialPhase", static p => Self(p).SpecialPhase, static (p, value) => Self(p).SpecialPhase = value);
+
+        private static PHMutantSphereSmall Self(Projectile projectile) => (PHMutantSphereSmall)projectile.ModProjectile;
+
+        public override void SendExtraAI(BinaryWriter writer) => Fields.Write(Projectile, writer);
+
+        public override void ReceiveExtraAI(BinaryReader reader) => Fields.Read(Projectile, reader);
         public override void AI()
         {
             if (Projectile.ai[0] > -1 && Projectile.ai[0] < Main.maxPlayers)

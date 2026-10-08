@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Core.Systems;
+using FargosPhantasmMode.Core.Systems;
 using Fargowiltas.Projectiles;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
@@ -28,37 +28,15 @@ namespace FargosPhantasmMode.Content.UI
         {
             if (!Masochist.CanToggleEternity())
                 return;
-            if (Main.netMode == NetmodeID.SinglePlayer)
-            {
-                bool changed = false;
-                if (Main.GameModeInfo.IsJourneyMode)
-                {
-                    var slider = CreativePowerManager.Instance.GetPower<DifficultySliderPower>();
-                    DifficultySelectionMenu.JourneyMode_SetValue.Invoke(slider, [1f]);
-                }
-                else
-                {
-                    if (Main.GameMode != GameModeID.Master)
-                        changed = true;
-                    Main.GameMode = GameModeID.Master;
-                }
-                if (changed)
-                    FargoSoulsUtil.PrintLocalization("Mods.Fargowiltas.Items.ModeToggle.Master", new Color(175, 75, 255));
 
-                WorldSavingSystem.ShouldBeEternityMode = true;
-                PModeWorldSavingSystem.CanPlayPhantasm = true;
-            }
-            else
-            {
-                if (Main.GameMode != GameModeID.Master || !WorldSavingSystem.ShouldBeEternityMode)
-                    SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Maso") with { Volume = 1f });
+            // 多人下先响一声：这两项都是已经同步下来的世界状态，客户端读得到。
+            // 单机原本不响这一声，保持原样。
+            if (Main.netMode != NetmodeID.SinglePlayer && (Main.GameMode != GameModeID.Master || !WorldSavingSystem.ShouldBeEternityMode))
+                SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/Difficulty" + "Maso") with { Volume = 1f });
 
-                var netMessage = FargosPhantasmMode.Instance.GetPacket();
-                netMessage.Write((byte)FargosPhantasmMode.PacketID.ActivePhamtasmMode);
-                netMessage.Write((byte)Main.LocalPlayer.whoAmI);
-                netMessage.Write((byte)3); // 2 = set to emode
-                netMessage.Send();
-            }
+            // 单机与多人同一条路：请求在权威端复核后执行，单机时"权威端"就是本机。
+            PModeNet.SetDifficulty.Send(3);
+
             int deviType = ModContent.NPCType<UnconsciousDeviantt>();
             if (!WorldSavingSystem.SpawnedDevi && !NPC.AnyNPCs(deviType))
             {
