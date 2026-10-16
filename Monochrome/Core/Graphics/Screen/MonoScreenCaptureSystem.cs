@@ -129,10 +129,17 @@ public sealed class MonoScreenCaptureSystem : ModSystem
     }
 
     /// <summary>
-    /// 每帧在 <c>DoDraw</c> 之前同步"这一帧要不要申请屏幕捕获"。
+    /// 每帧在 <c>DoDraw</c> 之前推进逐帧滤镜，再同步"这一帧要不要申请屏幕捕获"。
     /// <b>必须在这个钩子里</b>——见类型说明（<c>PostUpdateEverything</c> 在更新闸门内，定格时会停）。
+    /// <para>
+    /// 两件事的顺序不能颠倒：滤镜的淡入淡出决定它这一帧是否启用，而捕获申请看的就是这个启用状态。
+    /// </para>
     /// </summary>
-    public override void PreUpdateEntities() => SyncCaptureRequest();
+    public override void PreUpdateEntities()
+    {
+        MonoPostFxSystem.TickFilters();
+        SyncCaptureRequest();
+    }
 
     /// <summary>按需订阅/退订捕获申请。空闲时绝不订阅，见类型说明。</summary>
     private static void SyncCaptureRequest() => SetCaptureRequest(Enabled && HasActivePipeline);

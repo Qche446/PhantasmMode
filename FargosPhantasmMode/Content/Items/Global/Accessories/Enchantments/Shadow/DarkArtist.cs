@@ -9,7 +9,6 @@ using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -19,6 +18,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using static System.Net.Mime.MediaTypeNames;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shadow
 {
@@ -248,7 +248,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shado
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            return Utilities.CircularHitboxCollision(Projectile.Center + new Vector2(0, Radius), Radius, targetHitbox);
+            return MonoUtil.Intersect.CircleAABB(Projectile.Center + new Vector2(0, Radius), Radius, targetHitbox);
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {

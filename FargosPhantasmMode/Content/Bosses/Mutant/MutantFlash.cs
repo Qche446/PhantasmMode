@@ -1,7 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -12,13 +11,14 @@ using Terraria.DataStructures;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     /// <summary>
     /// ai0=whoami，ai1控制颜色(0 为红，1为蓝)
     /// </summary>
-    public class MutantFlash : ModProjectile, IProjOwnedByBoss<MutantBoss>
+    public class MutantFlash : ModProjectile, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
 

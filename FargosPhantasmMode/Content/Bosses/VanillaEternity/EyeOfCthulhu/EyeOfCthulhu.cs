@@ -1,4 +1,3 @@
-using FargosPhantasmMode.Content.Bossbar;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
@@ -10,26 +9,16 @@ using FargowiltasSouls.Content.Bosses.VanillaEternity;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
-using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Xna.Framework;
 using Monochrome.Common.MonoUtil;
-using Monochrome.Common.MonoUtil.Entities;
 using Monochrome.Core.Net;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Monochrome.Core.Graphics.Screen;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     /// <summary>
@@ -680,7 +669,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.Center = new Vector2(npc.localAI[0], npc.localAI[1]);
                 ReleaseDust(npc, 500);
-                ScreenShakeSystem.StartShake(10);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(10);
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
@@ -944,7 +933,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.Center = new Vector2(npc.localAI[0], npc.localAI[1]);
                 ReleaseDust(npc, 500);
-                ScreenShakeSystem.StartShake(10);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(10);
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
                 npc.rotation = npc.velocity.ToRotation() - MathHelper.PiOver2;
@@ -1057,12 +1046,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             if ((npc.ai[1] - 80) % 15 == 0 && npc.ai[1] >= 80 && npc.ai[1] <= 80 + 15 * 6)
             {
                 if(FargoSoulsUtil.HostCheck)
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 20);
                 ReleaseDust(npc, 100);
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
-                    ScreenShakeSystem.StartShake(5);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15)
@@ -1141,7 +1130,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 15);
                     ReleaseDust(npc, 100);
                 }
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
@@ -1151,7 +1140,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 if (speed > 66.7f)
                     npc.velocity = veldir * 66.7f;
                 if (npc.ai[1] == 80 + 1)
-                    ScreenShakeSystem.StartShake(5);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 8 * 15 && FargoSoulsUtil.HostCheck)
@@ -1241,13 +1230,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 15);
                     ReleaseDust(npc, 100);
                 }
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
-                    ScreenShakeSystem.StartShake(5);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 6 * 15 && FargoSoulsUtil.HostCheck)
@@ -1327,13 +1316,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 15);
                     ReleaseDust(npc, 100);
                 }
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
-                    ScreenShakeSystem.StartShake(5);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 15 * 8 && FargoSoulsUtil.HostCheck)
@@ -1414,14 +1403,14 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 if (FargoSoulsUtil.HostCheck)
                 {
-                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 30);
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + WillDashTrail.Offset(npc), Vector2.Zero, ModContent.ProjectileType<MoonlightTrail>(), 0, 0, Main.myPlayer, npc.whoAmI, 15);
                     ReleaseDust(npc, 100);
                 }
                 if ((npc.ai[1] - 80) % 20 == 0)
                     SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
                 if (npc.ai[1] == 80)
-                    ScreenShakeSystem.StartShake(5);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 npc.netUpdate = true;
             }
             if (npc.ai[1] > 80 && npc.ai[1] < 80 + 50 * 2 && FargoSoulsUtil.HostCheck)
@@ -1512,7 +1501,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 //ReleaseDust(npc, 100);
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
-                ScreenShakeSystem.StartShake(5);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 FalseEoC.MoveType movetype = FalseEoC.MoveType.Straight;
                 for (int i = 0; i < 4; i++)
                 {
@@ -1598,7 +1587,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.alpha = 0;
-                ScreenShakeSystem.StartShake(5);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 FalseEoC.MoveType movetype = FalseEoC.MoveType.Round;
                 for (int i = 0; i < 4; i++)
                 {
@@ -1733,7 +1722,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 npc.Center = new Vector2(npc.localAI[0], npc.localAI[1]);
                 ReleaseDust(npc, 500);
-                ScreenShakeSystem.StartShake(10);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(10);
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
                 npc.velocity = 72 * Vector2.UnitX.RotatedBy(npc.localAI[2]);
                 //npc.velocity = 72 * npc.SafeDirectionTo(player.Center);
@@ -1924,7 +1913,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             if (npc.alpha > 150)
                 npc.alpha = 150;
             
-            Particle p;
+            MonoParticle p;
             float scaleMult;
             int screenshake = 3;
             npc.velocity *= 0.92f; // 水平减速
@@ -1963,7 +1952,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 Vector2 pos = npc.Center + 5 * Vector2.UnitX.RotatedByRandom(MathHelper.TwoPi);
                 scaleMult = (DeathTimer - 60) / 23f; // 随时间增大的比例
-                p = new SparkParticle(pos, Vector2.UnitX.RotatedBy((pos - npc.Center).ToRotation()),
+                p = new FargoSparkParticle(pos, Vector2.UnitX.RotatedBy((pos - npc.Center).ToRotation()),
                     Color.Teal, scaleMult * 0.1f, 10);
                 p.Spawn();
                 /*
@@ -1981,10 +1970,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 // 眼睛发光效果
                 scaleMult = (DeathTimer - 150) / 10f;
-                p = new SparkParticle(mutantEyePos, Vector2.UnitY, Color.Teal, 1.5f, 120);
+                p = new FargoSparkParticle(mutantEyePos, Vector2.UnitY, Color.Teal, 1.5f, 120);
                 p.Scale *= scaleMult;
                 p.Spawn();
-                p = new SparkParticle(mutantEyePos, Vector2.UnitX, Color.Teal, 1.5f, 120);
+                p = new FargoSparkParticle(mutantEyePos, Vector2.UnitX, Color.Teal, 1.5f, 120);
                 p.Scale *= scaleMult;
                 p.Spawn();
 
@@ -2289,12 +2278,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             return false;
             */
             return true;
-        }
-        public override void SafeModifyHitByProjectile(NPC npc, Projectile projectile, ref NPC.HitModifiers modifiers)
-        {
-            if (projectile.type == ProjectileID.ThornChakram)
-                modifiers.FinalDamage *= 0.85f;
-            base.SafeModifyHitByProjectile(npc, projectile, ref modifiers);
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using FargosPhantasmMode.Content.Projectiles;
+using FargosPhantasmMode.Content.Projectiles;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using Luminance.Common.Utilities;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -13,6 +12,7 @@ using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Content.Projectiles.Souls;
 using FargowiltasSouls.Content.Patreon.DevAesthetic;
 using FargosPhantasmMode.Core.Systems;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature
 {
@@ -28,6 +28,12 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             ProjectileID.NorthPoleSnowflake,
             ModContent.ProjectileType<NatureTrailProj>(),
             ];
+        public readonly static List<int> weaponProj = [
+            ProjectileID.BladeOfGrass,
+            ProjectileID.ThornChakram,
+            ProjectileID.ThornWhip,
+            ProjectileID.JungleYoyo,
+        ];
         public override GlobalProjectile NewInstance(Projectile target) => PModeWorldSavingSystem.PhantasmMode ? base.NewInstance(target) : null;
         public override void OnSpawn(Projectile projectile, IEntitySource source)
         {
@@ -37,10 +43,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 bool HasForce = Main.LocalPlayer.ForceEffect<JungleEnhanceEffect>();
                 if (projectile.type == ProjectileID.IvyWhip)
                     projectile.extraUpdates += 1;
-                List<int> weaponProj = [ProjectileID.BladeOfGrass, ProjectileID.ThornChakram, ProjectileID.ThornWhip, ProjectileID.JungleYoyo];
+                //List<int> weaponProj = [ProjectileID.BladeOfGrass, ProjectileID.ThornChakram, ProjectileID.ThornWhip, ProjectileID.JungleYoyo];
                 if (weaponProj.Contains(projectile.type))
                 {
-                    projectile.GetGlobalProjectile<PModeGlobalProj>().PoisonAttribute = true;
+                    projectile.MonoTag().Add(MonoDamageTag.Poison);
                     //projectile.velocity *= 2;
                 }
                 if (projectile.type == ProjectileID.ThornWhip)

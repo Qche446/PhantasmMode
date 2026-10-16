@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
+﻿using FargosPhantasmMode.Common;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -14,7 +14,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
-            npc.GetGlobalNPC<PModeGlobalBuffNPC>().Hypothermia = true;
+            npc.Phantasm().Hypothermia = true;
         }
     }
     

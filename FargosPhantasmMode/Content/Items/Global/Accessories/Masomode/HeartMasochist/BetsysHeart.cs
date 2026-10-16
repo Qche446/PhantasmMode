@@ -10,7 +10,6 @@ using FargowiltasSouls.Content.UI.Elements;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
@@ -19,6 +18,7 @@ using System;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.HeartMasochist
 {

@@ -7,12 +7,11 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-	<ItemGroup>
-		<Reference Include="Luminance">
-			<HintPath>lib\Luminance.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
+	<!--
+	  Monochrome 对 Luminance 没有编译期引用：与它的协作（重载后同步注册表、停用它的文件监视器）
+	  都在 MonoShaderReloader 里走反射，运行期关系由 build.txt 的 weakReferences / sortAfter 描述。
+	  lib\Luminance.dll 因此不再需要（留着只是历史残留，未打包）。
+	-->
 	<PropertyGroup>
 		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == ''">powershell</MonochromePowerShell>
 		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == 'powershell' AND Exists('$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe')">$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe</MonochromePowerShell>

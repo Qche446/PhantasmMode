@@ -6,13 +6,15 @@ using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Content.WorldGeneration;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.StateMachines;
-using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using Monochrome.Common.MonoUtil;
 using Terraria.DataStructures;
+using Monochrome.Core.Graphics.Screen;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.Coffin
 {
     public partial class P_CursedCoffin
@@ -43,7 +45,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
         #region AI
         public override void OnFirstTick(NPC npc)
         {
-            coffin = Utilities.As<CursedCoffin>(npc);
+            coffin = MonoUtil.As<CursedCoffin>(npc);
         }
         public override bool SafePreAI(NPC npc)
         {
@@ -181,7 +183,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                         npc.velocity.Y -= 9f;
                         if (!Main.dedServ)
                         {
-                            ScreenShakeSystem.StartShake(10f, (float)Math.PI * 2f, (Vector2?)null, 0.5f);
+                            MonoScreenEffectsSystem.StartShakeByAmplitude(10f, 0.5f);
                         }
                         int dir = Math.Sign(Player.Center.X - CoffinArena.FightCenter.X);
                         HalfDropSand(dir);
@@ -327,7 +329,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
             }
             if (Timer <= 1f)
             {
-                initialDir = Utilities.SafeDirectionTo((Entity)Player, npc.Center).ToRotation();
+                initialDir = MonoUtil.SafeDirectionTo((Entity)Player, npc.Center).ToRotation();
                 initialDist = npc.Distance(Player.Center);
             }
             if (Timer <= 70f)
@@ -428,7 +430,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                     npc.velocity = Vector2.Zero;
                 }
             }
-            if (Math.Abs(npc.Center.X - CoffinArena.FightCenter.X) > (float)(CoffinArena.Width * 8 - npc.width / 2) && (float)Utilities.NonZeroSign(npc.velocity.X) != Utilities.HorizontalDirectionTo((Entity)npc, CoffinArena.FightCenter))
+            if (Math.Abs(npc.Center.X - CoffinArena.FightCenter.X) > (float)(CoffinArena.Width * 8 - npc.width / 2) && (float)MonoUtil.NonZeroSign(npc.velocity.X) != MonoUtil.HorizontalDirectionTo((Entity)npc, CoffinArena.FightCenter))
             {
                 npc.velocity.X = 0f;
             }
@@ -458,7 +460,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                 float sparkTime = 15f;
                 Vector2 sparkVel = (maskCenter - sparkCenter) / sparkTime;
                 float sparkScale = 2f - progress * 1.2f;
-                Particle spark = (Particle)new SparkParticle(sparkCenter, sparkVel, GlowColor, sparkScale, (int)sparkTime, true, (Color?)null);
+                MonoParticle spark = (MonoParticle)new FargoSparkParticle(sparkCenter, sparkVel, GlowColor, sparkScale, (int)sparkTime, true, (Color?)null);
                 spark.Spawn();
             }
             else if (Timer == (float)TelegraphTime)
@@ -511,7 +513,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                 Vector2 center = CoffinArena.FightCenter;
                 if (!Main.dedServ)
                 {
-                    ScreenShakeSystem.StartShake(10f, (float)Math.PI * 2f, (Vector2?)null, 0.5f);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(10f, 0.5f);
                 }
                 if (FargoSoulsUtil.HostCheck)
                 {

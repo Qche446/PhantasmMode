@@ -1,17 +1,8 @@
 using FargowiltasSouls;
-using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
-using System;
-using System.IO;
-using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
-using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {

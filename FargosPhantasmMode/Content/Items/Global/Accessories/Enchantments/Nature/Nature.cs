@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
@@ -10,13 +10,15 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework.Graphics;
 using FargosPhantasmMode.Content.Projectiles;
 using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Common.Utilities;
 using System.Runtime.InteropServices.Marshalling;
 using FargowiltasSouls.Content.Buffs.Souls;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature
 {
@@ -39,11 +41,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public override bool ExtraAttackEffect => true;
         public override bool MutantsPresenceAffects => true;
     }
-    public class NatureTrailProj : ModProjectile, IPixelatedPrimitiveRenderer
+    public class NatureTrailProj : ModProjectile, IMonoPixelatedPrimitive
     {
         public float radius = 32;
         public bool StartFaded = false;
-        public PixelationPrimitiveLayer LayerToRenderTo => PixelationPrimitiveLayer.AfterProjectiles;
+        public MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.AfterProjectiles;
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public override void SetStaticDefaults()
         {
@@ -71,7 +73,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         {
             for (int i = 0; i < Projectile.oldPos.Length; i += 4)
             {
-                if (Utilities.CircularHitboxCollision(Projectile.oldPos[i], WidthFunction(i / (float)Projectile.oldPos.Length), targetHitbox))
+                if (MonoUtil.Intersect.CircleAABB(Projectile.oldPos[i], WidthFunction(i / (float)Projectile.oldPos.Length), targetHitbox))
                     return true;
             }
             return false;
@@ -133,7 +135,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         }
         public override bool? CanHitNPC(NPC target)
         {
-            Projectile.GetGlobalProjectile<PModeGlobalProj>().IceAttribute = true;
+            Projectile.MonoTag().Add(MonoDamageTag.Ice);
             return !target.townNPC;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
@@ -142,11 +144,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             target.AddBuff(BuffID.Frostburn2, 240);
         }
         public override bool PreDraw(ref Color lightColor) => false;
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, Pixelate: true, Shader: shader), 60);
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 60);
         }
     }
 }

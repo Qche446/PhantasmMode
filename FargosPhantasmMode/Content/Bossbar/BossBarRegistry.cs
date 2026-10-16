@@ -1,32 +1,32 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Render;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls.Content.Bosses.BanishedBaron;
+using FargowiltasSouls.Content.Bosses.Champions.Cosmos;
 using FargowiltasSouls.Content.Bosses.Champions.Earth;
+using FargowiltasSouls.Content.Bosses.Champions.Life;
 using FargowiltasSouls.Content.Bosses.Champions.Nature;
+using FargowiltasSouls.Content.Bosses.Champions.Shadow;
+using FargowiltasSouls.Content.Bosses.Champions.Spirit;
 using FargowiltasSouls.Content.Bosses.Champions.Terra;
 using FargowiltasSouls.Content.Bosses.Champions.Timber;
+using FargowiltasSouls.Content.Bosses.Champions.Will;
 using FargowiltasSouls.Content.Bosses.CursedCoffin;
 using FargowiltasSouls.Content.Bosses.DeviBoss;
 using FargowiltasSouls.Content.Bosses.Lifelight;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Bosses.TrojanSquirrel;
-using static FargowiltasSouls.FargowiltasSouls;
-using Luminance.Assets;
-using Luminance.Core.Graphics;
-using System.Collections.Generic;
-using static Terraria.ModLoader.ModContent;
-using FargowiltasSouls.Content.Bosses.Champions.Life;
-using FargowiltasSouls.Content.Bosses.Champions.Shadow;
-using FargowiltasSouls.Content.Bosses.Champions.Spirit;
-using FargowiltasSouls.Content.Bosses.Champions.Will;
-using FargowiltasSouls.Content.Bosses.Champions.Cosmos;
-using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Solar;
-using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Vortex;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Nebula;
+using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Solar;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Stardust;
+using FargowiltasSouls.Content.NPCs.EternityModeNPCs.VanillaEnemies.LunarEvents.Vortex;
+using System.Collections.Generic;
 using System.Linq;
+using static FargowiltasSouls.FargowiltasSouls;
+using static Terraria.ModLoader.ModContent;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Bossbar
 {
@@ -108,7 +108,7 @@ namespace FargosPhantasmMode.Content.Bossbar
         public static BossBarConfig BaseBarStyle(Color color1, Color color2, float omiga = 0, bool HasShield = false, Func<NPC, int> Shield = null, Func<NPC, int> MaxShield = null) => new ((sb, npc, rectangle) => DoubleColorPulse(sb, npc, rectangle, () => color1, () => color2, npc.GetLifePercent(), omiga), HasShield, Shield, MaxShield);
         private static void DoubleColorPulse(SpriteBatch sb, NPC npc, Rectangle rectangle, Func<Color> color1, Func<Color> color2, float lifeRatio, float omiga)
         {
-            ManagedShader healthBarShader = ShaderManager.GetShader("FargosPhantasmMode.BossBarShader");
+            MonoShader healthBarShader = MonoShaderManager.GetShader("FargosPhantasmMode.BossBarShader");
             Texture2D noise = FargosTextureRegistry.WavyNoise.Value;
             sb.GraphicsDevice.Textures[1] = noise;
 
@@ -117,7 +117,7 @@ namespace FargosPhantasmMode.Content.Bossbar
             healthBarShader.TrySetParameter("color2", color2?.Invoke());
             healthBarShader.TrySetParameter("omiga", omiga);
             healthBarShader.Apply();
-            sb.Draw(MiscTexturesRegistry.InvisiblePixel.Value, rectangle, null, Color.White);
+            sb.Draw(Request<Texture2D>(FargoSoulsUtil.EmptyTexture).Value, rectangle, null, Color.White);
         }
         private static void MutantBossBar(SpriteBatch sb, NPC npc, Rectangle rectangle)
         {

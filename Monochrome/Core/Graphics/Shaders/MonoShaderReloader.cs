@@ -49,14 +49,25 @@ public static class MonoShaderReloader
     /// </para>
     /// </summary>
     /// <param name="force">true 表示不管 mtime 一律重编。</param>
-    public static IReadOnlyList<Result> ReloadAll(bool force = false)
+    /// <returns>每个可写回着色器的重载结果，以及被跳过的只读着色器数量。</returns>
+    public static (IReadOnlyList<Result> Results, int Skipped) ReloadAll(bool force = false)
     {
         List<Result> results = [];
+        int skipped = 0;
         if (Main.dedServ)
-            return results;
+            return (results, skipped);
         foreach ((string name, MonoShader shader) in MonoShaderManager.Shaders)
+        {
+            // 只读的宿主不该被逐个报成"失败"：注册表里固有几十个外来着色器，
+            // 一次全部重载会把聊天窗刷满。它们统一折成一句汇总。
+            if (!shader.CanWriteBack)
+            {
+                skipped++;
+                continue;
+            }
             results.Add(ReloadShader(name, shader, skipIfUpToDate: !force));
-        return results;
+        }
+        return (results, skipped);
     }
 
     /// <summary>
@@ -330,6 +341,14 @@ public static class MonoShaderReloader
         }
 
         string modName = assetPath[..slash];
+
+        // 注册是全场的，写回不是：宿主没声明 [MonoShaderScope] 就只读，别去动它的源目录。
+        if (!shader.CanWriteBack)
+        {
+            reason = $"{modName} 没有声明 [MonoShaderScope]，Monochrome 不会写回它的源目录；要改就在那个模组里自行编译 .fxc";
+            return false;
+        }
+
         string relative = assetPath[(slash + 1)..] + ".fx";
 
         // 1) 源目录。
@@ -479,6 +498,10 @@ public static class MonoShaderReloader
     /// 所以 Monochrome 换掉自己那份之后，Luminance 的 <c>ManagedShader</c> 还指着旧的。
     /// 只同步"它已经注册过的名字"——<c>SetShader</c> 在名字不存在时会新建条目，那等于改变对方的行为。
     /// </para>
+    /// <para>
+    /// 全程走反射：Monochrome 对 Luminance 没有编译期引用（它只在 <c>weakReferences</c> 里），
+    /// 类型从 Luminance 自己的程序集取，这样它的 <c>AssemblyLoadContext</c> 不会被绕开。
+    /// </para>
     /// </summary>
     private static void SyncLuminanceRegistry(string name, Effect effect)
     {
@@ -486,16 +509,69 @@ public static class MonoShaderReloader
             return;
         try
         {
-            if (Luminance.Core.Graphics.ShaderManager.TryGetShader(name, out _))
-                Luminance.Core.Graphics.ShaderManager.SetShader(name, new Ref<Effect>(effect));
-            if (Luminance.Core.Graphics.ShaderManager.TryGetFilter(name, out _))
-                Luminance.Core.Graphics.ShaderManager.SetFilter(name, new Ref<Effect>(effect));
+            if (!ResolveLuminanceRegistry())
+                return;
+
+            // TryGet 系列是 out 参数：返回值走 Invoke 的返回，命中与否看它。
+            if (tryGetShaderMethod!.Invoke(null, [name, null]) is true && setShaderMethod is not null)
+                setShaderMethod.Invoke(null, [name, new Ref<Effect>(effect)]);
+            if (tryGetFilterMethod!.Invoke(null, [name, null]) is true && setFilterMethod is not null)
+                setFilterMethod.Invoke(null, [name, new Ref<Effect>(effect)]);
         }
         catch (Exception ex)
         {
             WarnLuminanceOnce($"同步 Luminance 注册表失败（{name}）：{ex.Message}");
         }
     }
+
+    // Luminance 注册表那四个方法的反射句柄：解析一次后缓存。见 ResolveLuminanceRegistry 的说明。
+    private static bool resolvedLuminanceRegistry;
+    private static MethodInfo? tryGetShaderMethod;
+    private static MethodInfo? setShaderMethod;
+    private static MethodInfo? tryGetFilterMethod;
+    private static MethodInfo? setFilterMethod;
+
+    /// <summary>
+    /// 解析 Luminance 的 <c>ShaderManager</c> 上那四个方法并缓存。
+    /// 解析失败也记下"已尝试"，避免每次重载都查一遍元数据并刷日志。
+    /// </summary>
+    private static bool ResolveLuminanceRegistry()
+    {
+        if (resolvedLuminanceRegistry)
+            return tryGetShaderMethod is not null;
+
+        resolvedLuminanceRegistry = true;
+
+        Type? manager = LuminanceType("Luminance.Core.Graphics.ShaderManager");
+        if (manager is null)
+        {
+            WarnLuminanceOnce("解析不到 Luminance 的 ShaderManager，重载后不会同步它的注册表。");
+            return false;
+        }
+
+        const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        tryGetShaderMethod = manager.GetMethod("TryGetShader", flags);
+        setShaderMethod = manager.GetMethod("SetShader", flags);
+        tryGetFilterMethod = manager.GetMethod("TryGetFilter", flags);
+        setFilterMethod = manager.GetMethod("SetFilter", flags);
+
+        if (tryGetShaderMethod is null || setShaderMethod is null || tryGetFilterMethod is null || setFilterMethod is null)
+        {
+            WarnLuminanceOnce("Luminance 的 ShaderManager 成员解析不全（版本可能已变），重载后不会同步它的注册表。");
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 从 Luminance 自己的程序集里按类型全名取 <see cref="Type"/>；它不在场或名字变了就返回 <see langword="null"/>。
+    /// <para>
+    /// 用 <c>Mod.Code</c> 而不是 <c>Type.GetType("..., Luminance")</c>：模组程序集在各自的
+    /// <c>AssemblyLoadContext</c> 里，按程序集名解析字符串容易静默失败。
+    /// </para>
+    /// </summary>
+    private static Type? LuminanceType(string fullName)
+        => ModLoader.GetMod(LuminanceModName)?.Code?.GetType(fullName);
 
     /// <summary>
     /// 停用 Luminance 自己的"文件变动自动重编译"（它用 <c>FileSystemWatcher</c> 盯着各模组的着色器目录），
@@ -523,8 +599,9 @@ public static class MonoShaderReloader
     /// 首次编译（它的 <c>CompilingFiles</c> 队列只在遍历 <c>ShaderWatchers</c> 时被消费），
     /// 而 <c>Dispose()</c> 之后对方再读 watcher 的属性会抛 <c>ObjectDisposedException</c>。
     /// <para>
-    /// 用 <c>typeof</c> 而不是按程序集名解析字符串：Mod 程序集在各自的 <c>AssemblyLoadContext</c> 里，
-    /// 字符串解析容易静默失败（那正是先前"监视器还在"的根因），而 Monochrome 对 Luminance 有编译期引用。
+    /// 类型从 Luminance 自己的程序集按全名取（见 <see cref="LuminanceType"/>），
+    /// 而不是按程序集名解析字符串：Mod 程序集在各自的 <c>AssemblyLoadContext</c> 里，
+    /// 字符串解析容易静默失败（那正是先前"监视器还在"的根因）。
     /// </para>
     /// </summary>
     private static void SweepLuminanceWatchers()
@@ -584,7 +661,12 @@ public static class MonoShaderReloader
         resolvedLuminanceMembers = true;
 
         const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-        Type monitor = typeof(Luminance.Core.Graphics.ShaderRecompilationMonitor);
+        Type? monitor = LuminanceType("Luminance.Core.Graphics.ShaderRecompilationMonitor");
+        if (monitor is null)
+        {
+            WarnLuminanceOnce("解析不到 Luminance 的 ShaderRecompilationMonitor，无法停用其文件监视器。");
+            return false;
+        }
 
         watchersProperty = monitor.GetProperty("ShaderWatchers", flags);
         if (watchersProperty is null)
@@ -617,10 +699,13 @@ public static class MonoShaderReloader
 
     /// <summary>把结果表整理成给命令行回复的一行行文本。</summary>
     /// <param name="results">结果表。</param>
-    public static string Describe(IReadOnlyList<Result> results)
+    /// <param name="skipped">被跳过的只读着色器数量（<see cref="ReloadAll"/> 的第二个返回值）。</param>
+    public static string Describe(IReadOnlyList<Result> results, int skipped = 0)
     {
         if (results.Count == 0)
-            return "没有可重载的着色器。";
+            return skipped > 0
+                ? $"没有可重载的着色器；另有 {skipped} 个只读着色器未处理（宿主未声明 [MonoShaderScope]）。"
+                : "没有可重载的着色器。";
         StringBuilder output = new();
         int ok = 0;
         foreach (Result result in results)
@@ -630,6 +715,8 @@ public static class MonoShaderReloader
             output.Append(result.Success ? "[成功] " : "[失败] ").Append(result.Name).Append('：').Append(result.Message).Append('\n');
         }
         output.Append($"共 {results.Count} 个，成功 {ok} 个。");
+        if (skipped > 0)
+            output.Append($"\n另有 {skipped} 个只读着色器未处理（宿主未声明 [MonoShaderScope]，不会写回其源目录）。");
         return output.ToString();
     }
 }

@@ -3,7 +3,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
@@ -17,7 +17,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSphereRingP2 : MutantSphereRing, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSphereRingP2 : MutantSphereRing, IMonoOwnedProj<MutantBoss>
     {
 
         private int ritualID = -1;
@@ -336,7 +336,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         }
 
     }
-    public class PHMutantSphereRingP1 : MutantSphereRing, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSphereRingP1 : MutantSphereRing, IMonoOwnedProj<MutantBoss>
     {
 
         private int ritualID = -1;

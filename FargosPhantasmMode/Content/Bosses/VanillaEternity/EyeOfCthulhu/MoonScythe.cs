@@ -2,18 +2,13 @@
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
-using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Trails;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
-    public class MoonScythe : ModProjectile, IPixelatedPrimitiveRenderer
+    public class MoonScythe : ModProjectile
     {
+        private MonoTrail trail;
         public ref float randomize => ref Projectile.ai[0];
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Masomode/BloodScytheVanilla1";
 
@@ -85,6 +80,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
             if (Projectile.timeLeft < 180)
                 Projectile.tileCollide = true;
+            trail ??= new(20)
+            {
+                PointsToCreate = 25,
+                UseUnscaledMatrix = true,
+                WidthFunction = t => WidthFunction(1 - t),
+                ColorFunction = t => ColorFunction(1 - t),
+                Texture = FargosTextureRegistry.FadedStreak.Value,
+                Offset = 0.5f * Projectile.Size
+            };
         }
 
         private void CheckEoCState()
@@ -143,22 +147,22 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public Color ColorFunction(float completionRatio)
         {
             // 在无害模式下降低拖尾颜色强度
-            float alphaMultiplier = _harmlessMode ? 0.3f : 0.7f;
+            float alphaMultiplier = _harmlessMode ? 0.5f : 1f;
             return Color.Lerp(recolor ? Color.Teal : Color.DarkRed, Color.Transparent, completionRatio) * alphaMultiplier;
         }
-
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        /*
+        public void RenderPixelatedPrimitives()
         {
             // 在无害模式下不绘制像素化拖尾
             
             if (_harmlessMode)
                 return;
             
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, Pixelate: true, Shader: shader), 25);
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 25);
         }
-
+        */
         public override Color? GetAlpha(Color lightColor)
         {
             // 在无害模式下降低整体透明度
@@ -184,6 +188,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             // 在无害模式下不绘制发光环
             if (!_harmlessMode)
             {
+                trail?.DrawFrom(Projectile.oldPos);
                 Texture2D glowTexture = ModContent.Request<Texture2D>("FargowiltasSouls/Content/Projectiles/GlowRing").Value;
 
                 Vector2 glowDrawPosition = Projectile.Center + Projectile.velocity / 10f;

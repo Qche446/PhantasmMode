@@ -1,5 +1,5 @@
 ﻿using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -7,7 +7,7 @@ using Terraria.ID;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantDeathraySmall : MutantDeathraySmall, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantDeathraySmall : MutantDeathraySmall, IMonoOwnedProj<MutantBoss>
     {
         //是预警线阿(由Mark1生成）
         public override void SetStaticDefaults()

@@ -6,13 +6,12 @@ using FargowiltasSouls.Content.Bosses.TrojanSquirrel;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Monochrome.Core.Net;
 using System.Linq;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader.IO;
-
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.Trojan
 {
     public class P_TrojanSquirrel : PModeNPCBehaviour
@@ -553,15 +552,15 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
 
             if (Main.rand.NextBool(smokeAmount) && head == null)
             {
-                Particle p = new SmokeParticle(headsmokepos, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 1f, 0.05f);
+                MonoParticle p = new FargoSmokeParticle(headsmokepos, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 1f, 0.05f);
                 p.Spawn();
             }
 
             if (Main.rand.NextBool(3) && arms == null && head != null)
             {
-                Particle p = new SmokeParticle(armsmokepos, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 0.5f, 0.05f);
+                MonoParticle p = new FargoSmokeParticle(armsmokepos, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 0.5f, 0.05f);
                 p.Spawn();
-                //Particle p2 = new SmokeParticle(armsmokepos * -1, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 0.5f, 0.05f);
+                //MonoParticle p2 = new FargoSmokeParticle(armsmokepos * -1, new Vector2(0, Main.rand.Next(-10, -5)), Color.Gray, 50, 0.5f, 0.05f);
                 //p2.Spawn();
             }
         }

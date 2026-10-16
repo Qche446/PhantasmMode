@@ -219,7 +219,10 @@ public sealed class MonoGraphicsCommand : ModCommand
     }
 
 
-    /// <summary>列出注册表内容。资产路径为空说明它是用 <c>SetShader</c> 手工装的，不参与源文件热重载。</summary>
+    /// <summary>
+    /// 列出注册表内容。资产路径为空说明它是用 <c>SetShader</c> 手工装的，不参与源文件热重载；
+    /// 标了 <c>[只读]</c> 的是宿主模组没声明 <c>[MonoShaderScope]</c>，<c>/monoshader reload</c> 不会写回它的源目录。
+    /// </summary>
     private static string DescribeShaders()
     {
         StringBuilder output = new();
@@ -229,7 +232,8 @@ public sealed class MonoGraphicsCommand : ModCommand
             output.Append('\n')
                   .Append(name)
                   .Append(" loaded ").Append(shader.LoadedAtUtc.ToLocalTime().ToString("HH:mm:ss"))
-                  .Append(shader.AssetPath.Length > 0 ? "  <- " + shader.AssetPath : "  <- (手工装入，无源文件)");
+                  .Append(shader.AssetPath.Length > 0 ? "  <- " + shader.AssetPath : "  <- (手工装入，无源文件)")
+                  .Append(shader.CanWriteBack ? "  [可写回]" : "  [只读，宿主未声明 MonoShaderScope]");
         }
         return output.ToString();
     }
@@ -242,9 +246,15 @@ public sealed class MonoGraphicsCommand : ModCommand
             tokens = tokens[1..];
 
         if (tokens.Length < 2)
-            return MonoShaderReloader.Describe(MonoShaderReloader.ReloadAll());
+        {
+            var (results, skipped) = MonoShaderReloader.ReloadAll();
+            return MonoShaderReloader.Describe(results, skipped);
+        }
         if (tokens[1] is "all" or "*")
-            return MonoShaderReloader.Describe(MonoShaderReloader.ReloadAll(force: true));
+        {
+            var (results, skipped) = MonoShaderReloader.ReloadAll(force: true);
+            return MonoShaderReloader.Describe(results, skipped);
+        }
         return MonoShaderReloader.Describe([MonoShaderReloader.Reload(tokens[1])]);
     }
 

@@ -53,10 +53,17 @@ public sealed class MonoRenderTargetPool : ModSystem
     /// <inheritdoc/>
     public override void Unload()
     {
+        if (pool.Count == 0)
+            return;
+
+        // 池里的目标是本模块自己 new 的（不归 MonoRenderTargetManager 管），所以在这里收；
+        // 但卸载在后台线程上，RenderTarget2D 的释放得排到主线程。
+        List<RenderTarget2D> pending = [];
         foreach (Stack<RenderTarget2D> targets in pool.Values)
             while (targets.Count > 0)
-                targets.Pop().Dispose();
+                pending.Add(targets.Pop());
         pool.Clear();
+        MonoGraphicsDisposal.OnMainThread(pending);
     }
 
     /// <summary>一次借用。释放即把渲染目标推回对应分组。</summary>

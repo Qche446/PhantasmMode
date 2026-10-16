@@ -1,8 +1,8 @@
 ﻿using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using Luminance.Common.Utilities;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.InfoDisplays
 {
@@ -28,7 +28,7 @@ namespace FargosPhantasmMode.Content.InfoDisplays
         }
         public override void PostUpdateEquips()
         {
-            if (Utilities.AnyBosses())
+            if (MonoUtil.AnyBosses())
             {
                 if (!BossAliveLastFrame)
                 {

@@ -50,6 +50,9 @@ public sealed class MonoScreenEffectsSystem : ModSystem
     /// </summary>
     public static float WorldTimeScale { get; set; } = 1f;
 
+    /// <summary>trauma 为 1 时的峰值位移（像素）。振幅曲线的上限。</summary>
+    public const float MaxShakeAmplitude = 18f;
+
     /// <summary>
     /// 触发一次屏幕震动。
     /// </summary>
@@ -64,6 +67,28 @@ public sealed class MonoScreenEffectsSystem : ModSystem
         if (Main.dedServ || strength <= 0f)
             return;
         shakes.Add(new Shake { Trauma = MathHelper.Clamp(strength, 0f, 1f), Decay = Math.Max(0.001f, decay), Center = center ?? Vector2.Zero, HasCenter = center.HasValue, Radius = radius, Seed = Main.rand.Next() });
+    }
+
+    /// <summary>
+    /// 按"像素振幅"触发一次屏幕震动：峰值位移就是 <paramref name="amplitude"/> 像素，之后每帧减少
+    /// <paramref name="dissipationPerFrame"/> 像素，直到减完为止。
+    /// <para>
+    /// 与 <see cref="StartShake"/> 的分工：那条是 trauma 单位（<c>[0,1]</c> 的平方），适合"这一下有多重"；
+    /// 这条是像素单位，适合"屏幕要挪多少、挪多少帧"——从旧的像素单位接口迁移过来时数字可以原样照搬。
+    /// 两条最终都会落到同一条 trauma 曲线上，所以振幅上限仍是 18 像素。
+    /// </para>
+    /// </summary>
+    /// <param name="amplitude">峰值位移（像素），上限 18。</param>
+    /// <param name="dissipationPerFrame">每帧衰减的像素数，最小按 0.01 处理。</param>
+    public static void StartShakeByAmplitude(float amplitude, float dissipationPerFrame = 0.2f)
+    {
+        if (Main.dedServ || amplitude <= 0f)
+            return;
+
+        float clamped = Math.Min(amplitude, MaxShakeAmplitude);
+        float trauma = MathF.Sqrt(clamped / MaxShakeAmplitude);
+        float lifetime = amplitude / MathF.Max(0.01f, dissipationPerFrame);
+        StartShake(trauma, lifetime <= 0f ? 1f : trauma / lifetime);
     }
 
     /// <summary>
@@ -132,7 +157,7 @@ public sealed class MonoScreenEffectsSystem : ModSystem
                 float distance = Vector2.Distance(Main.LocalPlayer.Center, shake.Center);
                 trauma *= MathHelper.Clamp(1f - distance / shake.Radius, 0f, 1f);
             }
-            float amplitude = trauma * trauma * 18f;
+            float amplitude = trauma * trauma * MaxShakeAmplitude;
             float time = Main.GameUpdateCount * 0.37f + shake.Seed;
             Main.screenPosition += new Vector2(MathF.Sin(time * 1.71f), MathF.Cos(time * 1.23f)) * amplitude;
             shake.Trauma = Math.Max(0f, shake.Trauma - shake.Decay);

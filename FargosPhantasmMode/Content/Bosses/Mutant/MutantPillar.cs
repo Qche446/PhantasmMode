@@ -4,25 +4,24 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Screen;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantPillar : MutantPillar, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantPillar : MutantPillar, IMonoOwnedProj<MutantBoss>
     {
         public override void OnKill(int timeLeft)
         {
             if (Main.LocalPlayer.active && !Main.dedServ)
             {
-                ScreenShakeSystem.StartShake(10f, MathF.PI * 2f, null, 1f / 3f);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(10f, 1f / 3f);
             }
 
             SoundEngine.PlaySound(in SoundID.Item92, base.Projectile.Center);
@@ -115,7 +114,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             */
         }
     }
-    public class PHMutantFragment : MutantFragment, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantFragment : MutantFragment, IMonoOwnedProj<MutantBoss>
     {
         private int ritualID = -1;
         public override void AI()

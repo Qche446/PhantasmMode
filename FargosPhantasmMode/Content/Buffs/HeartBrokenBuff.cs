@@ -1,7 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Buffs
 {
@@ -16,7 +13,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
-            npc.GetGlobalNPC<PModeGlobalBuffNPC>().HeartBroken = true;
+            npc.Phantasm().HeartBroken = true;
             base.Update(npc, ref buffIndex);
         }
         public override void Update(Player player, ref int buffIndex)

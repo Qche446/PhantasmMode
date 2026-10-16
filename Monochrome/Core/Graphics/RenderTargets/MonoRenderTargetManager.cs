@@ -74,24 +74,13 @@ public sealed class MonoRenderTargetManager : ModSystem
         // 卸载不在主线程上：ModLoader.BeginLoad 用 Task.Run 起任务（ModLoader.cs:157），最终由
         // Mod.UnloadContent → SystemLoader.OnModUnload 回调到这里（Mod.cs:536）；而 RenderTarget2D 的释放
         // 会碰 FNA3D，此时主线程正并行绘制"加载模组"进度界面。所以登记表立刻清空（万一有漏网的
-        // OnPreDraw 也已无物可遍历），显存释放推到主线程做。
+        // OnPreDraw 也已无物可遍历），显存释放交给 MonoManagedRenderTarget.Dispose 自己排到主线程。
         List<MonoManagedRenderTarget> pending = [.. targets];
         targets.Clear();
         RenderTargetUpdateLoop = null;
 
-        if (Main.dedServ)
-        {
-            // 服务器上既没有图形设备、也没有主线程动作循环在跑，直接释放（此时通常根本没有目标）。
-            foreach (MonoManagedRenderTarget target in pending)
-                target.Dispose();
-            return;
-        }
-
-        Main.QueueMainThreadAction(() =>
-        {
-            foreach (MonoManagedRenderTarget target in pending)
-                target.Dispose();
-        });
+        foreach (MonoManagedRenderTarget target in pending)
+            target.Dispose();
     }
 
     private static void HandleTargetUpdateLoop(GameTime gameTime)

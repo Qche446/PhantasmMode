@@ -7,13 +7,13 @@ using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Content.Projectiles.Souls;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using System;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Cosmo
 {

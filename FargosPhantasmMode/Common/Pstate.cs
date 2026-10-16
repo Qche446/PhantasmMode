@@ -3,6 +3,7 @@ using System;
 
 namespace FargosPhantasmMode.Common
 {
+    /*
     public class Pstate<TStateIdentifier>(TStateIdentifier identifier) : IState<TStateIdentifier> where TStateIdentifier : struct
     {
         public TStateIdentifier Identifier { get; set; } = identifier;
@@ -12,4 +13,5 @@ namespace FargosPhantasmMode.Common
             Array.Clear(ai, 0, ai.Length);
         }
     }
+    */
 }

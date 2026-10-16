@@ -15,6 +15,10 @@ namespace Monochrome.Core.Graphics.RenderTargets;
 /// 这是为了让 wrapper 比底层目标活得久——它是唯一持有重建委托的东西。要永久注销请用
 /// <see cref="Retire"/>，那才会释放显存并把自己从登记表摘掉。
 /// </para>
+/// <para>
+/// <see cref="Dispose"/> 与 <see cref="Retire"/> 都把原生释放推回主线程，所以在后台线程上跑的卸载钩子里
+/// 可以直接调它们，不必自己排队。
+/// </para>
 /// </summary>
 [DebuggerDisplay("{Width}x{Height}, Uninitialized={IsUninitialized}, Idle={TimeSinceLastUsage}")]
 public sealed class MonoManagedRenderTarget : IDisposable
@@ -123,7 +127,10 @@ public sealed class MonoManagedRenderTarget : IDisposable
         return new(Main.instance.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
     }
 
-    /// <summary>丢弃当前渲染目标并按新尺寸重建。</summary>
+    /// <summary>
+    /// 丢弃当前渲染目标并按新尺寸重建。<b>必须在主线程调用</b>：它当场创建图形资源，没法像
+    /// <see cref="Dispose"/> 那样排队。
+    /// </summary>
     /// <param name="width">新宽度。</param>
     /// <param name="height">新高度。</param>
     /// <exception cref="InvalidOperationException">在专用服务器上被调用。</exception>
@@ -179,16 +186,23 @@ public sealed class MonoManagedRenderTarget : IDisposable
     /// <summary>
     /// <b>只释放底层渲染目标</b>，不注销自己——这不是本对象的终态，之后访问 <see cref="Target"/> 会按需重建（见类型说明）。
     /// 需要永久注销请用 <see cref="Retire"/>。重复调用安全。
+    /// <para>
+    /// 原生释放要碰 FNA3D，必须落在主线程；这里把它交给 <see cref="MonoGraphicsDisposal"/> 排过去，
+    /// 于是从卸载钩子（后台线程）调用同样安全。本对象自己的状态当场更新，不等排队。
+    /// </para>
     /// </summary>
     public void Dispose()
     {
         if (IsDisposed)
             return;
         IsDisposed = true;
-        target?.Dispose();
+        // 先把实例取到局部变量再排队：动作真正执行时 target 字段可能已经指向重建出来的新目标，
+        // 那时按字段去取就会把新的那份释放掉。
+        RenderTarget2D? released = target;
         target = null;
         TimeSinceLastUsage = 0;
         GC.SuppressFinalize(this);
+        MonoGraphicsDisposal.OnMainThread(released);
     }
 
     /// <summary>

@@ -1,24 +1,23 @@
-﻿using FargosPhantasmMode.Content.Buffs;
+using FargosPhantasmMode.Content.Buffs;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core.Globals;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
-using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
-using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
+using Monochrome.Core.Graphics.Trails;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
-    public class DarkStar : ModProjectile, IPixelatedPrimitiveRenderer
+    public class DarkStar : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_12";
+        private MonoTrail trail;
 
         public override void SetStaticDefaults()
         {
@@ -100,7 +99,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 Vector2 vector = Vector2.Normalize(-base.Projectile.velocity.RotatedByRandom(0.62831854820251465));
                 float num = Math.Max(4f, base.Projectile.velocity.Length() / 2f);
-                Particle particle = new ElectricSpark(base.Projectile.Center, vector * num, Color.OrangeRed * 0.7f, Main.rand.NextFloat(0.7f, 1f), 20);
+                MonoParticle particle = new FargoElectricSparkParticle(base.Projectile.Center, vector * num, Color.OrangeRed * 0.7f, Main.rand.NextFloat(0.7f, 1f), 20);
                 particle.Spawn();
             }
             /*
@@ -108,8 +107,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 Vector2 vector = Vector2.Normalize(base.Projectile.velocity.RotatedByRandom(0.62831854820251465));
                 float num = Math.Max(4f, base.Projectile.velocity.Length() / 2f);
-                CosmicFireMetaBall cosmicFireMetaBall = ModContent.GetInstance<CosmicFireMetaBall>();
-                cosmicFireMetaBall.CreateParticle(Projectile.Center, vector, 80);
+                new CosmicFireBlob(Projectile.Center, vector, 80f).Spawn();
             }
             */
             Lighting.AddLight(Projectile.Center, 0.9f, 0.8f, 0.1f);
@@ -121,6 +119,16 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             float ratio = Projectile.velocity.Length() / (Projectile.width * 3);
             if (ratio > 1)
                 Projectile.velocity /= ratio;
+            trail ??= new(20)
+            {
+                UseUnscaledMatrix = true,
+                PointsToCreate = 40,
+                WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 1.3f, 3.5f, 1 - t),
+                ColorFunction = t => Color.Lerp(Color.OrangeRed, Color.Transparent, 1 - t),
+                Texture = FargosTextureRegistry.FadedStreak.Value,
+                Offset = 0.5f * Projectile.Size
+            };
+
         }
 
         public override void OnHitPlayer(Player target, Player.HurtInfo info)
@@ -159,6 +167,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override bool PreDraw(ref Color lightColor)
         {
+            trail?.DrawFrom(Projectile.oldPos);
             Texture2D glow = ModContent.Request<Texture2D>("FargosPhantasmMode/Content/Bosses/VanillaEternity/Twins/DarkStar_Glow", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
             int rect1 = glow.Height / Main.projFrames[Projectile.type];
             int rect2 = rect1 * Projectile.frame;
@@ -210,13 +219,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public Color ColorFunction(float completionRatio)
         {
-            return Color.Lerp(Color.OrangeRed, Color.Transparent, completionRatio) * 0.6f;
+            return Color.Lerp(Color.OrangeRed, Color.Transparent, completionRatio);
         }
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        /*
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, Pixelate: true, Shader: shader));
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader));
         }
+        */
     }
 }

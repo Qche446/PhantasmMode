@@ -1,5 +1,4 @@
 ﻿using FargosPhantasmMode.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -7,6 +6,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Sky
 {
@@ -16,7 +16,7 @@ namespace FargosPhantasmMode.Content.Sky
         private float intensity;
         private int abomBossType = -1;
         Texture2D skyTexture;
-        ManagedShader shader;
+        MonoShader shader;
         Texture2D noiseTexture;
 
         public override void OnLoad()
@@ -63,7 +63,7 @@ namespace FargosPhantasmMode.Content.Sky
                 // 设置着色器参数
                 noiseTexture = PhantasmTextureRegistry.FireNoise2.Value;
                 var blackTile = TextureAssets.MagicPixel;
-                shader = ShaderManager.GetShader("FargosPhantasmMode.AbomSkyEffect");
+                shader = MonoShaderManager.GetShader("FargosPhantasmMode.AbomSkyEffect");
                 Main.spriteBatch.GraphicsDevice.Textures[1] = noiseTexture;
                 shader.TrySetParameter("maxOpacity", this.intensity * 0.6f);
                 shader.TrySetParameter("time", (float)Main.GlobalTimeWrappedHourly);

@@ -9,8 +9,6 @@ using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
@@ -21,6 +19,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {

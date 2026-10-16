@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
@@ -36,7 +36,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public static bool Apply => Main.LocalPlayer.HasEffect<JungleEnhanceEffect>();
         public static bool HasEnhance => Main.LocalPlayer.ForceEffect<JungleEnhanceEffect>() || Main.LocalPlayer.FargoSouls().ChlorophyteEnchantActive;
         public static bool HasNature => Main.LocalPlayer.HasEffect<NatureEffect>();
-        public static List<int> JungleItem => [
+        public static readonly List<int> JungleItem = [
             ItemID.JungleHat, ItemID.JungleShirt, ItemID.JunglePants,//套装
             ItemID.ThornChakram,//荆棘旋刃
             ItemID.IvyWhip,//荆棘钩爪
@@ -111,7 +111,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             if (!Apply) return base.CanHitNPC(item, player, target);
             if (JungleItem.Contains(item.type) && item.IsWeapon())
             {
-                item.GetGlobalItem<PModeGlobalItem>().PoisonAttribute = true;
+                item.MonoTag().Add(MonoDamageTag.Poison);
             }
             return base.CanHitNPC(item, player, target);
         }

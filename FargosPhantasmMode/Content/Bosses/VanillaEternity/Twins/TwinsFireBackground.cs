@@ -1,12 +1,12 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -83,14 +83,13 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (!blackTile.IsLoaded || !diagonalNoise.IsLoaded)
                 return false;
 
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
+            shader.SetCommonParameters();
             shader.TrySetParameter("isRetinazer", (int)Projectile.ai[1] == NPCID.Retinazer);
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", radius);
             shader.TrySetParameter("anchorPoint", auraPos);
-            shader.TrySetParameter("screenPosition", Main.screenPosition);
-            shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
             shader.TrySetParameter("playerPosition", target.Center);
             shader.TrySetParameter("maxOpacity", maxOpacity);
 

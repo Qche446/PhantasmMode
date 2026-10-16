@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Armor;
@@ -6,13 +7,13 @@ using FargowiltasSouls.Content.Items.Materials;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 namespace FargosPhantasmMode.Content.Items.Accessories
 {
     public class EridanusGuide : SoulsItem
@@ -32,6 +33,7 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Item.maxStack = 1;
             Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 10, 0, 0);
+            Item.GetGlobalItem<PModeGlobalItem>().Phantasm = true;
         }
         public override void UpdateInfoAccessory(Player player)
         {

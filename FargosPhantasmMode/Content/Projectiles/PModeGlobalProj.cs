@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.InfoDisplays;
 using FargosPhantasmMode.Content.Items.Accessories;
 using FargosPhantasmMode.Content.Items.Global;
@@ -16,25 +16,9 @@ namespace FargosPhantasmMode.Content.Projectiles
 {
     public class PModeGlobalProj : GlobalProjectile
     {
-        public bool PoisonAttribute;
-        public bool FireAttribute;
-        public bool IceAttribute;
-        public bool OrdinaryAttributes;
         public int GrazeCD = 0;
+        public int CaseCrush = 0;
         public override bool InstancePerEntity => true;
-        public override void ModifyHitNPC(Projectile projectile, NPC target, ref NPC.HitModifiers modifiers)
-        {
-            var Pbn = target.GetGlobalNPC<PModeGlobalBuffNPC>();
-            List<bool> Attributes = [PoisonAttribute, FireAttribute, IceAttribute];
-            List<float> Multiplier = [Pbn.PosionMultiplier, Pbn.FireMultiplier, Pbn.IceMultiplier];
-            float result = 1f;
-            for (int i = 0; i < Attributes.Count; i++)
-            {
-                if ((OrdinaryAttributes || Attributes[i]) && Multiplier[i] > result)
-                    result = Multiplier[i];
-            }
-            modifiers.FinalDamage *= result;
-        }
         public override void PostAI(Projectile projectile)
         {
             if (projectile.hostile && projectile.damage > 0 && projectile.aiStyle != ProjAIStyleID.FallingTile && --GrazeCD < 0)
@@ -55,6 +39,14 @@ namespace FargosPhantasmMode.Content.Projectiles
                     }
                 }
             }
+        }
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            target.Phantasm().CrushCumulative += CaseCrush;
+        }
+        public override void OnHitPlayer(Projectile projectile, Player target, Player.HurtInfo info)
+        {
+            target.Phantasm().CrushCumulative += CaseCrush;
         }
     }
 }

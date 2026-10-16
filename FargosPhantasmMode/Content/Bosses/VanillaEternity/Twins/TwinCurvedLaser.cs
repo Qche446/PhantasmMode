@@ -1,7 +1,5 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,6 +7,10 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -18,7 +20,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
     /// ai1 : 角度（角度制）
     /// ai2 : 方向
     /// </summary>
-    public class TwinCurvedLaser : ModProjectile, IPixelatedPrimitiveRenderer
+    public class TwinCurvedLaser : ModProjectile, IMonoPixelatedPrimitive
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public List<Vector2> trailPos = [];
@@ -164,7 +166,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 float width = 0.8f * (Projectile.width * Projectile.scale);
                 //int length = 14;
                 //rect = new Rectangle((int)trailPos[i].X, (int)trailPos[i].Y, (int)trailPos[i + 1].X - (int)trailPos[i].X, (int)trailPos[i + 1].Y - (int)trailPos[i].Y);
-                if (Utilities.CircularHitboxCollision(trailPos[i], width, targetHitbox))
+                if (MonoUtil.Intersect.CircleAABB(trailPos[i], width, targetHitbox))
                 {
                     return true;
                 }
@@ -203,12 +205,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             color.A = 0;
             return color * (!active ? 0.5f : 1) * Projectile.scale;
         }
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
             if (Projectile.hide)
                 return;
 
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.RetinazerDeathray");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.RetinazerDeathray");
 
             // 设置着色器参数
             shader.TrySetParameter("mainColor", new Color(240, 220, 240, 0));
@@ -219,7 +221,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             shader.TrySetParameter("useFadeIn", true);
 
             // 以像素化方式渲染轨迹
-            PrimitiveRenderer.RenderTrail(trailPos, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader));
+            MonoPrim.RenderTrail(trailPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, UseUnscaledMatrix: true, Shader: shader));
         }
     }
 }

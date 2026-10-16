@@ -3,19 +3,18 @@ using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantPungentAuraProj : PungentAuraProj, IProjOwnedByBoss<MutantBoss>
+    public class MutantPungentAuraProj : PungentAuraProj, IMonoOwnedProj<MutantBoss>
     {
         public override void SetDefaults()
         {
@@ -90,7 +89,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return false;
             var maxOpacity = Projectile.Opacity;
 
-            ManagedShader borderShader = ShaderManager.GetShader("FargowiltasSouls.WoFAuraShader");
+            MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.WoFAuraShader");
             borderShader.TrySetParameter("colorMult", 7.35f);
             borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             borderShader.TrySetParameter("radius", radius);

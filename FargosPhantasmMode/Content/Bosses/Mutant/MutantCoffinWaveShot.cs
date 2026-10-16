@@ -4,8 +4,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,13 +12,16 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     /// <summary>
     /// ai0决定偏角正弦内的相位·ai1 = whoami
     /// </summary>
-    public class MutantCoffinWaveShot : ModProjectile, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
+    public class MutantCoffinWaveShot : ModProjectile, IMonoPixelatedPrimitive, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Bosses/CursedCoffin/CoffinWaveShot";
         public Vector2 oldvel = Vector2.Zero;
@@ -149,11 +151,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Main.EntitySpriteDraw(value, base.Projectile.Center + vector - Main.screenPosition + new Vector2(0f, base.Projectile.gfxOffY), rectangle, base.Projectile.GetAlpha(drawColor), base.Projectile.rotation, origin, base.Projectile.scale, effects);
             return false;
         }
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargosTextureRegistry.FadedStreak.Value.SetTexture1();
-            PrimitiveRenderer.RenderTrail(base.Projectile.oldPos, new PrimitiveSettings(WidthFunction, ColorFunction, (float _) => base.Projectile.Size * 0.5f, Smoothen: true, Pixelate: true, shader), 44);
+            MonoPrim.RenderTrail(base.Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, (float _) => base.Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 44);
         }
     }
 }

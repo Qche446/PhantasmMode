@@ -4,8 +4,7 @@ using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,10 +13,13 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantPhantasmalDeathrayWOFS : PhantasmalDeathrayWOFS, IProjOwnedByBoss<MutantBoss>
+    public class MutantPhantasmalDeathrayWOFS : PhantasmalDeathrayWOFS, IMonoOwnedProj<MutantBoss>
     {
         float oldX = 0;
         float oldY = 0;
@@ -103,7 +105,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         }
     }
-    public class MutantPhantasmalDeathrayWOF : BaseDeathray, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
+    public class MutantPhantasmalDeathrayWOF : BaseDeathray, IMonoPixelatedPrimitive, IMonoOwnedProj<MutantBoss>
     {
         float oldX = 0;
         float oldY = 0;
@@ -262,12 +264,12 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             color.A = 0;
             return color;
         }
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
             if (Projectile.hide)
                 return;
 
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.WoFDeathray");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WoFDeathray");
 
             // Get the laser end position.
             Vector2 laserEnd = Projectile.Center + Projectile.velocity.SafeNormalize(Vector2.UnitY) * Projectile.localAI[1] * 1.5f;
@@ -288,7 +290,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             shader.TrySetParameter("useFadeIn", true);
             shader.TrySetParameter("realopacity", 1); // do not change this.
 
-            PrimitiveRenderer.RenderTrail(baseDrawPoints, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader), 15);
+            MonoPrim.RenderTrail(baseDrawPoints, new MonoPrimitiveSettings(WidthFunction, ColorFunction, UseUnscaledMatrix: true, Shader: shader), 15);
         }
     }
 }

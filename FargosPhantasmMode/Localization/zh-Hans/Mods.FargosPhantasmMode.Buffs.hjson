@@ -5,6 +5,11 @@ HeartBrokenBuff: {
 		最大生命值降低15%
 		“解裂之时...”
 		'''
+	ItemTooltip:
+		'''
+		对玩家：最大生命值降低50%
+		对敌怪：最大生命值降低15%
+		'''
 }
 
 FlawlessBuff: {
@@ -14,6 +19,7 @@ FlawlessBuff: {
 		提升生命再生速度，增加10点盔甲穿透，10%暴击率，10点防御和10%的减伤
 		”献给值得的人...“
 		'''
+	ItemTooltip: 对玩家：生命再生+5，盔甲穿透+10，暴击率+10%，防御+10，减伤+10%
 }
 
 NanoErosionBuff: {
@@ -23,11 +29,13 @@ NanoErosionBuff: {
 		受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
 		“结构之外...”
 		'''
+	ItemTooltip: 对敌怪：受到的减益伤害乘1.2，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
 }
 
 TimeGodsTrickBuff: {
 	DisplayName: 时神把戏
 	Description: “驾虚御实，彼者怀有时光...”
+	ItemTooltip: 加速技能冷却
 }
 
 HypothermiaBuff: {
@@ -37,11 +45,21 @@ HypothermiaBuff: {
 		急剧流失生命值，收到的伤害提升至1.05倍,破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
 		“失衡...”
 		'''
+	ItemTooltip:
+		'''
+		冰系 - 200dps
+		易伤5%，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
+		'''
 }
 
 PhSublimationBuff: {
 	DisplayName: 影灼之升华
 	Description: “你的灵魂正在挣脱你的肉体”
+	ItemTooltip:
+		'''
+		对玩家：25dps, 暴击率降低200%，防御减少15
+		对敌怪：25dps, 防御减少15
+		'''
 }
 
 HallowFlameBuff: {
@@ -51,6 +69,12 @@ HallowFlameBuff: {
 		免疫药水疾病，全方面消减你的生存能力
 		“于圣炎之中重获新生...”
 		'''
+	ItemTooltip:
+		'''
+		对玩家：5dps, 免疫药水疾病，防御-4，减伤-2，最大生命值-5%
+		对敌怪：20dps(强化后40dps)，防御-4，易伤1%(突变体为0.5%)	
+		所有效果随层数线性增加
+		'''
 }
 
 FractureBuff: {
@@ -59,5 +83,41 @@ FractureBuff: {
 		'''
 		幸运马掌坠落伤害免疫失效，最大下落速度提升至500%，略微减少伤害减免和移动速度
 		"虽然不知道怎么回事，但你骨折了"
+		'''
+	ItemTooltip: 对玩家：最大下落速度提升至500%，伤害减免-5%，移动速度-5%，摔落伤害生效高度-15
+}
+
+HunterMark: {
+	DisplayName: 猎杀标记
+	Description:
+		'''
+		禁用生命恢复，伤害减免减少20%
+		“...等死吧”
+		'''
+	ItemTooltip:
+		'''
+		对玩家：禁用生命恢复，减伤-20%，防御+5
+		对敌怪：禁用生命恢复，减伤-20%，撕裂螺旋_白增伤层数×200%
+		'''
+}
+
+BulletReload: {
+	DisplayName: 血弹装填
+	Description: 显示当前的装填状态
+}
+
+CrushBuff: {
+	DisplayName: 击溃
+	Description: 你被击溃了!
+	ItemTooltip: 禁用玩家和敌怪的减伤和防御
+}
+
+PrayerofTaintedBlood: {
+	DisplayName: 秽血之祈祷
+	Description: 流失生命值，强化血肉铳剑的攻击方式
+	ItemTooltip:
+		'''
+		对玩家：5dps
+		对地怪：25dps
 		'''
 }

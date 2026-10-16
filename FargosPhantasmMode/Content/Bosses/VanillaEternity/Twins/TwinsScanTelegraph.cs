@@ -1,6 +1,5 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,6 +8,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Map;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
@@ -54,7 +54,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             var blackTile = TextureAssets.MagicPixel;
             var noise = FargosTextureRegistry.Techno1Noise;
             /*
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ScanTelegraphShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ScanTelegraphShader");
             Main.spriteBatch.GraphicsDevice.Textures[1] = noise.Value;
             shader.TrySetParameter("color", Color.Green);
             shader.TrySetParameter("screenPosition", Main.screenPosition);
@@ -71,7 +71,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             float arcAngle = Direct;
             float arcWidth = AngleRange * timeLerp;
             Color color = Color.Green;
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.DestroyerScanTelegraph");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.DestroyerScanTelegraph");
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", radius);

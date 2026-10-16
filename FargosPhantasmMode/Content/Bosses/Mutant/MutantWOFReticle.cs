@@ -2,7 +2,7 @@
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Projectiles.Masomode;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantWOFReticle : WOFReticle, IProjOwnedByBoss<MutantBoss>
+    public class MutantWOFReticle : WOFReticle, IMonoOwnedProj<MutantBoss>
     {
         private int additive = 130;
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Masomode/WOFReticle";
@@ -93,7 +93,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class MutantWOFChain : WOFChain, IProjOwnedByBoss<MutantBoss>
+    public class MutantWOFChain : WOFChain, IMonoOwnedProj<MutantBoss>
     {
         bool startcheck = false;
         public override string Texture => "Terraria/Images/NPC_115";

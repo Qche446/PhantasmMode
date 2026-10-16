@@ -8,7 +8,6 @@ using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -16,6 +15,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit
 {
@@ -80,7 +80,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spiri
                 }
 
                 if ((PModeChangeApply || player.HasEffectEnchant<SpectreEffect>()) && !modPlayer.TerrariaSoul && !modPlayer.Eternity)
-                    modPlayer.SpectreGhostTime = Utilities.SecondsToFrames(5f);
+                    modPlayer.SpectreGhostTime = MonoUtil.SecondsToFrames(5f);
 
                 string text = Language.GetTextValue($"Mods.{FargosPhantasmMode.FargoMod.Name}.Message.Revived");
                 CombatText.NewText(player.Hitbox, Color.LightCyan, text, true);

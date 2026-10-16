@@ -4,8 +4,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -15,7 +14,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantEyeOfCthulhu : MutantEyeOfCthulhu, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantEyeOfCthulhu : MutantEyeOfCthulhu, IMonoOwnedProj<MutantBoss>
     {
         private bool spawned;
         public override void AI()
@@ -121,7 +120,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 {
                     SpawnProjectile(base.Projectile.Center - base.Projectile.velocity / 2f);
                     float ai = 0.025f;
-                    float ai2 = Luminance.Common.Utilities.Utilities.SafeDirectionTo(destination: new Vector2(base.Projectile.localAI[0], base.Projectile.localAI[1]), entity: base.Projectile).ToRotation();
+                    float ai2 = MonoUtil.SafeDirectionTo(destination: new Vector2(base.Projectile.localAI[0], base.Projectile.localAI[1]), entity: base.Projectile).ToRotation();
                     
                     int num3 = Projectile.NewProjectile(Terraria.Entity.InheritSource(base.Projectile), base.Projectile.Center, Vector2.Zero, ModContent.ProjectileType<MutantScythe2>(), base.Projectile.damage, 0f, Main.myPlayer, ai, ai2);
                     if (num3 != Main.maxProjectiles)

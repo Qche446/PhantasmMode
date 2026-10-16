@@ -4,7 +4,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -14,7 +14,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantCursedDeathray : BaseDeathray, IProjOwnedByBoss<MutantBoss>
+    public class MutantCursedDeathray : BaseDeathray, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Deathrays/CursedDeathray";
         public MutantCursedDeathray() : base(180, 0.5f) { } // 改为180帧
@@ -123,7 +123,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return false;//隐藏
         }
     }
-    public class MutantCursedFlamethrower : ModProjectile, IProjOwnedByBoss<MutantBoss>
+    public class MutantCursedFlamethrower : ModProjectile, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "Terraria/Images/Projectile_101";
 

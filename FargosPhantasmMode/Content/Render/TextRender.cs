@@ -1,9 +1,9 @@
 ﻿using FargosPhantasmMode.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Render
 {
@@ -28,8 +28,9 @@ namespace FargosPhantasmMode.Content.Render
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.LinearWrap, null, null, null, Main.UIScaleMatrix);
             
             var diagonalNoise = PhantasmTextureRegistry.FireNoise;
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.BurnText");
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.BurnText");
             Main.spriteBatch.GraphicsDevice.Textures[1] = diagonalNoise.Value;
+            shader.SetCommonParameters();
             shader.TrySetParameter("burnIntensity", burnIntensity); 
             shader.TrySetParameter("windDirection", windDirection);  
             shader.TrySetParameter("emberColor", emberColor);     // 暗烬 

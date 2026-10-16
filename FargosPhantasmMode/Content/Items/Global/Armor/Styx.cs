@@ -49,11 +49,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Armor
                     Vector2 speed = Vector2.Normalize(Main.MouseWorld - player.Center);
                     bool flip = speed.X < 0;
                     speed = speed.RotatedBy(MathHelper.PiOver2 * (flip ? 1 : -1));
-                    Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, speed, ModContent.ProjectileType<StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
                     if (PModeWorldSavingSystem.PhantasmMode)
                     {
+                        Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, speed, ModContent.ProjectileType<StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
                         Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, -speed, ModContent.ProjectileType<StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
                     }
+                    else
+                        Projectile.NewProjectile(player.GetSource_Misc(""), player.Center, speed, ModContent.ProjectileType<FargowiltasSouls.Content.Projectiles.StyxGazerArmor>(), 0, 14f, player.whoAmI, MathHelper.Pi / 120 * (flip ? -1 : 1));
                     player.controlUseItem = false; //this kills other heldprojs
                     player.releaseUseItem = true;
                     modPlayer.StyxAttackReadyTimer = 0;

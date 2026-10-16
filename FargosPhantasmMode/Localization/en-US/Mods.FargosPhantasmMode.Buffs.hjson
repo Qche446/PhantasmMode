@@ -5,6 +5,11 @@ HeartBrokenBuff: {
 		Maximum life reduced by 15%
 		"At the moment of breaking..."
 		'''
+	ItemTooltip:
+		'''
+		For players: Maximum life reduced by 50%
+		For enemies: Maximum life reduced by 15%
+		'''
 }
 
 FlawlessBuff: {
@@ -14,6 +19,7 @@ FlawlessBuff: {
 		Increases life regeneration, armor penetration by 10, critical chance by 10%, defense by 10, and damage reduction by 10%
 		"For those who are worthy..."
 		'''
+	ItemTooltip: For players: Life regeneration +5, armor penetration +10, critical chance +10%, defense +10, damage reduction +10%
 }
 
 NanoErosionBuff: {
@@ -23,11 +29,13 @@ NanoErosionBuff: {
 		Debuff damage taken is multiplied by 1.2. Daybreak's debuff damage bonus is no longer halved, and the Magical Curse bonus to debuff damage becomes multiplicative
 		"Beyond structure..."
 		'''
+	ItemTooltip: For enemies: Debuff damage taken is multiplied by 1.2, Daybreak's debuff damage bonus is no longer halved, and the Magical Curse bonus to debuff damage becomes multiplicative
 }
 
 TimeGodsTrickBuff: {
 	DisplayName: Time God's Trick
 	Description: Riding through the unreal and the real, one who holds time...
+	ItemTooltip: Accelerates skill cooldown
 }
 
 HypothermiaBuff: {
@@ -37,11 +45,21 @@ HypothermiaBuff: {
 		Rapidly drains life, damage taken is multiplied by 1.05. Daybreak's debuff damage bonus is no longer halved, and the Magical Curse bonus to debuff damage becomes multiplicative
 		"Imbalance..."
 		'''
+	ItemTooltip:
+		'''
+		冰系 - 200dps
+		易伤5%，破晓减益伤害被增幅的效果不再减半，魔法诅咒的减益伤害增幅改为乘算
+		'''
 }
 
 PhSublimationBuff: {
 	DisplayName: Shadowflame Sublimation
 	Description: Your soul is breaking free from your body
+	ItemTooltip:
+		'''
+		For players: 25dps, critical chance reduced by 200%, defense reduced by 15
+		For enemies: 25dps, defense reduced by 15
+		'''
 }
 
 HallowFlameBuff: {
@@ -51,6 +69,12 @@ HallowFlameBuff: {
 		Immune to Potion Sickness, but severely reduces your survivability in every way
 		"Reborn in holy flame..."
 		'''
+	ItemTooltip:
+		'''
+		For players: 5dps, immune to Potion Sickness, defense -4, damage reduction -2, maximum life -5%
+		For enemies: 20dps (enhanced to 40dps), defense -4, vulnerability 1% (mutant form is 0.5%)
+		All effects increase linearly with stack count
+		'''
 }
 
 FractureBuff: {
@@ -59,5 +83,41 @@ FractureBuff: {
 		'''
 		Lucky Horseshoe fall damage immunity is off, maximum drop speed increased to 500%, and damage reduction and movement speed are slightly reduced
 		"Although I don't know what happened, you broke a bone"
+		'''
+	ItemTooltip: For players: maximum fall speed increased to 500%, damage reduction -5%, movement speed -5%, fall damage threshold -15
+}
+
+HunterMark: {
+	DisplayName: HunterMark
+	Description:
+		'''
+		disabled life regeneration, damage reduction -20%
+		“...wait to die...”
+		'''
+	ItemTooltip:
+		'''
+		For players: disabled life regeneration, damage reduction -20%, defense +5
+		For enemies: disabled life regeneration, damage reduction -20%, rending spiral_white damage stacks ×200%
+		'''
+}
+
+BulletReload: {
+	DisplayName: 血弹装填
+	Description: 显示当前的装填状态
+}
+
+CrushBuff: {
+	DisplayName: 击溃
+	Description: 你被击溃了!
+	ItemTooltip: 禁用玩家和敌怪的减伤和防御
+}
+
+PrayerofTaintedBlood: {
+	DisplayName: 秽血之祈祷
+	Description: 流失生命值，强化血肉铳剑的攻击方式
+	ItemTooltip:
+		'''
+		对玩家：5dps
+		对地怪：25dps
 		'''
 }

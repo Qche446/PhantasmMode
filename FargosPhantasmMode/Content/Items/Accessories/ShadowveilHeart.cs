@@ -1,5 +1,6 @@
 ﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.InfoDisplays;
+using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
@@ -8,8 +9,6 @@ using FargowiltasSouls.Content.UI.Elements;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -18,6 +17,8 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Accessories
 {
@@ -42,6 +43,7 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Item.accessory = true;
             Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 0, 70, 0);
+            Item.GetGlobalItem<PModeGlobalItem>().Phantasm = true;
         }
         public static float GrazeCap => 0.25f;
         public override void UpdateAccessory(Player player, bool hideVisual)
@@ -122,8 +124,8 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Vector2 rectTopLeft = center;
             Rectangle drawRect = new Rectangle((int)rectTopLeft.X, (int)rectTopLeft.Y, (int)rectSize.X, (int)rectSize.Y);
 
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ShadowveilHeartRings");
-            // globalTime 由 Luminance 自动注入，无需（也不应）手动设置
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShadowveilHeartRings");
+            shader.TrySetParameter("globalTime", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("screenPosition", rectTopLeft);
             shader.TrySetParameter("screenSize", rectSize);
             shader.TrySetParameter("anchorPoint", center + rectSize * 0.5f);

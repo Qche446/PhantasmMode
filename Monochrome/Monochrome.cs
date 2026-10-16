@@ -1,4 +1,5 @@
 using System.IO;
+using Monochrome.Content.Status;
 using Monochrome.Core.Graphics.Shaders;
 using Monochrome.Core.Net;
 using Monochrome.Core.Services;
@@ -49,6 +50,10 @@ namespace Monochrome
 					MonoNetSystem.HandleRequest(reader, whoAmI);
 					break;
 
+				case MonoNetSystem.MsgPlayerBuffAi:
+					MonoBuffSync.HandlePlayerAi(reader, whoAmI);
+					break;
+
 				default:
 					MonoNet.NoteUnknownMessage(messageId, whoAmI);
 					break;
@@ -73,8 +78,6 @@ namespace Monochrome
 			while (MonoShaderManager.PostShaderLoadActions.TryDequeue(out Action? action))
 				action?.Invoke();
 
-			// Luminance 的 ShaderRecompilationMonitor 在它自己的 PostSetupContent 里建好文件监视器；
-			// Monochrome 的 sortAfter = Luminance，所以走到这里时它的监视器已经就位，可以安全停用。
 			MonoShaderReloader.TrySuppressLuminanceAutoReload();
 		}
 	}

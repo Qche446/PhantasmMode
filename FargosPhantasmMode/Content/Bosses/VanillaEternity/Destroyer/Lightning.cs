@@ -1,7 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,6 +8,8 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {
     public class Lightning : ModProjectile
@@ -51,7 +52,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
         {
             if (Main.rand.NextBool(5))
             {
-                Particle spark = new SparkParticle(Projectile.Center + Vector2.UnitY * (100 - Main.rand.Next(30, 300)), -Vector2.UnitY.RotatedByRandom(MathHelper.PiOver2 * 0.2f) * Main.rand.NextFloat(3, 13), Color.Cyan, Main.rand.NextFloat(0.3f, 0.7f), Main.rand.Next(10, 25));
+                MonoParticle spark = new FargoSparkParticle(Projectile.Center + Vector2.UnitY * (100 - Main.rand.Next(30, 300)), -Vector2.UnitY.RotatedByRandom(MathHelper.PiOver2 * 0.2f) * Main.rand.NextFloat(3, 13), Color.Cyan, Main.rand.NextFloat(0.3f, 0.7f), Main.rand.Next(10, 25));
                 spark.Spawn();
             }
             if (!playedsound)

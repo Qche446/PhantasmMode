@@ -146,5 +146,10 @@ MutantDestroyerGun.DisplayName: Mutant Destroyer Gun
 SqBomb.DisplayName: Sq炸弹
 KingSlimeSword.DisplayName: 史莱姆雨
 KSGuider.DisplayName: 断骨凝元
-// KSShockWave.DisplayName: K S Shock Wave
-// DarkOnyx.DisplayName: Dark Onyx
+KSShockWave.DisplayName: K S Shock Wave
+DarkOnyx.DisplayName: Dark Onyx
+HunterMark_Black.DisplayName: 猎杀标记_ 黑
+RendingSpiral_White.DisplayName: 撕裂螺旋_ 白
+// FleshBayonet_Dash.DisplayName: Flesh Bayonet_ Dash
+// FleshBayonet_Reload.DisplayName: Flesh Bayonet_ Reload
+// BloodBullets.DisplayName: Blood Bullets

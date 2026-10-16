@@ -1,20 +1,13 @@
 using FargosPhantasmMode.Common;
-using Fargowiltas.Items;
-using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using System;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Luminance.Common.Utilities;
-using FargosPhantasmMode.Content.Buffs.Global;
 using FargosPhantasmMode.Content.Buffs;
 using Monochrome.Content.Status;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit
 {
@@ -35,7 +28,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spiri
                 {
                     if (item.type == ItemID.Mushroom)
                     {
-                        player.AddBuff(ModContent.BuffType<MushroomPowerBuff>(), Utilities.SecondsToFrames(20f));
+                        player.AddBuff(ModContent.BuffType<MushroomPowerBuff>(), MonoUtil.SecondsToFrames(20f));
                     }
                 }
                 if (player.HasEffect<HallowEffect>())
@@ -65,7 +58,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spiri
         public override int ToggleItemType => ModContent.ItemType<HallowEnchant>();
         public override void PostUpdateEquips(Player player)
         {
-            player.GetModPlayer<PModeBuffPlayer>().MaxHallowLevel = player.ForceEffect<HallowFlameEffect>() ? 15 : 10;
+            player.Phantasm().MaxHallowLevel = player.ForceEffect<HallowFlameEffect>() ? 15 : 10;
         }
         public override void ModifyHitNPCBoth(Player player, NPC npc, ref NPC.HitModifiers modifiers, DamageClass damageClass)
         {

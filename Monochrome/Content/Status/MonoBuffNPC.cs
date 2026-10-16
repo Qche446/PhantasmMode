@@ -1,3 +1,5 @@
+using Terraria.ModLoader.IO;
+
 namespace Monochrome.Content.Status;
 
 /// <summary>
@@ -145,5 +147,20 @@ public sealed class MonoBuffNPC : GlobalNPC
     }
 
     /// <summary>把槽表投影到这只 NPC 当前的原版 buff 数组；同一 tick 里再调是空操作。</summary>
-    private void Refresh(NPC npc) => Buffs.Refresh(npc.buffType, MonoBuffSystem.Resolve, Main.GameUpdateCount);
+    /// <remarks>投影之后顺手看一次 <c>Ai</c> 有没有变，变了就替权威端把同步立起来。</remarks>
+    private void Refresh(NPC npc)
+    {
+        Buffs.Refresh(npc.buffType, MonoBuffSystem.Resolve, Main.GameUpdateCount);
+        MonoBuffSync.FlagNpc(npc);
+    }
+
+    /// <summary>把声明了 <see cref="MonoBuff.SyncAi"/> 的状态的 <c>Ai</c> 随这只 NPC 的 extra-AI 写出去。</summary>
+    /// <inheritdoc cref="GlobalNPC.SendExtraAI(NPC, BitWriter, BinaryWriter)"/>
+    public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
+        => MonoBuffSync.WriteNpc(npc, binaryWriter);
+
+    /// <summary>读回对端写的那份 <c>Ai</c>。</summary>
+    /// <inheritdoc cref="GlobalNPC.ReceiveExtraAI(NPC, BitReader, BinaryReader)"/>
+    public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
+        => MonoBuffSync.ReadNpc(npc, binaryReader);
 }

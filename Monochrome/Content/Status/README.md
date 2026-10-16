@@ -18,6 +18,7 @@
 | `MonoBuffNPC.cs` | NPC 宿主：同上，派发 NPC 侧钩子 | 是 | 否 |
 | `MonoBuffAccess.cs` | 消费入口：`player.MonoBuffs()` / `npc.MonoBuffs()` 与泛型查询 | 是 | 否 |
 | `MonoBuffControl.cs` | 原版 buff 数组的操控：读 / 设 / 叠加时长、施加、移除、转换 | 是 | 否 |
+| `MonoBuffSync.cs` | 跨端同步：把 `SyncAi` 打开的状态的 `Ai` 数组带过端。NPC 侧由权威端随 extra-AI 下发，玩家侧上行到服务端再转发 | 是 | 否 |
 | `MonoBuffIcon.cs` | 图标角标：右下角锚点与画字方法 | 是 | 否 |
 | `MonoBuffSlot.cs` | `MonoBuffSlot<T>.Index` 静态入口 | 是 | 否 |
 
@@ -68,6 +69,7 @@ tML 自己在 `ModBuff` 上的钩子直接重写即可，库不中转：`Update(
 | 图标右下角画层数 | `MonoBuffIcon.DrawCount` / `DrawRomanCount` |
 | 图标右下角画别的东西 | `MonoBuffIcon.BadgeAnchor` 配 `DrawBadge` |
 | 罗马数字 | `MonoRoman.ToRoman` |
+| 让层数之类的 `Ai` 跨端一致 | 重写 `SyncAi` 返回 `true` |
 | 槽位 | `MonoBuffSlot<T>.Index` |
 
 ## 4. 一个状态的最短路径
@@ -127,6 +129,7 @@ MonoBuffControl.Replace(npc, ModContent.BuffType<ABuff>(), ModContent.BuffType<B
 | 参数 | 位置 | 作用 |
 |---|---|---|
 | `AiSize` | `MonoBuff` | 伴生数据里 `Ai` 的长度，默认 4 |
+| `SyncAi` | `MonoBuff` | 这个状态的 `Ai` 要不要跨端同步，默认 `false`。打开之后同步整根 `Ai`，`Custom` 不参与 |
 | `CreateState()` | `MonoBuff` | 返回每实体的结构化数据，装进 `Custom`；默认 `null` |
 | `Ai` | `MonoBuffSlotData` | 每实体参数数组，用法对标 `NPC.ai` |
 | `Custom` | `MonoBuffSlotData` | 每实体自定义对象 |
@@ -138,12 +141,13 @@ MonoBuffControl.Replace(npc, ModContent.BuffType<ABuff>(), ModContent.BuffType<B
 
 ## 6. 这一版做什么、不做什么
 
-**做**：抽象基类与 tML 自动注册、玩家与 NPC 两套实体钩子派发、每实体伴生数据（`Ai` 与 `Custom`）、按 tick 的投影与进入 / 离开、断档作废、六个 buff 操控方法、图标角标与罗马数字。
+**做**：抽象基类与 tML 自动注册、玩家与 NPC 两套实体钩子派发、每实体伴生数据（`Ai` 与 `Custom`）、按 tick 的投影与进入 / 离开、断档作废、六个 buff 操控方法、图标角标与罗马数字、把 `SyncAi` 打开的状态的 `Ai` 跨端同步（默认关）。
 
 **不做**：
 
 - 声明式的状态定义——层数模式枚举、数值聚合管线、互斥组与优先级、驱散类别、免疫标签，全部由消费者在重写方法里自己写
-- 状态实例的网络同步。现有消费者都走原版 `AddBuff`，原版自会同步 buff 本身；自定义层数不跨端
+- `Custom` 的同步。它不是可序列化的东西，要跨端就把它摊进 `Ai`
+- 原版 buff 本身的同步。`buffType` / `buffTime` 由原版负责，库只补 `Ai`
 - 图标汇总、悬浮列表、超出槽位上限的处理
 - 命令面与运行期诊断
 
@@ -158,3 +162,6 @@ MonoBuffControl.Replace(npc, ModContent.BuffType<ABuff>(), ModContent.BuffType<B
 | 状态在槽表里看起来还活着 | `Has` 读的是本 tick 的投影；同一 tick 内移除的，要到下一 tick 才反映出来 |
 | 角标位置不对 | 锚点取的是 `Position` 加 `SourceRectangle` 的尺寸；改 `Position` 会把角标一起挪 |
 | NPC 身上层数永远不涨 | 层数只在施加时由外部拷进去，见消费方的写法 |
+| 两端读到的层数不一样 | 这个状态没打开 `SyncAi`。打开之后权威端在值变时发一次，值随实体自己那份 extra-AI 过去 |
+| 打开 `SyncAi` 之后单人下什么都没发生 | 正常：单人没有对端，这条路整个不发生 |
+| 服务端日志说"客户端只能替自己说话" | 有人发来了别的玩家编号的状态包，服务端丢弃了它 |

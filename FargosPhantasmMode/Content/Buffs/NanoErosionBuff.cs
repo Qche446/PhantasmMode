@@ -1,14 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
-using FargowiltasSouls;
-using FargowiltasSouls.Content.Items.Accessories.Enchantments;
-using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Globals;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using System;
-using System.Reflection;
-using Terraria;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Buffs
 {
@@ -21,7 +11,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(NPC npc, ref int buffIndex)
         {
-            npc.GetGlobalNPC<PModeGlobalBuffNPC>().NanoErosion = true;
+            npc.Phantasm().NanoErosion = true;
             base.Update(npc, ref buffIndex);
         }
     }

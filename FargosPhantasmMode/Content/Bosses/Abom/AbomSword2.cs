@@ -5,8 +5,6 @@ using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,7 +12,12 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {
     public class AbomSword2 : AbomSpecialDeathray
@@ -145,7 +148,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
                             Vector2 vel = Projectile.velocity.RotatedBy(Math.PI / 2 * -Math.Sign(Projectile.ai[0]));
                             vel *= Main.rand.NextFloat(6, 12f);
                             vel = vel.RotatedByRandom(MathHelper.PiOver2 * 0.3f);
-                            Particle p = new RectangleParticle(spawnPos, vel, Color.OrangeRed, Main.rand.NextFloat(0.2f, 0.4f), Main.rand.Next(20, 40), true, true, Color.Yellow);
+                            MonoParticle p = new FargoRectangleParticle(spawnPos, vel, Color.OrangeRed, Main.rand.NextFloat(0.2f, 0.4f), Main.rand.Next(20, 40), true, true, Color.Yellow);
                             p.Spawn();
                         }
                     }
@@ -205,7 +208,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             return false;
         }
 
-        public static void DrawStyxGazerDeathray(Projectile projectile, float drawDistance, PrimitiveSettings.VertexWidthFunction widthFunction, bool drawHandle = true, bool fadeStart = false)
+        public static void DrawStyxGazerDeathray(Projectile projectile, float drawDistance, Func<float, float> widthFunction, bool drawHandle = true, bool fadeStart = false)
         {
             // This should never happen, but just in case.
             if (projectile.velocity == Vector2.Zero)
@@ -214,7 +217,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
 
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.StyxGazerShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.StyxGazerShader");
             Texture2D hiltTexture = ModContent.Request<Texture2D>("FargowiltasSouls/Content/Bosses/AbomBoss/AbomSword").Value;
 
             Vector2 direction = projectile.velocity.SafeNormalize(Vector2.UnitY);
@@ -248,8 +251,8 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             FargoSoulsUtil.SetTexture1(fademap);
             for (int j = 0; j < 2; j++)
             {
-                PrimitiveSettings primSettings = new(widthFunction, ColorFunction, Shader: shader);
-                PrimitiveRenderer.RenderTrail(baseDrawPoints, primSettings, 30);
+                MonoPrimitiveSettings primSettings = new(t => widthFunction(t) * 2f, ColorFunction, Shader: shader);
+                MonoPrim.RenderTrail(baseDrawPoints, primSettings, 30);
             }
 
             if (drawHandle)

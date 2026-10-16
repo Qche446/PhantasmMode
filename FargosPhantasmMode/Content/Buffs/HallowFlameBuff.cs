@@ -1,4 +1,4 @@
-using FargosPhantasmMode.Content.Buffs.Global;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items.Accessories.Forces;
@@ -23,8 +23,12 @@ namespace FargosPhantasmMode.Content.Buffs
             Main.buffNoSave[Type] = true;
             BuffID.Sets.NurseCannotRemoveDebuff[Type] = true;
         }
+
+        /// <summary>层数要跨端：NPC 侧的层数会被伤害规则读，两端不一致会让同一发伤害算出不同的数。</summary>
+        public override bool SyncAi => true;
+
         //下限兜底
-        private static int Level(MonoBuffSlotData data)
+        public static int Level(MonoBuffSlotData data)
         {
             if (data is null)
                 return 0;
@@ -38,8 +42,8 @@ namespace FargosPhantasmMode.Content.Buffs
         public override bool ReApply(Player player, int time, int buffIndex)
         {
             int left = MonoBuffControl.TimeLeft(player, Type);
-            MonoBuffControl.SetTime(player, Type, left > time ? left + time / 2 : left / 2 + time);
-
+            //MonoBuffControl.SetTime(player, Type, left > time ? left + time / 2 : left / 2 + time);
+            player.SetTime(Type, left > time ? left + time / 2 : left / 2 + time);
             MonoBuffSlotData data = player.MonoBuffs().GetOrCreateData<HallowFlameBuff>();
             data.Ai[0] += 1f;
             return true;
@@ -66,7 +70,7 @@ namespace FargosPhantasmMode.Content.Buffs
             if (data is null)
                 return;
 
-            int max = player.GetModPlayer<PModeBuffPlayer>().MaxHallowLevel;
+            int max = player.Phantasm().MaxHallowLevel;
             if (Level(data) > max)
                 data.Ai[0] = max;
         }
@@ -125,17 +129,6 @@ namespace FargosPhantasmMode.Content.Buffs
             npc.lifeRegen -= a * 10 * level;
             if (damage < a * level)
                 damage = a * level;
-        }
-
-        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            int level = Level(npc.MonoBuffs().Data<HallowFlameBuff>());
-            if (level <= 0)
-                return;
-
-            modifiers.Defense.Flat -= 4 * level;
-            float a = Main.LocalPlayer.FargoSouls().MutantPresence ? 0.005f : 0.01f;
-            modifiers.FinalDamage *= 1f + a * level;
         }
 
         public override void DrawEffects(NPC npc, ref Color drawColor)

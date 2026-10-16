@@ -13,9 +13,13 @@ public sealed class MonoParticleManager : ModSystem
 
     private static readonly List<MonoParticle> active = [];
     private static readonly Dictionary<DrawGroup, List<MonoParticle>> drawLists = [];
+    private static readonly List<MonoEmitter> emitters = [];
 
     /// <summary>当前活动的全部粒子。</summary>
     public static IReadOnlyList<MonoParticle> Active => active;
+
+    /// <summary>当前活动的全部发射器。</summary>
+    public static IReadOnlyList<MonoEmitter> Emitters => emitters;
 
     /// <summary>把一个粒子纳入活动集合。已在活动集合中的实例会被忽略。</summary>
     /// <param name="particle">要激活的粒子。</param>
@@ -29,11 +33,39 @@ public sealed class MonoParticleManager : ModSystem
         GetList(particle).Add(particle);
     }
 
+    /// <summary>把一个发射器纳入活动集合，并把它自己那点计数归零。已在集合里的实例会被忽略。</summary>
+    /// <param name="emitter">要激活的发射器。</param>
+    internal static void Attach(MonoEmitter emitter)
+    {
+        if (emitter.Active)
+            return;
+
+        emitter.Reset();
+        emitter.Active = true;
+        emitters.Add(emitter);
+    }
+
+    /// <summary>把一个发射器移出活动集合。它已经发出去的粒子不受影响。</summary>
+    /// <param name="emitter">要停掉的发射器。</param>
+    internal static void Detach(MonoEmitter emitter)
+    {
+        if (!emitter.Active)
+            return;
+
+        emitter.Active = false;
+        emitters.Remove(emitter);
+    }
+
     /// <summary>推进所有粒子的行为、位置、旋转与寿命，并回收到寿的粒子。</summary>
     public override void PostUpdateDusts()
     {
         if (Main.dedServ)
             return;
+
+        // 倒着走：发射器在 Update 里可能因为 Duration 到点而把自己停掉（从表里移除）。
+        for (int i = emitters.Count - 1; i >= 0; i--)
+            emitters[i].Update();
+
         for (int i = active.Count - 1; i >= 0; i--)
         {
             MonoParticle particle = active[i];
@@ -71,28 +103,41 @@ public sealed class MonoParticleManager : ModSystem
     /// <summary>挂上世界相位的绘制钩子（客户端）。界面相位用 <see cref="PostDrawInterface"/>，不需要挂钩子。</summary>
     public override void Load()
     {
+        // 热重载时静态表可能还留着上一版建的对象，而它们的行为方法与委托指向的已经不是这一版代码了——
+        // 留着它们会在下一次 Update/Draw 里报"尝试调用已生成的 lambda 或本地函数"。先在装载时清一次。
+        Clear();
+        MonoParticleTextures.Dispose();
+
         if (!Main.dedServ)
             On_Main.DrawDust += DrawParticles;
     }
 
-    /// <summary>摘掉绘制钩子并清空。</summary>
+    /// <summary>摘掉绘制钩子、清空、丢掉生成的贴图。</summary>
     public override void Unload()
     {
         if (!Main.dedServ)
             On_Main.DrawDust -= DrawParticles;
         Clear();
+        MonoParticleTextures.Dispose();
     }
 
-    /// <summary>世界卸载时清空所有粒子。</summary>
+    /// <summary>世界卸载时清空所有粒子与发射器。</summary>
     public override void OnWorldUnload() => Clear();
 
-    /// <summary>清空活动集合与全部绘制分组。粒子对象本身不被释放，只是变为非活动。</summary>
+    /// <summary>模组卸载时再清一次。tML 的两个卸载钩子都会调，谁先谁后没有保证。</summary>
+    public override void OnModUnload() => Clear();
+
+    /// <summary>清空活动集合、全部绘制分组与全部发射器。对象本身不被释放，只是变为非活动。</summary>
     public static void Clear()
     {
         active.Clear();
         foreach (List<MonoParticle> list in drawLists.Values)
             list.Clear();
         drawLists.Clear();
+
+        foreach (MonoEmitter emitter in emitters)
+            emitter.Active = false;
+        emitters.Clear();
     }
 
     private static void RemoveAt(int index, MonoParticle particle)

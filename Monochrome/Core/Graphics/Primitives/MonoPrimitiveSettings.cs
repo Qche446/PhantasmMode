@@ -5,7 +5,7 @@ namespace Monochrome.Core.Graphics.Primitives;
 /// <summary>
 /// GPU 拖尾的配置。位置属于哪个坐标空间由 <see cref="Space"/> 决定。
 /// </summary>
-/// <param name="WidthFunction">沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（0 为尾巴，1 为头部），返回该处的条带全宽（像素）；条带以中心线为轴向两侧各展开一半。</param>
+/// <param name="WidthFunction">沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（0 为尾巴，1 为头部），返回该处的条带<b>全宽</b>（像素）；条带以中心线为轴向两侧各展开一半。<b>注意与 Luminance 的单位不同</b>：它的 <c>WidthFunction</c> 是半宽（两个顶点各向侧面偏移那么多），同一个函数搬过来要乘 2 才画得出同样宽的条带。</param>
 /// <param name="ColorFunction">沿轨迹的颜色函数，入参同上；颜色由 GPU 在顶点间插值。</param>
 /// <param name="OffsetFunction">可选的位置偏移，在减去 <c>Main.screenPosition</c> 之前加在世界坐标上，适合做整体摆动而不改传入的点列。</param>
 /// <param name="Smoothen">是否用 Catmull-Rom 样条重采样点列。点列稀疏时开（默认）；关掉按最近索引取样、不插值，省算力。</param>
@@ -16,6 +16,8 @@ namespace Monochrome.Core.Graphics.Primitives;
 /// <param name="BlendState">混合状态，默认 <see cref="BlendState.AlphaBlend"/>。</param>
 /// <param name="InitialVertexPositionsOverride">用一对显式位置替换第一个路径点的左右顶点（按 <see cref="Space"/> 给出的坐标），让拖尾头部对齐到精确位置而不由法线推出；两个分量都为零时视为未设置。</param>
 /// <param name="Space">传入位置所属的坐标空间，默认 <see cref="MonoGraphicsSpace.World"/>。</param>
+/// <param name="Texture">要给自定义着色器采样的贴图，绑到采样槽 <b>1</b>（槽 0 归 <c>SpriteBatch</c>）；为 <see langword="null"/> 时不碰槽 1。</param>
+/// <param name="Sampler">上面那张贴图的采样状态，默认 <see cref="SamplerState.LinearWrap"/>（条纹类贴图要平铺）。</param>
 public sealed record MonoPrimitiveSettings(
     Func<float, float> WidthFunction,
     Func<float, Color> ColorFunction,
@@ -27,7 +29,9 @@ public sealed record MonoPrimitiveSettings(
     bool UseUnscaledMatrix = false,
     BlendState? BlendState = null,
     (Vector2 Left, Vector2 Right)? InitialVertexPositionsOverride = null,
-    MonoGraphicsSpace Space = MonoGraphicsSpace.World)
+    MonoGraphicsSpace Space = MonoGraphicsSpace.World,
+    Texture2D? Texture = null,
+    SamplerState? Sampler = null)
 {
     /// <summary>等宽单色拖尾的快捷构造：整条轨迹用同一个宽度与颜色。</summary>
     /// <param name="width">条带全宽（像素）。</param>

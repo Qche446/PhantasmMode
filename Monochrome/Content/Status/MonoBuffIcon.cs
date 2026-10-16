@@ -78,7 +78,7 @@ public static class MonoBuffIcon
     public static void DrawRomanCount(SpriteBatch spriteBatch, in BuffDrawParams drawParams, int count,
         float scale = 0.75f, Color? textColor = null, Color? outlineColor = null)
     {
-        if (count < 2)
+        if (count < 1)
             return;
 
         DrawBadge(spriteBatch, drawParams, MonoRoman.ToRoman(count), scale, textColor, outlineColor);

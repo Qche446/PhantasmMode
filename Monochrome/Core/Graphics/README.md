@@ -127,10 +127,12 @@ Monochrome/Core/Graphics/
 │  └─ MonoRenderTargetManager.cs     统一维护全部受管目标
 ├─ Shaders/                          着色器
 │  ├─ MonoShader.cs                  参数缓存 / 纹理绑定 / pass 选择 / 热替换
-│  ├─ MonoShaderManager.cs           注册表、自动加载、管辖范围判定
+│  ├─ MonoShaderManager.cs           注册表、自动加载、写回授权判定
 │  └─ MonoShaderReloader.cs          运行时编译与写回
-├─ Particles/                        对象式粒子（带独立行为与绘制）
+├─ Particles/                        对象式粒子：基类 + 四个现成件 + 发射器
 ├─ Metaballs/                        融合球数据与 GPU 等值面
+├─ Text/                             文字绘制（测量 / 锚点 / 多行 / 描边 / 换行 / 打字机）
+├─ Trails/                           拖尾：轨迹点缓冲 + 条纹贴图 + 内置拖尾着色器
 ├─ PostProcessing/                   ping-pong 后处理链 + 内置屏幕特效
 │  ├─ IMonoPostFxPass.cs             一个 pass 的契约
 │  ├─ MonoPostFxPipeline.cs          链：pass 排序 + ping-pong
@@ -190,7 +192,7 @@ Monochrome/Core/Graphics/
 | | 消费者代码 | 调 `MonoPrim.*`；调用点要落在 `End()` 与 `Begin()` 之间 |
 | **世界画完、界面之前** | `MonoScreenCaptureSystem.EndCaptureDetour`（`On_FilterManager.EndCapture`，`Main.cs:60145`） | 把注册的屏幕后处理链原地作用到世界捕获目标上（§5.12） |
 | **分辨率变化** | `MonoRenderTargetManager.ResizeScreenSizedTargets`（`On_Main.SetDisplayMode`） | 给每个允许重建的受管目标排队 `Recreate` |
-| **卸载期** | 各 `Unload` / `OnModUnload`（在线程池线程上） | 释放缓冲与效果、摘掉钩子。受管目标的显存释放会经 `Main.QueueMainThreadAction` 推回主线程 |
+| **卸载期** | 各 `Unload` / `OnModUnload`（在线程池线程上） | 释放缓冲与效果、摘掉钩子。图形资源的显存释放会经 `MonoGraphicsDisposal` 推回主线程 |
 
 **两个时机的实测依据**（"原版会先做 X"这类断言必须落到源码）：
 
@@ -216,9 +218,13 @@ Monochrome/Core/Graphics/
 | 写/用自定义着色器 | `MonoShaderManager` + `MonoShader`（§5.5） |
 | 马上看到 `.fx` 改动 | `/monoshader reload <名字>`（§5.5） |
 | 成百上千个带行为的粒子 | 派生 `MonoParticle`（§5.8） |
+| 现成的粒子（光点 / 火花 / 烟 / 光条） | `Particles/Builtin/` 下的四个（§5.8） |
+| 按节拍持续发射 | `MonoEmitter`（§5.8） |
 | 会互相粘连的形体 | `MonoMetaballManager`（§5.9） |
+| 画一段带描边、可按锚点摆放的多行文字 | `MonoText`（§5.14） |
 | 屏幕震动 / 定格 / 慢动作 | `MonoScreenEffectsSystem`（§5.10） |
 | 世界画面的后处理（暗角、色差、模糊……） | `MonoScreenFx` + `MonoScreenCaptureSystem`（§5.12、§5.13） |
+| 拖尾（记点 + 画条带 + 条纹着色器） | `MonoTrail`（§5.15） |
 | 相机跟随 | `MonoCameraFollow`（§5.10） |
 
 ---
@@ -268,7 +274,7 @@ Monochrome/Core/Graphics/
 
 | 类型 | 用途 | 关键成员 |
 |---|---|---|
-| `MonoPrimitiveSettings` | 拖尾 | `WidthFunction` / `ColorFunction` / `OffsetFunction` / `Smoothen` / `InitialVertexPositionsOverride`，以及共有的 `Shader` / `BlendState` / `Space` / `UseUnscaledMatrix` / `ProjectionWidth·Height` |
+| `MonoPrimitiveSettings` | 拖尾 | `WidthFunction` / `ColorFunction` / `OffsetFunction` / `Smoothen` / `InitialVertexPositionsOverride` / `Texture`（绑到采样槽 1）/ `Sampler`，以及共有的 `Shader` / `BlendState` / `Space` / `UseUnscaledMatrix` / `ProjectionWidth·Height` |
 | `MonoCircleSettings` | 实心圆 | `RadiusFunction`（沿角度的半径，可做心形/星形） |
 | `MonoCircleEdgeSettings` | 圆环带 | `RadiusFunction`（内径）+ `EdgeWidthFunction`（环厚，向外展开） |
 
@@ -302,6 +308,38 @@ MonoPrim.RenderTrail(projectile.oldPos, new MonoPrimitiveSettings(
 `ModSystem`，只负责图元缓冲的生命周期：`OnModLoad` 排队创建、`Unload` 排队释放。
 释放带一个**生命周期代号**，让"卸载期间发生重新初始化"（模组热重载）时那次释放自动作废，
 不会释放掉新资源。
+
+#### 5.2.5 MonoPixelationSystem —— 像素化图元
+
+像素化靠"半分辨率离屏目标 + 2 倍点采样"实现：图元先画进一张屏幕尺寸一半的目标，再按 2 倍、
+`PointClamp` 贴回屏幕，放大时不被滤掉就成了像素块。这套东西不能在画图元的地方就地做，所以由系统统一代管。
+
+NPC 或弹幕实现 `IMonoPixelatedPrimitive` 即可：
+
+```csharp
+public class MyLaser : ModProjectile, IMonoPixelatedPrimitive
+{
+    // 画到哪一层；默认 BeforeProjectiles
+    public MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.BeforeNPCs;
+
+    public void RenderPixelatedPrimitives()
+    {
+        // 关键就是 UseUnscaledMatrix：它让图元走不含缩放的正交投影，与半分辨率目标配合出像素块。
+        MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(
+            WidthFunction, ColorFunction, UseUnscaledMatrix: true, Shader: shader), 30);
+    }
+}
+```
+
+四个层各配一组绘制时机：`BeforeNPCs` / `AfterNPCs` 夹在 `DoDraw_DrawNPCsOverTiles` 两侧，
+`BeforeProjectiles` / `AfterProjectiles` 夹在 `DrawProjectiles` 两侧。收集与画进目标发生在世界绘制之前
+（`MonoRenderTargetManager.RenderTargetUpdateLoop`），那里没有开着的批次，允许原始绘制。
+
+三条边界：
+
+- **不要在 `RenderPixelatedPrimitives` 里开关 `SpriteBatch`**，它已经在原始绘制路径上（与 `MonoPrim.*` 同一约定）。接口也因此不带 `SpriteBatch` 参数。
+- **`UseUnscaledMatrix = true` 只管矩阵、不改坐标换算**：`Space` 保持默认的 `World`，位置照旧给世界坐标。它也意味着宽度单位是全宽——见 5.2.2 里与 Luminance 的差异。
+- 目标**按需创建**：某个层从没出现过内容就不建它。建过而某一帧空了的层仍会被清一次，所以效果结束时不会留下最后一帧。
 
 ---
 
@@ -340,6 +378,10 @@ var screenTarget = MonoRt.ScreenSized();
 - `FxcReader` 的实现就是 `new Effect(graphicsDevice, bytes)`（`FxcReader.cs:27`）；FNA 不含 HLSL 编译器。
 - 因此 `.fxc` 必须是**完整效果**（`fx_2_0`）。实测产物头：`/T fx_2_0` → `01 09 FF FE`；
   裸 `/T ps_3_0` → `00 03 FF FF`，`new Effect` 解析不了。
+- **"效果目标是 `fx_2_0`"不等于"着色器只能是 2_0"**：`fx_2_0` 里写 `compile vs_3_0 / ps_3_0` 是合法的，
+  实测同一份源编出来的产物头与 `ps_2_0` 那版完全一致（`fx_3_0` 这个目标 fxc 根本不接受）。
+  要动态分支、要更多寄存器就直接写 3_0；FargowiltasSouls 的 19 个着色器都这么写。
+  于是编译脚本不需要按文件换 profile，始终 `/T fx_2_0`。
 
 所以 `.fx` 是源码、`.fxc` 是产物，**两个都要进仓库也都要进 `.tmod`**——`.fx` 进包是因为运行时重载要靠它。
 
@@ -374,22 +416,26 @@ PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回
 | `all` / `*` | 强制全部重编 |
 
 `MonoShaderReloader` 的源文件优先取所属模组的 `SourceFolder`；没有源目录时退回从 `.tmod` 里取出
-`.fx` 写到临时目录，所以 `.fx` 必须留在包里。它每次只重编**在管辖范围内**的模组（见下）。
+`.fx` 写到临时目录，所以 `.fx` 必须留在包里。它只重编宿主声明了 `[MonoShaderScope]` 的着色器（见下）。
 
 #### MonoShaderManager
 
 按与 Luminance 相同的约定自动加载：文件名以 `.fxc` 或 `.xnb` 结尾，且路径含
-`Assets/AutoloadedEffects/Shaders` 或 `Assets/Effects`。`Monochrome.PostSetupContent` 对每个已加载模组
-各调一次，所以声明了管辖的模组所带着色器也会进这张表。
+`Assets/AutoloadedEffects/Shaders`（Monochrome 自己额外认 `Assets/Effects`）。
+`Monochrome.PostSetupContent` 对每个已加载模组各调一次，所以任何已加载模组的着色器都会进这张表。
 
-**管辖范围**由模组主类上的 `[MonoShaderScope]` 显式声明（Monochrome 自己总是算在内）。这条限制是必须的：
-热重载会把编好的 `.fxc` 写回该模组的源目录，那是会动别人磁盘的操作，该由消费者自己表态。
-判据不用"程序集引用了 Monochrome"，因为那只说明消费者用到了某个类型——只用到会被内联的常量时，
-编译器不会写出那条引用，判定会静默失效。有资产却没声明的模组会收到一条点名日志。
+**注册不设门槛**：消费者按 `<模组名>.<文件名>` 就能取到别的模组的着色器，与 Luminance 的注册语义一致。
+设门的是**写回**：只有模组主类声明了 `[MonoShaderScope]`（Monochrome 自己总是算在内）才允许热重载把编好的
+`.fxc` 写回它的源目录，因为那是会动别人磁盘的操作。没声明的着色器照常可读，只是 `CanWriteBack` 为
+`false`，`/monoshader reload` 会跳过它们并在汇总里报出数量。判据不用"程序集引用了 Monochrome"，
+因为那只说明消费者用到了某个类型——只用到会被内联的常量时，编译器不会写出那条引用，判定会静默失效。
+
+外来模组只认 `Assets/AutoloadedEffects/Shaders`：`Assets/Effects` 是很常见的目录名，别人放在那里的 `.xnb`
+多半是贴图（tML 会把 `.png` 编成同名 `.xnb`），按 `Effect` 去请求只会刷一串加载失败的警告。
 
 同名 `.fxc` 与 `.xnb` 并存时以 `.fxc` 为准（分两趟扫，先 `.fxc` 后 `.xnb`）。这个顺序是必需的：
 `Mod.GetFileNames()` 的枚举顺序没有任何保证，单趟扫描等于把"用哪一份"交给运气。热重载写回 `.fxc`
-时会顺手删掉同名 `.xnb`，加载期发现重复也会记一条日志。
+时会顺手删掉同名 `.xnb`，加载期发现重复也会记一条日志（只对可写回的模组）。
 
 #### MonoShader
 
@@ -439,6 +485,8 @@ PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回
 - **`Dispose` 不是终态**：它只丢掉显存里那块纹理，之后访问 `Target` 会按需重建。这是为了让 wrapper
   比底层目标活得久——它是唯一持有重建委托的东西。要永久注销请用 `Retire()`，那才会释放显存**并**
   把自己从登记表摘掉，此后访问会抛 `ObjectDisposedException`。
+- **释放的线程约定**：`Dispose()` 与 `Retire()` 自己把原生释放经 `MonoGraphicsDisposal` 排到主线程，
+  所以卸载钩子（跑在线程池线程上）里可以直接调；`Recreate()` 反过来，它当场创建资源，必须在主线程调。
 
 #### MonoRenderTargetManager
 
@@ -483,6 +531,22 @@ ping-pong 的意义是两个 pass 之间不需要新的渲染目标，把每帧�
 按名字保存后处理链的注册表（`GetOrCreate(name)`，名字不区分大小写）。用名字而不是全局单例，
 是为了让多个模组各自拥有独立的链而互不干扰。`Unload` 清空。
 
+它还保管**逐帧滤镜**：`GetFilter(shaderName)` 取一条绑在指定着色器上的 `MonoScreenFilter`，
+不存在则创建，并自动把它挂进屏幕捕获系统。滤镜与链的分工是——
+
+- 链（`GetOrCreate` + `Register`）：适合由消费者自己决定开关、长期存在的特效；
+- 滤镜（`GetFilter`）：适合"由某个实体的状态决定、每帧续期一次"的效果。
+
+```csharp
+// 某个阶段里每帧调一次；漏调就自己淡出。
+MonoPostFxSystem.GetFilter("MyMod.FinalSpark").Activate();
+```
+
+`MonoScreenFilter` 的不透明度按 `FadeSpeed`（默认 0.015，约 67 帧）朝目标走：本帧 `Activate` 过就朝 1，
+否则朝 0；降到 0 时它自动退出启用状态，屏幕捕获随之退订，闲置时一帧开销都不产生。推进发生在
+`MonoScreenCaptureSystem.PreUpdateEntities`，`Activate` 与它的绘制之间因此隔一帧，淡入淡出这种量级看不出来。
+着色器契约与其它屏幕 pass 相同（输入在 s1、淡出走 `fxOpacity`），需要自带参数的滤镜请直接派生 `MonoShaderPass`。
+
 #### MonoTintPass
 
 无着色器的整幅染色 pass，定位是**测试与降级**：验证中间目标、ping-pong 顺序与状态恢复是否正确，
@@ -503,10 +567,12 @@ ping-pong 的意义是两个 pass 之间不需要新的渲染目标，把每帧�
 | `Time` / `Lifetime` / `LifetimeRatio` | 寿命。`LifetimeRatio` 是 `[0,1]` 的进度；`Lifetime` 非正时恒为 1 |
 | `Active` | 是否处于活动集合内，由管理器写 |
 | `Space` | 虚属性，默认 `World`。它同时决定坐标系**与绘制相位** |
-| `Update()` / `Draw(...)` / `ShouldKill()` | 虚方法：行为、绘制、消亡条件 |
+| `Update()` / `Draw(...)` | 虚方法：行为与绘制 |
 | `Spawn()` / `Kill()` | 交给自己所属的管理器 |
 
-`Draw` 的默认实现是 `Space == World ? Position - Main.screenPosition : Position`。
+`Draw` 的默认实现是 `Space == World ? Position - Main.screenPosition : Position`；轴心按 `Frame`（没有就用整图）的尺寸取半，所以用帧序列不会偏。
+
+**管理器不复用对象**：`Spawn` 把实例放进活动集合，到寿移出，下一颗要一个新对象。要复用就自己留着死掉的实例，把字段改回想要的值再 `Spawn` 一次——字段不会自动重置，这一步是调用方的责任。
 
 > **`TextureAssets.MagicPixel` 是 1×1000，不是 1×1**（实测）。默认 `Draw` 的 `Scale` 是**贴图倍数**，
 > 拿它当 1 像素贴图用会画出一条横跨全屏的竖线（`1000 × Scale.Y`）。要固定像素大小就覆写 `Draw`
@@ -525,6 +591,48 @@ ping-pong 的意义是两个 pass 之间不需要新的渲染目标，把每帧�
 **不生效**（那时批次已经开着，自己 `Begin` 会抛异常）。需要界面侧自定义混合或着色器时，
 得自己在 `End()` / `Begin()` 之间画。
 
+#### 内置粒子
+
+四个现成件在 `Particles/Builtin/`，共用一张**程序生成**的软圆（`MonoParticleTextures.Soft`，64×64、smoothstep 边缘），所以不必准备任何 PNG。尺寸都用**像素**给，不必换算成贴图倍数。
+
+| 类型 | 混合 | 用它做 | 主要参数 |
+|---|---|---|---|
+| `MonoGlow` | 加法 | 发光点、能量球、命中闪 | `StartSize` / `EndSize` / `MaxOpacity` |
+| `MonoSpark` | 加法 | 火星、碎屑、弹着点 | `Gravity` / `Drag` / `StartSize` / `EndSize` |
+| `MonoSmoke` | 普通 | 烟、尘、雾气 | `StartSize` / `EndSize` / `Rise` / `MaxOpacity` |
+| `MonoStreak` | 加法 | 尾迹、斩击余光 | `Thickness` / `LengthScale` / `MinLength` |
+
+```csharp
+new MonoSpark { Position = hit, Velocity = Main.rand.NextVector2Circular(3f, 3f), Lifetime = 30, Color = Color.OrangeRed }.Spawn();
+```
+
+`MonoStreak` 每帧按当前速度重算朝向与长度，所以速度变成 0 时会缩成一小团——那种情况直接 `Kill()`。
+
+#### MonoEmitter —— 持续发射器
+
+```csharp
+new MonoEmitter
+{
+    Position = npc.Center,
+    Direction = -MathHelper.PiOver2,
+    Spread = 0.5f,
+    Radius = 18f,
+    Shape = MonoEmitShape.Ring,
+    Count = 3,
+    Period = 4,
+    Lifetime = 60,           // 发射器自己活多少帧
+    ParticleLifetime = 40,   // 发出来的粒子活多少帧
+    Factory = static () => new MonoSpark { Color = Color.OrangeRed },
+    Configure = static p => p.Velocity *= 1.5f,
+}.Spawn();
+```
+
+`Spawn()` 开始、`Stop()` 停止。**它自带生命周期**，形状与 `MonoParticle` 对齐：`Time` / `Lifetime` / `LifetimeRatio` / `ShouldStop()`；`Lifetime` 默认 60 帧，到点自动停，想一直发就设成 `<= 0`。**取点与取朝向是分开的**：`Shape`（`Point` / `Circle` / `Ring`）决定在哪儿生，`Direction` 与 `Spread` 决定朝哪儿飞；算术在 `MonoEmitPattern` 里，是纯逻辑，进离线验收台。`Factory` 为 `null` 时它什么都不发，不报错。
+
+发射器与粒子一起在 `PostUpdateDusts` 推进，换世界时一并清空。
+
+> **热重载提醒**：发射器把调用方给的委托（`Factory` / `Configure`）存在自己身上，所以**不要在静态字段里长期持有它**——热重载之后再调到上一版的委托会报"尝试调用已生成的 lambda 或本地函数"。给它一个有限的 `Lifetime`、或者在 `Load` 里重建，都能避开。管理器自己也会在 `Load` / `Unload` / `OnModUnload` 时清一次静态表，避免上一版的对象留在里面。
+
 ---
 
 ### 5.9 Metaballs —— 融合球
@@ -540,8 +648,51 @@ ping-pong 的意义是两个 pass 之间不需要新的渲染目标，把每帧�
 | `Softness` / `EdgeWidth` / `EdgeColor` | — | 合成时的阈值过渡宽度与边缘带 |
 | `InfluencePower` | — | 影响力曲线的幂次，决定融合手感 |
 | `Segments` / `ResolutionDivisor` / `Opacity` | 24 / 2 / — | 每颗球的分段数、半分辨率累积的除数、整体不透明度 |
+| `CompositeShader` | null | 这一层合成时用的着色器；null 表示用内置的 `Monochrome.MetaballComposite` |
+| `ConfigureComposite` | null | 标准 uniform 写完之后调用，用来补这一层自己的参数与贴图槽 |
 
 **阈值不改变球的大小**：可见半径恒等于你给的 `Radius`。
+
+**参数是按层来的**：`MonoMetaballManager.Settings` 是默认的那一份，没单独设过的层都用它；要"血稠、电稀"就给某一层单独设一份——
+
+```csharp
+MonoMetaballManager.SetSettings("blood", new MonoMetaballSettings { Threshold = 0.2f, InfluencePower = 2f });
+MonoMetaballManager.SetSettings("blood", null);   // 恢复默认
+```
+
+`SettingsFor(layer)` 取这一层当前生效的那份（累积、合成、`Sample` 都用它）。**`ResolutionDivisor` 只在层第一次累积时生效**——累积目标是那时按它建的，之后改不会重建，要改就 `FreeLayer` 之后再发。
+
+**界面上的融合球（UIMetaball）**：给这一层把 `Space` 设成 `MonoGraphicsSpace.UI`，位置就按 UI 坐标给：
+
+```csharp
+MonoMetaballManager.SetSettings("ui.glow", new MonoMetaballSettings
+{
+    Space = MonoGraphicsSpace.UI,
+    Threshold = 0.35f,
+});
+MonoMetaballManager.Add("ui.glow", new MonoMetaball(uiPosition, 24f, Color.Cyan));
+```
+
+管理器会把这一层合成进它自己的一张整屏目标，然后在界面相位（`PostDrawInterface`）当普通贴图贴出去——它不跟世界镜头跑，也不需要抢 `End()` / `Begin()` 的空隙（界面批那时是开着的，只画一次 `SpriteBatch.Draw`）。两条代价：
+
+- 每多一个 UI 层就多一张整屏 RT（世界层只有半分辨率的场目标）；
+- `Main.UIScaleMatrix` 在累积那一刻（`Main.OnPreDraw`）还是上一帧的值，所以 **UI 缩放变化的那一帧会偏一帧**。
+
+`AutoDraw = false` 时这条自动路不生效——那时 `Draw` 只把结果合成到当前绑定的目标，UI 层要自己接上界面相位。
+
+**换合成着色器**：某一层的材质想自己写（例如叠一张噪声贴图当火焰），给它 `CompositeShader` 与 `ConfigureComposite`。内置的五个 uniform（`uThreshold` / `uSoftness` / `uEdgeWidth` / `uEdgeColor` / `uOpacity`）仍会按这一层的值写入，着色器里没有同名的会自动跳过：
+
+```csharp
+MonoMetaballManager.SetSettings("flame", new MonoMetaballSettings
+{
+    CompositeShader = MonoShaderManager.GetShader("MyMod.Flame"),
+    ConfigureComposite = s => s
+        .SetParameter("color", new Color(57, 10, 110))
+        .SetTexture(noise, 1, SamplerState.LinearWrap),
+});
+```
+
+`AutoDraw` 是全局开关，没有逐层版本：需要自己挑合成时机的层得把整个管理器的自动合成关掉，再在选定的时机调 `Draw(layer)`（FPM 的幽火就在 `On_Main.DrawProjectiles` 里这么用）。着色器被卸载后这一层退回内置合成，不会画不出来。
 
 #### 两种球
 
@@ -758,6 +909,83 @@ Bloom（亮部提取 + 降采样 + 加性合成）与 Distortion（需要第二�
 
 ---
 
+### 5.14 Text —— 文字绘制
+
+原版只给 `Utils.DrawBorderStringFourWay`：锚点、多行、行距都得自己算，`origin` 该不该乘缩放则是每个调用点都要重猜一遍的事。这一层把"一段文字按锚点摆在某个点上"收成一次调用，排版算术在 `MonoTextLayout` 里（纯逻辑，进离线验收台）。
+
+```csharp
+using Monochrome.Core.Graphics.Text;
+
+// 界面相位（批次已经开着）：居中的标题，白字黑描边
+MonoText.Draw(spriteBatch, "境妄模式", new Vector2(Main.screenWidth / 2f, 80f), new MonoTextStyle
+{
+    Scale = 1.2f,
+    Anchor = new Vector2(0.5f, 0.5f),
+});
+
+// 世界坐标里的飘字
+MonoText.Draw(spriteBatch, damageText, npc.Center, style, MonoGraphicsSpace.World);
+```
+
+| 想做的事 | 用哪个 |
+|---|---|
+| 量一段文字（缩放之后） | `MonoText.Measure` |
+| 按锚点画，支持 `\n` 多行 | `MonoText.Draw` |
+| 按宽度自动换行 | `MonoText.Wrap` |
+| 按宽度裁切并加省略号 | `MonoText.Crop` |
+| 打字机 | `MonoText.Visible(text, n)`，结果再交给 `Draw` |
+
+`MonoTextStyle` 是结构体，用 `new MonoTextStyle()` 建——**不要用 `default`**，那样颜色是全透明黑。`Anchor` 两个分量都在 `[0,1]`：`(0,0)` 左上、`(0.5,0.5)` 正中、`(1,1)` 右下；**多行时每一行各按自己的宽度对齐**，纵向按整块算。
+
+**边界：**
+
+- **它从不 `Begin` / `End`**，批次由调用方开好。界面相位与它天然相容；`End()` 与下一次 `Begin()` 之间那种原始绘制相位不是它的场合。
+- **描边粗细固定 2 像素**（原版 `DrawBorderStringFourWay` 里的硬编码偏移），且不随缩放变化。要更粗的描边得自己画。
+- 单行绘制不分配；多行会分配一个 Y 数组，并逐行 `Substring`。
+- **没有测量缓存**：`MeasureString` 每次都会重走一遍字形排布。界面文本量小，暂时够用；等到真有每帧数百次测量的场景再加。
+- 换行与裁切直接用字库的 `CreateWrappedText` / `CreateCroppedText`，断行规则跟着字库走，这里不另立一套。
+
+---
+
+### 5.15 Trails —— 拖尾
+
+拖尾 = "记一串走过的点" + "把它画成条带"。后半段图元层已经有了（`MonoPrim.RenderTrail`），这一层补前半段，以及一套开箱可用的观感。
+
+```csharp
+// 推荐：直接喂引擎维护的旧位置（Luminance 的用法）
+MonoTrail trail = new(20) { Space = MonoGraphicsSpace.World, Source = () => Projectile.oldPos }.Spawn();
+
+// 或者自己记点
+MonoTrail recorded = new(24) { Space = MonoGraphicsSpace.World }.Spawn();
+recorded.Update(Projectile.Center);
+```
+
+`Spawn()` 之后由 `MonoTrailSystem` 自动画；不 `Spawn` 就在合法的绘制相位自己调一次 `Draw()`。
+
+| 想做的事 | 用哪个 |
+|---|---|
+| 记点、按最小间距去重、满了挤掉最旧的 | `MonoTrailBuffer`（纯逻辑，进离线验收台） |
+| 一条能直接画的拖尾 | `MonoTrail` |
+| 直接用 `Projectile.oldPos` 那类现成点列 | `MonoTrail.Source`，或 `DrawFrom(点列)` 画一次 |
+| 只画不想记 | `MonoPrim.RenderTrail(点列, MonoPrimitiveSettings)`（§5.2） |
+| 内置的条纹贴图 | `MonoTrailTextures.Streak`（程序生成，横向无缝） |
+
+`Source` 与 `DrawFrom` 都是按 **"新的在前"** 理解输入的（`oldPos` 就是这个顺序），库负责翻成 `RenderTrail` 要的"尾巴在前"，并跳过零值槽（`oldPos` 里还没被填过的那几个就是零）。所以宽度/颜色函数里的 `t` 仍然 **0 为尾、1 为头**。
+
+**两种画法**：`Spawn()` 过的拖尾由 `MonoTrailSystem` 在世界绘制相位（`On_Main.DrawDust`）每帧自动画一次，调用方只要负责 `Update`——FPM 的 `HunterMark_Black` 走的就是这条；界面空间的拖尾别 `Spawn`，自己在界面相位调 `Draw`。**它不自己推进时间**：`Update` 什么时候被调、调几次，由调用方决定。
+
+**默认观感**：`Shader` 与 `Texture` 都不给时，它用内置的 `Monochrome.StreakTrail`（`Assets/Effects/Primitives/StreakTrail.fx`）与程序生成的条纹贴图；贴图绑到采样槽 1，默认 `SamplerState.LinearWrap`。宽度默认"尾巴细、头粗"，颜色默认白，混合默认加法。
+
+**边界：**
+
+- **头部会滞后一个 `velocity`**：`Projectile.Update` 是先 `AI()`（`Projectile.cs:14926`）后 `UpdatePosition()`（`17457`），所以在 `AI` 里 `Update(Center)` 采到的头点必然差最后那一步，`PostAI` 也在积分之前、帮不上。**推荐直接用 `Source = () => Projectile.oldPos`**——那是引擎维护的旧位置，顺序与零值都由库处理，比自己采样省事也少一步滞后。**采样点不要塞进 `Draw`**：绘制必须保持纯的（一帧可能画 0 次，开了 `CaptureEntities` 时又可能画两次），而且往轨迹里插一个合成点只会让它出现突起。
+- **宽度单位是"全宽"**：`WidthFunction` 返回条带总宽，条带以中心线向两侧各展开一半。**Luminance 的是半宽**（`PrimitiveRenderer` 里两个顶点各 `± width`），同一个函数从那边搬过来要 <b>× 2</b>——不乘就画细一半，而症状只是"看着有点细"，很容易被当成贴图或着色器的问题去查。
+- `MonoTrailBuffer` 的容量至少 2；下标 0 是最旧的点，`Count-1` 是最新的。
+- `MinDistance` 是"慢速时不堆点"的闸门，设成 0 就逐帧都记。
+- 着色器没加载到（缺 `.fxc`）时 `Draw` 退回默认图元着色器 + 顶点色路径，画出来是一条纯色条带，不会什么都不显示。
+
+---
+
 ## 6. 图元层深入：从点列到三角形
 
 以一条拖尾为例，完整数据流：
@@ -840,7 +1068,7 @@ Bloom（亮部提取 + 降采样 + 加性合成）与 Distortion（需要第二�
 | 界面空间粒子的两条限制 | 见 §5.8 | 需要界面侧自定义混合或着色器时得自己在 `End()` / `Begin()` 之间画 |
 | 相机跟随 | 平滑跟随 + 死区 + 前瞻 + 漂移守卫已实现，默认关闭 | 速度自适应缩放没做，理由是硬性的（见 §5.10） |
 | 纹理工具 | 无 | 图集 / 描边生成 / 调色板替换 / 9-slice / 预渲染动画贴图全部未做 |
-| 着色器资产 | 9 个：图元默认、融合球两个、屏幕特效六个 | 缺 Bloom 与 Distortion；**且 6 个屏幕特效只经过编译与参数核对，没有逐条目视确认过**——`/monoshader capture fx <名字> on` 就是为这件事准备的 |
+| 着色器资产 | 10 个：图元默认、拖尾条纹、融合球两个、屏幕特效六个 | 缺 Bloom 与 Distortion；**且 6 个屏幕特效只经过编译与参数核对，没有逐条目视确认过**——`/monoshader capture fx <名字> on` 就是为这件事准备的 |
 | 融合球的形状 | `MonoMetaballBrush` 只有 `Ball` | 一个实例可以用 `DrawField` 摆出复杂形状，但**单颗非圆**不行 |
 | 屏幕裁剪 | `Flush` 没有设 `ScissorRectangle` | 屏幕外的图元照样进光栅化。要做就得用自己持有的 `RasterizerState` 实例，不能改 FNA 的共享静态对象 |
 | 屏幕特效的质量档位 | 只有代码侧的 `Enabled` 静态总开关 | 蓝图要求 ModConfig 里的低/中/高与关闭项，**没有** |

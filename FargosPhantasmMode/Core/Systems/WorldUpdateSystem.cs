@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using static FargosPhantasmMode.Core.Systems.PModeWorldSavingSystem;
 using static FargowiltasSouls.Core.Systems.WorldSavingSystem;
-using Luminance.Common.Utilities;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Core.Systems
 {
@@ -15,7 +15,7 @@ namespace FargosPhantasmMode.Core.Systems
             if (Main.netMode == NetmodeID.MultiplayerClient)
                 return;
 
-            if (!PhantasmMode && EternityMode && MasochistModeReal && CanPlayPhantasm && !Utilities.AnyBosses())
+            if (!PhantasmMode && EternityMode && MasochistModeReal && CanPlayPhantasm && !MonoUtil.AnyBosses())
             {
                 // 赋值本身就把新值发出去了（值变才发），播报写在字段的 OnChanged 里，两端各播一次。
                 PhantasmMode = true;

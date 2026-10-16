@@ -1,7 +1,6 @@
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
@@ -16,7 +15,7 @@ using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     //PH投矛发射的会追踪的幻影球
-    public class PHMutantSphereSmall : MutantSphereSmall, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSphereSmall : MutantSphereSmall, IMonoOwnedProj<MutantBoss>
     {
         float Angle = 0;
         public int waittime = 85;

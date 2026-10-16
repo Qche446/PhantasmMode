@@ -1,6 +1,4 @@
-﻿using Terraria;
-using Terraria.ModLoader;
-
+﻿
 namespace FargosPhantasmMode.Content.Buffs
 {
     public class FlawlessBuff : ModBuff

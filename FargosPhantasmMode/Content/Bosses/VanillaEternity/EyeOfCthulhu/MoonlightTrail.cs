@@ -1,19 +1,14 @@
 ﻿using FargowiltasSouls;
-using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Trails;
+using FargowiltasSouls.Assets.ExtraTextures;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
-    public class MoonlightTrail : ModProjectile, IPixelatedPrimitiveRenderer
+    public class MoonlightTrail : ModProjectile
     {
-        public PixelationPrimitiveLayer LayerToRenderTo => PixelationPrimitiveLayer.BeforeNPCs;
+        //public MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.BeforeNPCs;
+        private MonoTrail trail;
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public override void SetStaticDefaults()
         {
@@ -22,7 +17,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         }
         public override void SetDefaults()
         {
-            ProjectileID.Sets.TrailCacheLength[Projectile.type] = 30;
             Projectile.width = 1;
             Projectile.height = 1;
             Projectile.aiStyle = -1;
@@ -61,7 +55,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 Projectile.Opacity -= (1f / 8);
             }
-
+            trail ??= new(30)
+            {
+                PointsToCreate = 60,
+                UseUnscaledMatrix = true,
+                WidthFunction = t => WidthFunction(1 - t),
+                ColorFunction = t => ColorFunction(1 - t),
+                Texture = FargosTextureRegistry.FadedStreak.Value,
+                Offset = 0.5f * Projectile.Size
+            };
         }
         public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
         {
@@ -71,6 +73,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         public static Vector2 Offset(NPC npc) => (npc.rotation + MathHelper.PiOver2).ToRotationVector2() * 25;
         public override bool PreDraw(ref Color lightColor)
         {
+            trail?.DrawFrom(Projectile.oldPos);
             return false;
         }
 
@@ -90,14 +93,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             float threshold2 = 0.78f;
             if (completionRatio > 0.78f)
                 opacity *= MathF.Pow(1 - ((completionRatio - threshold2) / (1 - threshold2)), 2);
-            return Color.Lerp(new Color(41, 243, 243), Color.Transparent, completionRatio) * 0.4f * opacity * Projectile.Opacity ;
+            return Color.Lerp(new Color(41, 243, 243), Color.Transparent, completionRatio) * opacity * Projectile.Opacity;
         }
-
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        /*
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, Pixelate: true, Shader: shader), 60);
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 60);
         }
+        */
     }
 }

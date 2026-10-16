@@ -2,14 +2,15 @@
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 
 namespace FargosPhantasmMode.Content.Projectiles
 {
@@ -27,7 +28,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             if (Main.player[Projectile.owner].reuseDelay < 17)
                 Main.player[Projectile.owner].reuseDelay = 17;
         }
-        public static void DrawStyxGazerDeathray(Projectile projectile, float drawDistance, PrimitiveSettings.VertexWidthFunction widthFunction, bool drawHandle = true, bool fadeStart = false)
+        public static void DrawStyxGazerDeathray(Projectile projectile, float drawDistance, Func<float, float> widthFunction, bool drawHandle = true, bool fadeStart = false)
         {
             if (projectile.velocity == Vector2.Zero)
             {
@@ -36,7 +37,7 @@ namespace FargosPhantasmMode.Content.Projectiles
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.StyxGazerShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.StyxGazerShader");
             Texture2D value = ModContent.Request<Texture2D>("FargowiltasSouls/Content/Bosses/AbomBoss/AbomSword").Value;
             Vector2 vector = projectile.velocity.SafeNormalize(Vector2.UnitY);
             Vector2 vector2 = vector * projectile.scale * value.Height;
@@ -62,8 +63,8 @@ namespace FargosPhantasmMode.Content.Projectiles
             value4.SetTexture1();
             for (int j = 0; j < 2; j++)
             {
-                PrimitiveSettings settings = new PrimitiveSettings(widthFunction, ColorFunction, null, Smoothen: true, Pixelate: false, shader);
-                PrimitiveRenderer.RenderTrail(array, settings, 30);
+                MonoPrimitiveSettings settings = new MonoPrimitiveSettings(t => widthFunction(t) * 2f, ColorFunction, null, Smoothen: true, Shader: shader);
+                MonoPrim.RenderTrail(array, settings, 30);
             }
 
             if (drawHandle)

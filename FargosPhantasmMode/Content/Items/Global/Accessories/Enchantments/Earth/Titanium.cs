@@ -7,7 +7,6 @@ using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
 using JetBrains.Annotations;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -17,6 +16,8 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
 {

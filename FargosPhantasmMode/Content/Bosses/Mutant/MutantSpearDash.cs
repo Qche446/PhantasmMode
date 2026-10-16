@@ -2,7 +2,7 @@
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSpearDash : MutantSpearDash, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSpearDash : MutantSpearDash, IMonoOwnedProj<MutantBoss>
     {
         private float scaletimer;
         public override void AI()

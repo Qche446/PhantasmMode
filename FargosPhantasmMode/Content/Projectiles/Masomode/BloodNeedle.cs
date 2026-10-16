@@ -18,11 +18,11 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
         private NPC abomBoss = null;
         private int abomBossPhase = 0;
         //后置减速模块
-        private const float SlowdownDistance = 600f; // 减速区域半径
-        private const float SlowSpeed = 6.5f;       // 减速后的速度
-        private float originalSpeed;                // 原始速度（存储）
-        private bool isSlowed = false;              // 是否处于减速状态
-        private float slowdownTimer = 0f;           // 减速计时器（用于平滑过渡）
+        private const float SlowdownDistance = 600f; 
+        private const float SlowSpeed = 6.5f;       
+        private float originalSpeed;                
+        private bool isSlowed = false;              
+        private float slowdownTimer = 0f;           
         public override void SetStaticDefaults()
         {
             // DisplayName.SetDefault("Blood Thorn");

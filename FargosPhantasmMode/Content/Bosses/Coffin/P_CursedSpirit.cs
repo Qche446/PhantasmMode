@@ -8,10 +8,10 @@ using FargowiltasSouls.Content.Bosses.CursedCoffin;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.WorldGeneration;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics.Shaders;
+using Monochrome.Common.MonoUtil;
 
 public class P_CursedSpirit : PModeNPCBehaviour
 {
@@ -54,7 +54,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 
 	public override void OnFirstTick(NPC npc)
 	{
-		spirit = Utilities.As<CursedSpirit>(npc);
+		spirit = MonoUtil.As<CursedSpirit>(npc);
 	}
 
 	/// <summary>
@@ -79,7 +79,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 		Player victim = Main.player[victimWhoAmI];
 		cursedSpirit.BittenPlayer = -1;
 		cursedSpirit.BiteTimer = -90;
-		npc.velocity = -Utilities.SafeDirectionTo((Entity)npc, victim.Center) * 12f;
+		npc.velocity = -MonoUtil.SafeDirectionTo((Entity)npc, victim.Center) * 12f;
 		victim.immune = true;
 		victim.immuneTime = Math.Max(victim.immuneTime, 30);
 		victim.hurtCooldowns[0] = Math.Max(victim.hurtCooldowns[0], 30);
@@ -124,7 +124,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 			Player player = Main.player[owner.target];
 			if (player != null && FargoExtensionMethods.Alive(player))
 			{
-				CursedCoffin coffin = Utilities.As<CursedCoffin>(owner);
+				CursedCoffin coffin = MonoUtil.As<CursedCoffin>(owner);
 				if (BittenPlayer != -1)
 				{
 					Player victim = Main.player[BittenPlayer];
@@ -139,7 +139,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 					{
 						BittenPlayer = -1;
 						BiteTimer = -90;
-						npc.velocity = -Utilities.SafeDirectionTo((Entity)npc, victim.Center) * 12f;
+						npc.velocity = -MonoUtil.SafeDirectionTo((Entity)npc, victim.Center) * 12f;
 						victim.immune = true;
 						victim.immuneTime = Math.Max(victim.immuneTime, 30);
 						victim.hurtCooldowns[0] = Math.Max(victim.hurtCooldowns[0], 30);
@@ -171,7 +171,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 						AI3 = 0f;
 						npc.netUpdate = true;
 					}
-					Movement(npc, player.Center + Utilities.SafeDirectionTo(player.Center, npc.Center) * 300f, 0.1f, 10f, 5f, 0.08f, 20f);
+					Movement(npc, player.Center + MonoUtil.SafeDirectionTo(player.Center, npc.Center) * 300f, 0.1f, 10f, 5f, 0.08f, 20f);
 					break;
 				case P_CursedCoffin.BehaviorStates.HoveringForSlam:
 					if (newState)
@@ -231,7 +231,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 			{
 				AI3 = 1f;
 			}
-			npc.velocity = Vector2.Lerp(npc.velocity, Utilities.SafeDirectionTo((Entity)npc, owner.Center) * Math.Min(Math.Max(20f, owner.velocity.Length()), npc.Distance(owner.Center)), 0.2f);
+			npc.velocity = Vector2.Lerp(npc.velocity, MonoUtil.SafeDirectionTo((Entity)npc, owner.Center) * Math.Min(Math.Max(20f, owner.velocity.Length()), npc.Distance(owner.Center)), 0.2f);
 			LerpOpacity(npc, 0.15f);
 			LerpScale(npc, 0.4f);
 		}
@@ -292,7 +292,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 		Player player = Main.player[owner.target];
 		if (Timer <= 1f)
 		{
-			AI3 = Utilities.SafeDirectionTo((Entity)npc, player.Center).ToRotation() + Main.rand.NextFloat(-0.9424779f, 0.9424779f);
+			AI3 = MonoUtil.SafeDirectionTo((Entity)npc, player.Center).ToRotation() + Main.rand.NextFloat(-0.9424779f, 0.9424779f);
 			npc.netUpdate = true;
 			List<Vector2> corners = CoffinArena.TopArenaCorners((Entity)npc);
 			P_CursedCoffin coffin = owner.GetGlobalNPC<P_CursedCoffin>();
@@ -333,7 +333,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 				{
 					npc.velocity += npc.velocity.SafeNormalize(Vector2.Zero) * 0.5f;
 				}
-				npc.velocity = Utilities.ClampLength(npc.velocity, 0f, 10f);
+				npc.velocity = MonoUtil.ClampLength(npc.velocity, 0f, 10f);
 			}
 			else
 			{
@@ -393,7 +393,7 @@ public class P_CursedSpirit : PModeNPCBehaviour
 
 	private void GrabbyHands(NPC npc, NPC owner)
 	{
-		CursedCoffin coffin = Utilities.As<CursedCoffin>(owner);
+		CursedCoffin coffin = MonoUtil.As<CursedCoffin>(owner);
 		Player player = Main.player[owner.target];
 		if (coffin.Timer < 40f)
 		{

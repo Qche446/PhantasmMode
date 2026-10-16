@@ -1,6 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
-using Terraria;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Buffs
 {
@@ -13,7 +11,7 @@ namespace FargosPhantasmMode.Content.Buffs
         }
         public override void Update(Player player, ref int buffIndex)
         {
-            player.GetModPlayer<PModeBuffPlayer>().Fracture = true;
+            player.Phantasm().Fracture = true;
             player.extraFall -= 15;
             player.maxFallSpeed *= 5f;
             player.moveSpeed -= 0.05f;

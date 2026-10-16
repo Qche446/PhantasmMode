@@ -3,11 +3,14 @@ using ReLogic.Content;
 namespace Monochrome.Core.Graphics.Shaders;
 
 /// <summary>
-/// 挂在模组主类上，声明"本模组的着色器交给 Monochrome 管"：加载期扫进注册表，热重载时把编好的
-/// <c>.fxc</c> 写回该模组的源目录。
+/// 挂在模组主类上，声明<b>"允许 Monochrome 把重编出来的 <c>.fxc</c> 写回我的源目录"</b>。
+/// <para>
+/// <b>它管的是写回，不管注册。</b>注册是全场的：任何已加载模组的着色器资产都会进注册表，
+/// 消费者按 <c>模组名.文件名</c> 就能取到别的模组的着色器。写回会动别人的磁盘，这件事才该由消费者表态。
+/// </para>
 /// <para>
 /// 判据用显式声明，因为"程序集引用了 Monochrome"只说明消费者用到了它某个类型。只用到会被内联的常量时，
-/// 编译器不会写出那条引用，判定就会静默失效。热重载要动别人的源目录，这件事该由消费者自己表态。
+/// 编译器不会写出那条引用，判定就会静默失效。
 /// </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
@@ -46,11 +49,15 @@ public sealed class MonoShaderManager : ModSystem
     }
 
     /// <summary>
-    /// 按 Luminance 相同的约定从一个模组里找出所有着色器资产并注册：文件名以 <c>.fxc</c> 或 <c>.xnb</c>
-    /// 结尾，且路径包含 <c>Assets/AutoloadedEffects/Shaders</c> 或 <c>Assets/Effects</c>。
+    /// 按约定从一个模组里找出所有着色器资产并注册：文件名以 <c>.fxc</c> 或 <c>.xnb</c> 结尾，
+    /// 且路径符合 <see cref="IsShaderAssetPath"/>。
     /// <para>
-    /// 只对管辖范围内的模组生效（见 <see cref="IsUnderScope"/>）。Monochrome 在 <c>PostSetupContent</c>
-    /// 里对每个已加载模组各调一次，所以声明了管辖的模组所带着色器也会进这张表，重复的名字被跳过。
+    /// <b>注册不设管辖门槛</b>：任何已加载模组的着色器都会进这张表，消费者按 <c>模组名.文件名</c>
+    /// 就能取用别的模组的着色器（与 Luminance 的注册语义一致）。写回源目录（热重载）才需要该模组声明
+    /// <see cref="MonoShaderScopeAttribute"/>，见 <see cref="MonoShader.CanWriteBack"/>。
+    /// </para>
+    /// <para>
+    /// Monochrome 在 <c>PostSetupContent</c> 里对每个已加载模组各调一次，重复的名字被跳过。
     /// </para>
     /// </summary>
     /// <param name="mod">要扫描的模组。</param>
@@ -75,18 +82,7 @@ public sealed class MonoShaderManager : ModSystem
             return;
         }
 
-        if (!IsUnderScope(mod))
-        {
-            // 有资产却没声明管辖时必须说出来：沉默会把"我的着色器没被注册"变成一条没有线索的报障。
-            int assets = CountShaderAssets(files);
-            if (assets > 0)
-            {
-                Monochrome.Instance?.Logger.Info(
-                    $"{mod.Name}：发现 {assets} 个着色器资产，但模组主类没有声明 [MonoShaderScope]，未纳入注册与热重载。");
-            }
-            return;
-        }
-
+        bool self = ReferenceEquals(mod, Monochrome.Instance);
         Dictionary<string, MonoShader> registry = shaders;
 
         // 先扫 .fxc 再扫 .xnb，两趟都靠 registry 里"同名已存在就跳过"来去重。
@@ -96,7 +92,7 @@ public sealed class MonoShaderManager : ModSystem
         foreach (string file in files)
         {
             if (file.EndsWith(".fxc", StringComparison.OrdinalIgnoreCase))
-                TryRegisterAsset(mod, file, registry);
+                TryRegisterAsset(mod, file, registry, self);
         }
 
         int shadowed = 0;
@@ -105,48 +101,66 @@ public sealed class MonoShaderManager : ModSystem
             if (!file.EndsWith(".xnb", StringComparison.OrdinalIgnoreCase))
                 continue;
             string relative = file.Replace('\\', '/');
-            if (IsShaderAssetPath(relative) && registry.ContainsKey($"{mod.Name}.{Path.GetFileNameWithoutExtension(relative)}"))
+            if (IsShaderAssetPath(relative, self) && registry.ContainsKey($"{mod.Name}.{Path.GetFileNameWithoutExtension(relative)}"))
             {
                 shadowed++;
                 continue;
             }
-            TryRegisterAsset(mod, file, registry);
+            TryRegisterAsset(mod, file, registry, self);
         }
 
         // "被覆盖"这件事必须说出来：否则源目录里那份 .xnb 是完全不可见的，
         // 而它正是"改了 .fx 却没生效"这类困惑的常见来源。
         // 真正删掉它是在热重载写回 .fxc 的时候（MonoShaderReloader.RemoveStaleXnb），
         // 加载期只报告不动磁盘。
-        if (shadowed > 0)
+        // 只有可写回的模组才会被 /monoshader reload 顺手清理那些 .xnb，所以这行只对它们有意义。
+        if (shadowed > 0 && IsReloadable(mod))
         {
             Monochrome.Instance?.Logger.Info(
                 $"{mod.Name}：{shadowed} 个 .xnb 与同名 .fxc 重复，已忽略 .xnb（以 .fxc 为准）。" +
-                "这些 .xnb 来自旧的 Content Pipeline；任何一次 /mono shader reload 都会顺手删掉它们。");
+                "这些 .xnb 来自旧的 Content Pipeline；任何一次 /monoshader reload 都会顺手删掉它们。");
         }
 
         // 一行摘要：这个模组到底交出了多少着色器。**没有这行的话，"一个都没注册"与"这个模组本来就没有"
         // 在日志里长得一模一样**——而依赖方（例如 FPM）看到的只是"我的着色器没被注册"。
+        if (CountShaderAssets(files, self) == 0)
+            return;
+
         int own = 0;
         foreach (string name in registry.Keys)
         {
             if (name.StartsWith(mod.Name + ".", StringComparison.Ordinal))
                 own++;
         }
+        string scope = self
+            ? "（Monochrome 自身，可写回）"
+            : IsReloadable(mod)
+                ? "（已声明 [MonoShaderScope]，可写回源目录）"
+                : "（未声明 [MonoShaderScope]，只读，热重载不写回）";
         Monochrome.Instance?.Logger.Info(
-            $"{mod.Name}：着色器扫描完成，本模组注册 {own} 个，注册表共 {registry.Count} 个。");
+            $"{mod.Name}：着色器注册 {own} 个{scope}，注册表共 {registry.Count} 个。");
     }
 
-    /// <summary>路径是否符合着色器自动加载的约定（<c>Assets/AutoloadedEffects/Shaders</c> 或 <c>Assets/Effects</c> 之下）。</summary>
+    /// <summary>
+    /// 路径是否符合着色器自动加载的约定。
+    /// <para>
+    /// <b>只有 Monochrome 自己认 <c>Assets/Effects</c>。</b>那是很常见的目录名，别的模组放在那里的
+    /// <c>.xnb</c> 多半是贴图（tML 会把 <c>.png</c> 编成同名 <c>.xnb</c>），按 <c>Effect</c> 去请求只会得到
+    /// 一串加载失败的警告。外来模组只认 <c>Assets/AutoloadedEffects/Shaders</c>，与 Luminance 判据一致。
+    /// </para>
+    /// </summary>
     /// <param name="relativePath">模组相对路径，分隔符已统一成正斜杠。</param>
-    private static bool IsShaderAssetPath(string relativePath)
-        => relativePath.Contains("Assets/AutoloadedEffects/Shaders", StringComparison.OrdinalIgnoreCase)
-        || relativePath.Contains("Assets/Effects", StringComparison.OrdinalIgnoreCase);
+    /// <param name="self">这个模组是不是 Monochrome 自己。</param>
+    private static bool IsShaderAssetPath(string relativePath, bool self)
+        => !relativePath.Contains("Compiler/", StringComparison.OrdinalIgnoreCase)
+        && (relativePath.Contains("Assets/AutoloadedEffects/Shaders", StringComparison.OrdinalIgnoreCase)
+            || (self && relativePath.Contains("Assets/Effects", StringComparison.OrdinalIgnoreCase)));
 
     /// <summary>把模组里的一个候选文件按约定注册（路径与扩展名不符合就静默跳过）。</summary>
-    private static void TryRegisterAsset(Mod mod, string file, Dictionary<string, MonoShader> registry)
+    private static void TryRegisterAsset(Mod mod, string file, Dictionary<string, MonoShader> registry, bool self)
     {
         string relative = file.Replace('\\', '/');
-        if (!IsShaderAssetPath(relative))
+        if (!IsShaderAssetPath(relative, self))
             return;
         // 不能用 Path.ChangeExtension(relative, null)：它返回的是**带尾点**的名字
         // （实测 "…/StandardPrimitive.fxc" -> "…/StandardPrimitive."），
@@ -157,7 +171,7 @@ public sealed class MonoShaderManager : ModSystem
         string name = mod.Name + "." + Path.GetFileNameWithoutExtension(relative);
         if (registry.ContainsKey(name))
             return;
-        TryLoad(name, assetPath, out _);
+        TryLoad(name, assetPath, out _, IsReloadable(mod));
     }
 
     /// <summary>
@@ -180,15 +194,14 @@ public sealed class MonoShaderManager : ModSystem
     }
 
     /// <summary>
-    /// 这个模组的着色器是否归 Monochrome 管辖：Monochrome 自己，或模组主类挂了
-    /// <see cref="MonoShaderScopeAttribute"/>。
+    /// 这个模组的着色器是否允许 Monochrome 把编好的 <c>.fxc</c> 写回它的源目录。
     /// <para>
-    /// 热重载会把编好的 <c>.fxc</c> 写回该模组的源目录，这种会动别人磁盘的操作该由消费者自己表态，
-    /// 不该由库靠程序集引用去猜。
+    /// <b>它管的是写回，不管注册</b>——注册是全场的，注册表里本来就有其他模组的着色器。
+    /// 热重载会动别人的磁盘，这种操作该由消费者自己表态，不该由库靠程序集引用去猜。
     /// </para>
     /// </summary>
     /// <param name="mod">要判断的模组。</param>
-    public static bool IsUnderScope(Mod mod)
+    public static bool IsReloadable(Mod mod)
     {
         if (mod is null)
             return false;
@@ -199,7 +212,9 @@ public sealed class MonoShaderManager : ModSystem
     }
 
     /// <summary>数一个模组里 Monochrome 会注册的那些资产（<c>.fxc</c> / <c>.xnb</c>，且路径符合着色器约定）。</summary>
-    private static int CountShaderAssets(List<string> files)
+    /// <param name="files">模组文件表。</param>
+    /// <param name="self">这个模组是不是 Monochrome 自己。</param>
+    private static int CountShaderAssets(List<string> files, bool self)
     {
         int count = 0;
         foreach (string file in files)
@@ -207,7 +222,7 @@ public sealed class MonoShaderManager : ModSystem
             if (!file.EndsWith(".fxc", StringComparison.OrdinalIgnoreCase)
                 && !file.EndsWith(".xnb", StringComparison.OrdinalIgnoreCase))
                 continue;
-            if (IsShaderAssetPath(file.Replace('\\', '/')))
+            if (IsShaderAssetPath(file.Replace('\\', '/'), self))
                 count++;
         }
         return count;
@@ -217,8 +232,9 @@ public sealed class MonoShaderManager : ModSystem
     /// <param name="name">注册名（<c>模组名.文件名</c>）。</param>
     /// <param name="assetPath">tML 资产路径（<c>模组名/相对路径</c>，不带扩展名）。</param>
     /// <param name="shader">加载成功时的包装对象；失败为 null。</param>
+    /// <param name="canWriteBack">是否允许热重载把 <c>.fxc</c> 写回该模组的源目录；默认不允许。</param>
     /// <returns>是否加载成功。</returns>
-    public static bool TryLoad(string name, string assetPath, out MonoShader? shader)
+    public static bool TryLoad(string name, string assetPath, out MonoShader? shader, bool canWriteBack = false)
     {
         shader = null;
         if (Main.dedServ || shaders is null)
@@ -226,7 +242,7 @@ public sealed class MonoShaderManager : ModSystem
         try
         {
             Effect effect = ModContent.Request<Effect>(assetPath, AssetRequestMode.ImmediateLoad).Value;
-            shader = new MonoShader(name, effect, assetPath);
+            shader = new MonoShader(name, effect, assetPath, canWriteBack);
             shaders[name] = shader;
             return true;
         }

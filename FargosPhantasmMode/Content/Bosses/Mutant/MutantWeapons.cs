@@ -7,14 +7,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.GameContent;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     /// <summary>
     /// ai0 whoami,ai1时间,ai2光环颜色0123456红橙黄绿青蓝紫
     /// </summary>
-    public class MutantSpear : MutantSpearSpin, IProjOwnedByBoss<MutantBoss>
+    public class MutantSpear : MutantSpearSpin, IMonoOwnedProj<MutantBoss>
     {
         private int direction = 1;
         public override string Texture => "FargowiltasSouls/Content/Projectiles/BossWeapons/Penetrator";
@@ -81,7 +81,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return false;
         }
     }
-    public class MutantBiggestSting : MutantSpear, IProjOwnedByBoss<MutantBoss>
+    public class MutantBiggestSting : MutantSpear, IMonoOwnedProj<MutantBoss>
     {
         private int direction = 1;
         public override string Texture => "FargowiltasSouls/Content/Items/Weapons/FinalUpgrades/TheBiggestSting";
@@ -118,7 +118,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return base.PreDraw(ref lightColor);
         }
     }
-    public class MutantDestroyerGun : MutantSpear, IProjOwnedByBoss<MutantBoss>
+    public class MutantDestroyerGun : MutantSpear, IMonoOwnedProj<MutantBoss>
     {
         private int direction = 1;
         public override string Texture => "FargowiltasSouls/Content/Items/Weapons/SwarmDrops/DestroyerGun2";

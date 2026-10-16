@@ -106,4 +106,14 @@ public sealed class MonoBuffPlayer : ModPlayer
 
     /// <summary>把槽表投影到玩家当前的原版 buff 数组；同一 tick 里再调是空操作。</summary>
     private void Refresh() => Buffs.Refresh(Player.buffType, MonoBuffSystem.Resolve, Main.GameUpdateCount);
+
+    /// <summary>本地玩家把改动过的 <c>Ai</c> 上行给服务端；别的玩家与单机下都不发。</summary>
+    public override void PostUpdate() => MonoBuffSync.PushPlayerChanges(Player);
+
+    /// <summary>服务端在同步这个玩家时，把声明了 <see cref="MonoBuff.SyncAi"/> 的状态的 <c>Ai</c> 一并补齐。</summary>
+    /// <param name="toWho">接收者编号。</param>
+    /// <param name="fromWho">来源编号。</param>
+    /// <param name="newPlayer">是不是新加入的玩家。</param>
+    public override void SyncPlayer(int toWho, int fromWho, bool newPlayer)
+        => MonoBuffSync.PushPlayerFull(Player, toWho, fromWho);
 }

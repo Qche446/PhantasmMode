@@ -1,21 +1,20 @@
-﻿using FargosPhantasmMode.Content.Render;
+﻿using FargosPhantasmMode.Content.Rarities;
+using FargosPhantasmMode.Content.Render;
 using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Systems;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using Terraria;
-using Terraria.ID;
-using Terraria.Localization;
-using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.SupremeDeath
 {
     public class SupremeDeathbringerFairyOverride : PModeGlobalMasoItem<SupremeDeathbringerFairy>
     {
         public override bool IsAssembly => true;
+        public override void SetDefaults(Item entity)
+        {
+            entity.rare = ModContent.RarityType<SupremeDeathRarity>();
+        }
         public override void PHExtraTooltipDraw(DrawableTooltipLine line, ref int yOffset)
         {
-            TextRender.BurnDraw(line, 0.2f, new Vector2(0, -0.5f), Color.Gray, Color.Blue, Color.Aqua, Color.Purple);
+            //TextRender.BurnDraw(line, 0.2f, new Vector2(0, -0.5f), Color.Gray, Color.Blue, Color.Aqua, Color.Purple);
+            SupremeDeathTextRender.Draw(line);
         }
         public override void SafeUpdateAccessory(Item item, Player player, bool hideVisual)
         {

@@ -2,7 +2,7 @@
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSlimeSpearThrown : MutantSpearThrown, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSlimeSpearThrown : MutantSpearThrown, IMonoOwnedProj<MutantBoss>
     {
         //改版投矛
         public override void AI()

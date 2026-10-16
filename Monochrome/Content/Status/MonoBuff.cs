@@ -31,6 +31,17 @@ public abstract class MonoBuff : ModBuff
     public virtual int AiSize => 4;
 
     /// <summary>
+    /// 这个状态的 <see cref="MonoBuffSlotData.Ai"/> 要不要跟着实体跨端同步。默认 <see langword="false"/>。
+    /// <para>
+    /// 打开之后，权威端发现 <c>Ai</c> 变了就让实体发一次同步，值随实体自己的 extra-AI 过去，
+    /// 消费者不用再手写一对 <c>SendExtraAI</c> / <c>ReceiveExtraAI</c>。同步的是整根 <c>Ai</c> 数组；
+    /// <see cref="MonoBuffSlotData.Custom"/> 不参与——它不是可序列化的东西。
+    /// </para>
+    /// <para>关闭时库完全不碰网络：<c>Ai</c> 只在本端存在，两端各算各的。</para>
+    /// </summary>
+    public virtual bool SyncAi => false;
+
+    /// <summary>
     /// 建这个状态在某实体上的自定义数据，返回值会填进 <see cref="MonoBuffSlotData.Custom"/>。
     /// <para>默认返回 <see langword="null"/>，此时只用 <c>Ai</c> 数组。</para>
     /// </summary>

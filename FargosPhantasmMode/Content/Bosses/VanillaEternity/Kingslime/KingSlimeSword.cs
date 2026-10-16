@@ -1,7 +1,6 @@
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
@@ -12,11 +11,14 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
 {
     //ai0传史王whoami
-    public class KingSlimeSword : ModProjectile, IPixelatedPrimitiveRenderer
+    public class KingSlimeSword : ModProjectile, IMonoPixelatedPrimitive
     {
         //state0初始，state1瞄准，state2运动， state3 静止，停止本体绘制，开始展开领域
         ref float State => ref Projectile.localAI[0];
@@ -116,11 +118,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
         {
             return Color.Lerp(FargowiltasSouls.FargowiltasSouls.EModeColor(), Color.Transparent, completionRatio) * 0.6f;
         }
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, Pixelate: true, Shader: shader), 20);
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, UseUnscaledMatrix: true, Shader: shader), 20);
         }
     }
 }

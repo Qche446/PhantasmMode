@@ -1,12 +1,12 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Projectiles
 {
@@ -80,9 +80,8 @@ namespace FargosPhantasmMode.Content.Projectiles
             var Noise = FargosTextureRegistry.CracksNoise;
             var maxOpacity = Projectile.Opacity * 0.5f;
 
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
-            shader.TrySetParameter("screenPosition", Main.screenPosition);
-            shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
+            shader.SetCommonParameters();
             shader.TrySetParameter("Radius", radius * Projectile.scale);
             shader.TrySetParameter("Center", Projectile.Center);
             shader.TrySetParameter("color1", Color.DarkRed);

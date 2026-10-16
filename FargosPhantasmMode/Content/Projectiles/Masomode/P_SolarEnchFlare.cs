@@ -2,13 +2,13 @@
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Projectiles.Souls;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Projectiles.Masomode
 {
@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
             Asset<Texture2D> magicPixel = TextureAssets.MagicPixel;
             Asset<Texture2D> wavyNoise = FargosTextureRegistry.WavyNoise;
             float num2 = base.Projectile.Opacity * ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.SolarEnchantShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.SolarEnchantShader");
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", num * base.Projectile.scale);

@@ -1,13 +1,15 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {
@@ -122,7 +124,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             if (Projectile.velocity == Vector2.Zero)
                 return false;
 
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.WillDeathray");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillDeathray");
             // Get the laser end position.
             Vector2 laserEnd = Projectile.Center + Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance;
 
@@ -144,7 +146,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Texture2D fademap = ModContent.Request<Texture2D>("FargowiltasSouls/Assets/ExtraTextures/Trails/WillStreak").Value;
             FargoSoulsUtil.SetTexture1(fademap);
 
-            PrimitiveRenderer.RenderTrail(baseDrawPoints, new(WidthFunction, ColorFunction, Shader: shader), 30);
+            MonoPrim.RenderTrail(baseDrawPoints, new MonoPrimitiveSettings(WidthFunction, ColorFunction, Shader: shader), 30);
             return false;
         }
     }

@@ -4,8 +4,8 @@ using System.Reflection;
 using Terraria.ModLoader;
 using Terraria;
 using Terraria.ID;
-using Luminance.Common.Utilities;
 using FargosPhantasmMode.Common;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
 {
@@ -22,7 +22,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Earth
 
             if (!player.onHitRegen)
             {
-                player.AddBuff(BuffID.RapidHealing, Utilities.SecondsToFrames(3)); //heal time based on damage dealt, capped at 5sec
+                player.AddBuff(BuffID.RapidHealing, MonoUtil.SecondsToFrames(3)); //heal time based on damage dealt, capped at 5sec
             }
         }
     }

@@ -2,7 +2,7 @@
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using System.Linq;
@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantEye : MutantEye, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantEye : MutantEye, IMonoOwnedProj<MutantBoss>
     {
         private int ritualID = -1;
         public override void SetDefaults()
@@ -65,7 +65,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class PHMutantEyeHoming : PHMutantEye, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantEyeHoming : PHMutantEye, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => FargoSoulsUtil.AprilFools ?
             "FargowiltasSouls/Content/Bosses/MutantBoss/MutantEye_April" :
@@ -154,7 +154,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             base.AI();
         }
     }
-    public class PHMutantEyeWavy : PHMutantEye, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantEyeWavy : PHMutantEye, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => FargoSoulsUtil.AprilFools ?
             "FargowiltasSouls/Content/Bosses/MutantBoss/MutantEye_April" :

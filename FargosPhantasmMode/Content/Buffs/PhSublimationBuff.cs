@@ -1,7 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
-using FargowiltasSouls;
-using Terraria;
-using Terraria.ModLoader;
+﻿using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Buffs
 {
@@ -17,13 +14,13 @@ namespace FargosPhantasmMode.Content.Buffs
 
         public override void Update(NPC npc, ref int buffIndex)
         {
-            npc.GetGlobalNPC<PModeGlobalBuffNPC>().Sublimation = true;
+            npc.Phantasm().Sublimation = true;
         }
         public override void Update(Player player, ref int buffIndex)
         {
             player.statDefense -= 15;
             player.GetCritChance(DamageClass.Generic) -= 200;
-            player.GetModPlayer<PModeBuffPlayer>().Sublimation = true;
+            player.Phantasm().Sublimation = true;
         }
     }
 }

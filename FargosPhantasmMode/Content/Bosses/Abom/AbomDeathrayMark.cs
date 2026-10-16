@@ -1,11 +1,11 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {

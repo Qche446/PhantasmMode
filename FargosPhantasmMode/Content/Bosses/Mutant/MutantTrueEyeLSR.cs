@@ -5,8 +5,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,10 +13,14 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Screen;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantTrueEyeL : MutantTrueEyeL, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantTrueEyeL : MutantTrueEyeL, IMonoOwnedProj<MutantBoss>
     {
         private float localAI0;
 
@@ -170,7 +173,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class PHMutantTrueEyeDeathray : BaseDeathray, IPixelatedPrimitiveRenderer, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantTrueEyeDeathray : BaseDeathray, IMonoPixelatedPrimitive, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Projectiles/Deathrays/" + (FargoSoulsUtil.AprilFools ? "PhantasmalDeathray" : "PhantasmalDeathrayML");
 
@@ -191,7 +194,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
 
         public override void AI()
         {
-            ScreenShakeSystem.StartShake(3f);
+            MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
             base.Projectile.hide = false;
             Vector2? vector = null;
             if (base.Projectile.velocity.HasNaNs() || base.Projectile.velocity == Vector2.Zero)
@@ -303,11 +306,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             return result;
         }
 
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
             if (!base.Projectile.hide)
             {
-                ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.GenericDeathray");
+                MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.GenericDeathray");
                 Vector2 value = base.Projectile.Center + base.Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance * 1.1f;
                 Vector2 center = base.Projectile.Center;
                 Vector2[] array = new Vector2[8];
@@ -322,7 +325,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 shader.TrySetParameter("scrollSpeed", 2f);
                 shader.TrySetParameter("uColorFadeScaler", 1f);
                 shader.TrySetParameter("useFadeIn", true);
-                PrimitiveRenderer.RenderTrail(array, new PrimitiveSettings(WidthFunction, ColorFunction, null, Smoothen: true, Pixelate: true, shader), 20);
+                MonoPrim.RenderTrail(array, new MonoPrimitiveSettings(WidthFunction, ColorFunction, null, UseUnscaledMatrix: true, Shader: shader), 20);
             }
         }
     }

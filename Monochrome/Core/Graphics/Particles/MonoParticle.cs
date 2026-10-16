@@ -1,12 +1,17 @@
 namespace Monochrome.Core.Graphics.Particles;
 
 /// <summary>
-/// 池化视觉粒子的基类：派生类给出贴图与可选的行为/绘制覆写，实例由
+/// 视觉粒子的基类：派生类给出贴图与可选的行为/绘制覆写，实例由
 /// <see cref="MonoParticleManager"/> 持有并驱动。
 /// <para>
 /// <b>这不是值类型的轻量粒子</b>——每个粒子是一个对象，适合"需要独立行为与绘制逻辑"的场合
 /// （拖尾、软粒子、光照），数量级以数百为限。要几千个火星碎屑请走 Dust 或结构体池
 /// （蓝图 §11.4）。
+/// </para>
+/// <para>
+/// <b>管理器不复用对象</b>：<see cref="Spawn"/> 把实例放进活动集合，到寿移出，下一颗要一个新对象。
+/// 想复用就自己留着死掉的实例——把字段改回想要的值再 <see cref="Spawn"/> 一次即可
+/// （字段不会被自动重置，这是调用方要负责的部分）。
 /// </para>
 /// </summary>
 public abstract class MonoParticle
@@ -100,6 +105,8 @@ public abstract class MonoParticle
     {
         // 只有 World 需要减屏幕位置；界面相位直接给屏幕/UI 坐标。
         Vector2 screen = Space == MonoGraphicsSpace.World ? Position - Main.screenPosition : Position;
-        spriteBatch.Draw(Texture, screen, Frame, Color * Opacity, Rotation, Texture.Size() * 0.5f, Scale, SpriteEffects, 0f);
+        // 轴心按"这一帧实际画的那块"算：Frame 只是整图里的一个子矩形，用整图尺寸会在用帧序列时偏。
+        Vector2 origin = (Frame ?? Texture.Bounds).Size() * 0.5f;
+        spriteBatch.Draw(Texture, screen, Frame, Color * Opacity, Rotation, origin, Scale, SpriteEffects, 0f);
     }
 }

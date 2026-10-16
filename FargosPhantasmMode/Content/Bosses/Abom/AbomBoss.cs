@@ -7,27 +7,14 @@ using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Buffs.Souls;
 using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Core.Globals;
-using FargowiltasSouls.Core.NPCMatching;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Microsoft.Xna.Framework;
-using System;
-using System.IO;
 using System.Linq;
-using Terraria;
-using Terraria.Audio;
 using Terraria.DataStructures;
-using Terraria.GameContent.Creative;
-using Terraria.Graphics.Effects;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 using FargowiltasSouls.Content.Buffs.Boss;
 using System.Collections.Generic;
 using FargosPhantasmMode.Common;
 using Monochrome.Common.MonoUtil;
 using static FargosPhantasmMode.Common.IDelegateStateMachine;
-using Monochrome.Common.MonoUtil.Entities;
 
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {

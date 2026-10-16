@@ -1,12 +1,12 @@
 using FargowiltasSouls;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
 using Microsoft.Xna.Framework;
 using Monochrome.Core.Net;
 using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
 using static Terraria.GameContent.Creative.CreativePowers;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Core.Systems
 {
@@ -101,7 +101,7 @@ namespace FargosPhantasmMode.Core.Systems
                 {
                     float value = diff >= 2 ? 1f : 0.66f;
                     DifficultySliderPower slider = CreativePowerManager.Instance.GetPower<DifficultySliderPower>();
-                    typeof(DifficultySliderPower).GetMethod("SetValueKeyboardForced", Utilities.UniversalBindingFlags).Invoke(slider, [value]);
+                    typeof(DifficultySliderPower).GetMethod("SetValueKeyboardForced", MonoUtil.UniversalBindingFlags).Invoke(slider, [value]);
                 }
                 else
                 {

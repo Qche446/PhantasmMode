@@ -1,7 +1,7 @@
-﻿using FargowiltasSouls.Content.Items.BossBags;
-using Luminance.Common.Utilities;
+using FargowiltasSouls.Content.Items.BossBags;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Monochrome.Core.Graphics.Text;
 using ReLogic.Graphics;
 using SteelSeries.GameSense;
 using System;
@@ -9,6 +9,8 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bossbar
 {
@@ -59,13 +61,16 @@ namespace FargosPhantasmMode.Content.Bossbar
             Vector2 vector = area.Center.ToVector2();
             vector.X -= 190;
             vector.Y += TextOffset;
-            DynamicSpriteFont font = FontAssets.MouseText.Value;
-            Vector2 vector2 = font.MeasureString(bossName);
-            Utils.DrawBorderStringFourWay(sb, font, bossName, vector.X, vector.Y, Color.White, Color.Transparent, vector2 / 2f, 0.9f);
+            MonoText.Draw(sb, bossName, vector, new MonoTextStyle
+            {
+                Color = Color.White,
+                OutlineColor = Color.Transparent,
+                Anchor = new Vector2(0.5f, 0.5f),
+                Scale = 0.9f,
+            });
         }
         private static void DrawHealthText(SpriteBatch spriteBatch, NPC npc, Rectangle area)
         {
-            DynamicSpriteFont value = FontAssets.MouseText.Value;
             Vector2 vector = area.Center.ToVector2();
             vector.X += 10;
             vector.Y += TextOffset;
@@ -84,18 +89,27 @@ namespace FargosPhantasmMode.Content.Bossbar
                 strliferatio += "0";
             strliferatio += "%";
             string healthtext = $"{totalLife}/{totalMaxlife}   " + strliferatio;
-            Vector2 vector2 = value.MeasureString(healthtext);
-            Utils.DrawBorderStringFourWay(spriteBatch, value, healthtext, vector.X, vector.Y, Color.White, Color.Transparent, vector2 / 2f, 0.80f);
+            MonoText.Draw(spriteBatch, healthtext, vector, new MonoTextStyle
+            {
+                Color = Color.White,
+                OutlineColor = Color.Transparent,
+                Anchor = new Vector2(0.5f, 0.5f),
+                Scale = 0.80f,
+            });
         }
         private static void DrawShieldText(SpriteBatch sb, int shield, int maxShield, Rectangle area)
         {
-            DynamicSpriteFont value = FontAssets.MouseText.Value;
             Vector2 vector = area.Center.ToVector2();
             vector.X += 10;
             vector.Y += TextOffset;
             string healthtext = $"{shield} / {maxShield}";
-            Vector2 vector2 = value.MeasureString(healthtext);
-            Utils.DrawBorderStringFourWay(sb, value, healthtext, vector.X, vector.Y, Color.White, Color.Transparent, vector2 / 2f, 0.80f);
+            MonoText.Draw(sb, healthtext, vector, new MonoTextStyle
+            {
+                Color = Color.White,
+                OutlineColor = Color.Transparent,
+                Anchor = new Vector2(0.5f, 0.5f),
+                Scale = 0.80f,
+            });
         }
         public static bool TryGetEaterOfWorldsChainLife(NPC head, out int life, out int maxLife)
         {

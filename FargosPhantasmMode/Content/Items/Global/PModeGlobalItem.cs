@@ -1,34 +1,25 @@
 using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Buffs.Global;
-using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shadow;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
+using FargosPhantasmMode.Content.Rarities;
+using FargosPhantasmMode.Content.Render;
 using FargosPhantasmMode.Core.Systems;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
-using FargowiltasSouls.Content.Items.Accessories.Forces;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
-using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections.Generic;
-using System.Reflection;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
+using Terraria.Localization;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global
 {
     public class PModeGlobalItem : GlobalItem
     {
+        public bool Phantasm = false;
         public override bool InstancePerEntity => true;
-        public bool PoisonAttribute;
-        public bool FireAttribute;
-        public bool IceAttribute;
-        public bool OrdinaryAttributes;
         public override void Load()
         {
             //PhanUtil.AddILHooks(EModeGlobalItem.EModePrefixChanges, ILPrefixChanges);
@@ -57,28 +48,13 @@ namespace FargosPhantasmMode.Content.Items.Global
             {
                 if (player.HasEffect<HallowFlameEffect>())
                 {
-                    //Main.NewText("HallowFlame true");
                     player.AddBuff(ModContent.BuffType<HallowFlameBuff>(), 45 * 60);
                 }
             }
         }
         public override void ModifyHitNPC(Item item, Player player, NPC target, ref NPC.HitModifiers modifiers)
         {
-            //属性附加（）
-            if (item.IsWeapon())
-            {
-                var Pgm = item.GetGlobalItem<PModeGlobalItem>();
-                var Pbn = target.GetGlobalNPC<PModeGlobalBuffNPC>();
-                List<bool> Attributes = [Pgm.PoisonAttribute, Pgm.FireAttribute, Pgm.IceAttribute];
-                List<float> Multiplier = [Pbn.PosionMultiplier, Pbn.FireMultiplier, Pbn.IceMultiplier];
-                float result = 1f;
-                for (int i = 0; i < Attributes.Count; i++)
-                {
-                    if ((OrdinaryAttributes || Attributes[i]) && Multiplier[i] > result)
-                        result = Multiplier[i];
-                }
-                modifiers.FinalDamage *= result;
-            }
+            //忍者物品减伤
             if (player.HasEffect<NinjaAttackSpeedEffect>())
             {
                 bool hasForce = player.ForceEffect<NinjaAttackSpeedEffect>();
@@ -90,11 +66,39 @@ namespace FargosPhantasmMode.Content.Items.Global
         }
         public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            base.OnHitNPC(item, player, target, hit, damageDone);
-            PoisonAttribute = false;
-            FireAttribute = false;
-            IceAttribute = false;
-            OrdinaryAttributes = false;
+            item.MonoTag().Clear();
+        }
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            if (Phantasm)
+                tooltips.Add(new TooltipLine(Mod, $"{Mod.Name}:Phantasm", Language.GetTextValue("Mods.FargosPhantasmMode.Items.Extra.Phantasm")));
+        }
+        public override bool PreDrawTooltipLine(Item item, DrawableTooltipLine line, ref int yOffset)
+        {
+            if (Phantasm)
+            {
+                if (line.Name == $"{Mod.Name}:Phantasm")
+                    return !PhantomTextRender.Draw(line, PhantomTextRender.Cyan, PhantomTextRender.Blue);
+                if (line.Name == "ItemName")
+                {
+                    if (item.ModItem is IPhantomRender pr)
+                        return !PhantomTextRender.Draw(line, pr.Color1, pr.Color2);
+                    else
+                        return !PhantomTextRender.Draw(line, Color.Aqua, Color.WhiteSmoke);
+                }
+
+            }
+            //稀有度
+            if (line.Name == "ItemName")
+            {
+                if (item.rare == ModContent.RarityType<SupremeDeathRarity>())
+                    return !SupremeDeathRarity.RenderTooltip(line);
+                if (item.rare == ModContent.RarityType<MechRarity>())
+                    return !MechRarity.RenderTooltip(line);
+               
+            }
+            return true;
+
         }
     }
 }

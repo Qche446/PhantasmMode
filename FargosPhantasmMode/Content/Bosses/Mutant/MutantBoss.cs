@@ -15,9 +15,8 @@ using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
+using Monochrome.Core.Graphics.PostProcessing;
 using Monochrome.Core.Net;
 using ReLogic.Utilities;
 using System;
@@ -26,7 +25,11 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.ModLoader.IO;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics.Screen;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     public class MutantBossOverride : PModeNPCBehaviour
@@ -535,7 +538,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     {
                         Vector2 spawnPos = Main.rand.NextVector2Unit() * Main.rand.Next(250, 500) + npc.Center;
                         Vector2 vel = -Main.rand.NextFloat(0.5f, 1) * (spawnPos - npc.Center) / 20f;
-                        Particle p = new AlphaSparkParticle (spawnPos, vel, Color.Teal, 0.5f, Main.rand.Next(40, 50));
+                        MonoParticle p = new FargoAlphaSparkParticle (spawnPos, vel, Color.Teal, 0.5f, Main.rand.Next(40, 50));
                         p.Spawn();
                     }
                     if (npc.ai[2] == 19 && FargoSoulsUtil.HostCheck)
@@ -548,7 +551,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                         P1NextAttackOrMasoOptions(npc, npc.ai[0]);
                         Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<MutantShockWave>(), 0, 0, Main.myPlayer,
                             80, 33);
-                        ScreenShakeSystem.StartShake(20f);
+                        MonoScreenEffectsSystem.StartShakeByAmplitude(20f);
                         PHMutantSphereRingP1.EnterSpecialPhase();
                     }
                 }
@@ -956,7 +959,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (NPC.ai[1] == 20)
             {
                 if (!Main.dedServ && Main.LocalPlayer.active)
-                    ScreenShakeSystem.StartShake(10, shakeStrengthDissipationIncrement: 10f / 30);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(10, 10f / 30);
 
                 //moon chain explosions
                 int explosions = 0;
@@ -3169,7 +3172,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (npc.ai[1] == 180)
             {
                 // 演出（震动、音效）各端本地放；下面的权威生成才需要门
-                ScreenShakeSystem.StartShake(5);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(5);
                 SoundEngine.PlaySound(SoundID.NPCDeath13, npc.Center);
             }
             if (npc.ai[1] == 180 && FargoSoulsUtil.HostCheck)
@@ -3706,8 +3709,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             {
                 if (!Main.dedServ)
                 {
-                    ManagedScreenFilter filter = ShaderManager.GetFilter("FargowiltasSouls.FinalSpark");
-                    filter.Activate();
+                    MonoPostFxSystem.GetFilter("FargosPhantasmMode.FinalSpark").Activate();
                     if (Main.WaveQuality == 0)
                         Main.WaveQuality = 1;
                 }
@@ -4268,7 +4270,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                     NPC.ai[3] = 0;
                     NPC.netUpdate = true;
                     FargoSoulsUtil.ClearHostileProjectiles(1, NPC.whoAmI);
-                    IProjOwnedByBoss<MutantBoss>.KillAll();
+                    MonoProj.KillOwned<MutantBoss>();
                     EdgyBossText(NPC, GFBQuote(3));
                 }
                 return true;
@@ -4554,7 +4556,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return;
             var maxOpacity = npc.Opacity;
 
-            ManagedShader borderShader = ShaderManager.GetShader("FargowiltasSouls.MutantP1Aura");
+            MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.MutantP1Aura");
             borderShader.TrySetParameter("colorMult", 7.35f);
             borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             borderShader.TrySetParameter("radius", radius);

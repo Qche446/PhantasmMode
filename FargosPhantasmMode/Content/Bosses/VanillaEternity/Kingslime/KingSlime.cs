@@ -1,25 +1,18 @@
 using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls;
-using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Common.Utilities;
 using FargowiltasSouls.Content.Bosses.VanillaEternity;
 using FargowiltasSouls.Content.NPCs.EternityModeNPCs;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
-using Microsoft.Xna.Framework;
 using Monochrome.Core.Net;
-using System;
-using System.IO;
-using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-
+using Monochrome.Core.Graphics.Screen;
+using Monochrome.Common.MonoUtil;
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
 {
     public class P_KingSlime : PModeNPCBehaviour
@@ -132,7 +125,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     if (JumpTimer >= SpecialJumpTime && !SpecialJumping && npc.ai[1] < 5)
                     {
                         SoundEngine.PlaySound(new SoundStyle("FargowiltasSouls/Assets/Sounds/VanillaEternity/KingSlime/KSCharge"), npc.Center);
-                        Particle p = new ExpandingBloomParticle(npc.Center, Vector2.Zero, Color.Blue, Vector2.One, Vector2.One * 60, 40, true, Color.Transparent);
+                        MonoParticle p = new FargoBloomParticle(npc.Center, Vector2.Zero, Color.Blue, Vector2.One, Vector2.One * 60, 40, true, Color.Transparent);
                         SpecialJumping = true;
                         SpecialJumpWindupTimer = 60;
                         p.Spawn();
@@ -343,9 +336,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                 {
                     if (SFTpCounter > 0)
                     {
-                        Particle p = new ExpandingBloomParticle(tpPos, Vector2.Zero, Color.Blue, Vector2.One, Vector2.One * 60, 40, true, Color.Transparent);
+                        MonoParticle p = new FargoBloomParticle(tpPos, Vector2.Zero, Color.Blue, Vector2.One, Vector2.One * 60, 40, true, Color.Transparent);
                         p.Spawn();
-
                     }
                     npc.velocity *= 0;
                     for (int i = 0; i < 3; i++)
@@ -697,7 +689,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     if (npc.ai[3] == SuperSpecialJumpWindupTimer + Waittime)
                     {
                         SoundEngine.PlaySound(SoundID.Item21, player.Center);
-                        ScreenShakeSystem.StartShake(10);
+                        MonoScreenEffectsSystem.StartShakeByAmplitude(10);
                         if (PhanUtil.HostCheck && npc.HasValidTarget)
                         {
                             //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<KSShockWave>(), 0, 0, Main.myPlayer, 60, 30);
@@ -857,12 +849,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                 }
             }
             */
-        }
-        public override void SafeModifyHitByProjectile(NPC npc, Projectile projectile, ref NPC.HitModifiers modifiers)
-        {
-            if (projectile.type == ProjectileID.ThornChakram)
-                modifiers.FinalDamage *= 0.75f;
-            base.SafeModifyHitByProjectile(npc, projectile, ref modifiers);
         }
         private static void ReleaseDustTp(Vector2 start, Vector2 end, int gap)
         {

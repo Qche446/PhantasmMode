@@ -432,6 +432,11 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i < actualCount - 1; i++)
             PushQuad(i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
 
+        // 拖尾常配"条纹贴图 + 自定义着色器"，这里把贴图绑到槽 1。放在 Flush 之前是对的：
+        // Flush 只在 RenderQuad 那条路上碰槽 1，走拖尾这条路时它不会覆盖这里绑的东西。
+        if (settings.Texture is not null)
+            settings.Shader?.SetTexture(settings.Texture, 1, settings.Sampler ?? SamplerState.LinearWrap);
+
         Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings), settings.ProjectionWidth, settings.ProjectionHeight);
     }
 

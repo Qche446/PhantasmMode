@@ -36,4 +36,8 @@ public sealed class MonoBuffSystem : ModSystem
     /// <summary>把一个原版 buff 类型映射到槽位；不是本系统的状态时返回 -1。</summary>
     /// <param name="buffType">原版 buff 类型 id。0（空槽）与原版 buff 都会落到 -1。</param>
     internal static int Resolve(int buffType) => (ModContent.GetModBuff(buffType) as MonoBuff)?.Slot ?? -1;
+
+    /// <summary>按槽位问这个状态的 <c>Ai</c> 要不要跨端同步；槽位无效时是 <see langword="false"/>。</summary>
+    /// <param name="slot">槽位。</param>
+    internal static bool SyncAiOf(int slot) => (uint)slot < (uint)instances.Length && instances[slot].SyncAi;
 }

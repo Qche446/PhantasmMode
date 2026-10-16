@@ -1,3 +1,5 @@
+Extra.Phantasm: 境妄
+
 BrokenTimepiece: {
 	DisplayName: 永恒的时计
 	Tooltip:
@@ -46,5 +48,34 @@ WhiteRibbon: {
 		'''
 		纯洁无垢的缎带，拥有某种排斥“死灵”的力量
 		[c/A0A0A0:玩家不再能'旋转'(死灵密酿的旋转冲刺不再会使玩家旋转，但冲刺加速的效果仍然存在)]
+		'''
+}
+
+Monochrome: {
+	DisplayName: 黑白
+	Tooltip:
+		'''
+		左键发射猎杀标记_黑，能使敌人的[pbuff:FargosPhantasmMode/HunterMark]层数增加，最高20层
+		右键发射撕裂螺旋_白，造成[pbuff:FargosPhantasmMode/PhSublimationBuff]，并消耗全部猎杀标记层数。每消耗一层，撕裂螺旋的伤害增加200%
+
+		“如入缥缈梦境 如现蜃楼幻景
+		我犹如布满灰尘的银镜 黯然照耀着光明”
+		'''
+}
+
+FleshBayonet: {
+	DisplayName: 神圣铳剑
+	Tooltip:
+		'''
+		左键发射祈祷的血弹，造成不同程度的削韧。能通过右键进行血弹装填，来切换攻击方式。
+		血弹装填状态以[pbuff:FargosPhantasmMode/BulletReload]显示，共有4种。
+		每次切换血弹时都会为自身施加[pbuff:FargosPhantasmMode/PrayerofTaintedBlood]，流失生命值的同时强化攻击形态
+		血弹Ⅰ：较快速度发射血弹，血弹将指向光标处
+		血弹Ⅱ：较慢速度发射大颗血弹，血弹不再指向光标处而是直接穿过
+		血弹Ⅲ：极慢速度发射一大片血弹，血弹将随机指向光标处附近一大片区域
+		血弹Ⅳ：举起铳剑向光标处突进，可撞击敌人并弹回，额外造成[pbuff:FargosPhantasmMode/PrayerofTaintedBlood]和[pbuff:FargowiltasSouls/MutantNibbleBuff]
+		每当敌人削韧值超过其最大值，将转换为[pbuff:FargosPhantasmMode/CrushBuff]
+
+		“我以血之神圣将病魔净化”
 		'''
 }

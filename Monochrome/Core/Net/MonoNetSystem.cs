@@ -26,6 +26,9 @@ public sealed class MonoNetSystem : ModSystem
     /// <summary>客户端→服务端的请求。</summary>
     internal const byte MsgRequest = 4;
 
+    /// <summary>玩家身上的状态 <c>Ai</c> 同步；消息与状态系统共用（见 <c>Content/Status/MonoBuffSync.cs</c>）。</summary>
+    internal const byte MsgPlayerBuffAi = 5;
+
     /// <inheritdoc/>
     public override void PreUpdateEntities()
     {

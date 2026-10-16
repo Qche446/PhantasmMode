@@ -1,6 +1,6 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantIllusion : MutantIllusion, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantIllusion : MutantIllusion, IMonoOwnedProj<MutantBoss>
     {
         //四柱用
         public override void AI()

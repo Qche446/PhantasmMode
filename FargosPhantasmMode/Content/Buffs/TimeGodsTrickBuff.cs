@@ -7,9 +7,6 @@ using FargowiltasSouls.Content.Items.Accessories.Masomode;
 using FargowiltasSouls.Content.Items.Armor;
 using FargowiltasSouls.Content.Projectiles.Minions;
 using FargowiltasSouls.Core.ModPlayers;
-using System;
-using Terraria;
-using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Buffs
 {

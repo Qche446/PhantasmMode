@@ -1,8 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Render
 {
@@ -130,6 +131,26 @@ namespace FargosPhantasmMode.Content.Render
         /// <summary>
         /// 材质一般可用Terraria.GameContent.TextureAssets.MagicPixel.Value
         /// </summary>
+        /// <summary>
+        /// 两点之间拉一条发光线段：贴图沿线段方向拉伸，宽度由 <paramref name="width"/> 给。
+        /// 与 Luminance 的同名助手一致，位置按世界坐标给（内部会减 <c>Main.screenPosition</c>）。
+        /// </summary>
+        private static void DrawBloomLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color, float width)
+        {
+            if (start == end)
+                return;
+
+            start -= Main.screenPosition;
+            end -= Main.screenPosition;
+
+            Texture2D bloomLine = ModContent.Request<Texture2D>("FargowiltasSouls/Content/Projectiles/BloomLine").Value;
+            float rotation = (end - start).ToRotation() + MathHelper.PiOver2;
+            Vector2 scale = new Vector2(width, Vector2.Distance(start, end)) / bloomLine.Size();
+            Vector2 origin = new(bloomLine.Width * 0.5f, bloomLine.Height);
+
+            sb.Draw(bloomLine, start, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
+        }
+
         public static void AllDraw(SpriteBatch sb)
         {
             foreach (Particle d in particles)
@@ -138,7 +159,7 @@ namespace FargosPhantasmMode.Content.Render
                 {
                     Vector2 start = d.Points[i] + Main.screenPosition;
                     Vector2 end = d.Points[i + 1] + Main.screenPosition;
-                    Luminance.Common.Utilities.Utilities.DrawBloomLine(sb, start, end, d.Color * d.Alpha, d.Width);
+                    DrawBloomLine(sb, start, end, d.Color * d.Alpha, d.Width);
                 }
             }
         }

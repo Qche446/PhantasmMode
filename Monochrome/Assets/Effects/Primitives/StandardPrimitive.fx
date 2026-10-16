@@ -56,6 +56,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float2 uv = float2(coord.x, (coord.y - 0.5) / coord.z + 0.5);
 
     // ps_2_0 没有动态分支，所以三态一律用 lerp/saturate 表达。
+    // **要动态分支就写 ps_3_0**：效果目标仍然必须是 fx_2_0（FNA 只认 D3DX9 效果头），
+    // 但 fx_2_0 里放 vs_3_0 / ps_3_0 是合法的，实测产物头与 ps_2_0 那版一致。
     // 未绑定采样器时 D3D9 返回常量色（不是 NaN），因此系数为 0 的那一项不会污染结果。
     float4 solid = input.Color;
     float4 textured = tex2D(uTexture, uv) * input.Color;

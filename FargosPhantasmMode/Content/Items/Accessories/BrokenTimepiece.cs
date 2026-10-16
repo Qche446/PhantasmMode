@@ -1,4 +1,5 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
+using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.UI.Elements;
@@ -33,6 +34,7 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Item.accessory = true;
             Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 0, 47, 0);
+            Item.GetGlobalItem<PModeGlobalItem>().Phantasm = true;
         }
         public override void UpdateAccessory(Player player, bool hideVisual)
         {

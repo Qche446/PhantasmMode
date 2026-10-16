@@ -33,6 +33,15 @@ public sealed class MonoShader : IDisposable
     /// </summary>
     public string AssetPath { get; }
 
+    /// <summary>
+    /// 是否允许 Monochrome 把编好的 <c>.fxc</c> 写回这个着色器所属模组的源目录（即热重载）。
+    /// <para>
+    /// <b>它管的是写回，不管注册。</b>注册是全场的：任何模组的着色器资产都会被读进注册表。
+    /// 写回会动别人的磁盘，所以只对声明了 <see cref="MonoShaderScopeAttribute"/> 的模组开放。
+    /// </para>
+    /// </summary>
+    public bool CanWriteBack { get; }
+
     /// <summary>底层的 FNA 效果对象。<b>热重载后这个引用会被换掉</b>，不要长期持有它。</summary>
     public Effect Effect { get; private set; }
 
@@ -45,11 +54,12 @@ public sealed class MonoShader : IDisposable
     /// <summary>本次（或最近一次热重载后）装入的 UTC 时间，供诊断显示。</summary>
     public DateTime LoadedAtUtc { get; private set; }
 
-    internal MonoShader(string name, Effect effect, string assetPath = "")
+    internal MonoShader(string name, Effect effect, string assetPath = "", bool canWriteBack = false)
     {
         Name = name;
         AssetPath = assetPath;
         Effect = effect;
+        CanWriteBack = canWriteBack;
         LoadedAtUtc = DateTime.UtcNow;
     }
 

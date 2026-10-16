@@ -1,4 +1,5 @@
-﻿using FargosPhantasmMode.Content.Buffs;
+using FargosPhantasmMode.Common.Particles;
+using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.Circuitry;
 using Fargowiltas.Common.Configs;
 using FargowiltasSouls;
@@ -162,7 +163,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
             {
                 Vector2 vector = Vector2.Normalize(-base.Projectile.velocity.RotatedByRandom(0.62831854820251465));
                 float num = Math.Max(4f, base.Projectile.velocity.Length() / 2f);
-                new ElectricSpark(base.Projectile.Center, vector * num, color2 * 0.7f, Main.rand.NextFloat(0.7f, 1f), 20).Spawn();
+                new FargoElectricSparkParticle(base.Projectile.Center, vector * num, color2 * 0.7f, Main.rand.NextFloat(0.7f, 1f), 20).Spawn();
             }
 
             float r = (float)(int)color2.R / 255f;

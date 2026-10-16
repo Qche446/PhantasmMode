@@ -44,6 +44,9 @@ public sealed class MonoBuffSet
     /// <summary>各槽位的消费者数据，第一次取用时才建。</summary>
     private readonly MonoBuffSlotData?[] data;
 
+    /// <summary>各槽位最近一次写进包里的 <c>Ai</c>；没发过是 null。用来判断这一格有没有变。</summary>
+    private readonly float[]?[] sentAi;
+
     /// <summary>已经投影过的 tick；用来挡掉同一 tick 的重复刷新。</summary>
     private long tick = long.MinValue;
 
@@ -57,6 +60,7 @@ public sealed class MonoBuffSet
         previous = new bool[slotCount];
         buffIndices = new int[slotCount];
         data = new MonoBuffSlotData?[slotCount];
+        sentAi = new float[]?[slotCount];
         Array.Fill(buffIndices, -1);
     }
 
@@ -90,6 +94,7 @@ public sealed class MonoBuffSet
             Array.Clear(current);
             Array.Clear(previous);
             Array.Clear(data);
+            Array.Clear(sentAi);
             ActiveCount = 0;
         }
 
@@ -147,8 +152,11 @@ public sealed class MonoBuffSet
     /// <param name="slot">槽位。</param>
     public void Release(int slot)
     {
-        if (InRange(slot))
-            data[slot] = null;
+        if (!InRange(slot))
+            return;
+
+        data[slot] = null;
+        sentAi[slot] = null;
     }
 
     /// <summary>把整张表恢复到刚建好的样子，包括清掉全部消费者数据。</summary>
@@ -158,9 +166,142 @@ public sealed class MonoBuffSet
         Array.Clear(previous);
         Array.Fill(buffIndices, -1);
         Array.Clear(data);
+        Array.Clear(sentAi);
         ActiveCount = 0;
         tick = long.MinValue;
     }
+
+    /// <summary>
+    /// 这个槽位的 <c>Ai</c> 与最近一次写进包里的值不一样吗。没有数据时是 <see langword="false"/>。
+    /// </summary>
+    /// <param name="slot">槽位。</param>
+    public bool AiChanged(int slot)
+    {
+        if (!InRange(slot) || data[slot] is not { } slotData)
+            return false;
+
+        float[]? sent = sentAi[slot];
+        if (sent is null || sent.Length != slotData.Ai.Length)
+            return true;
+
+        for (int i = 0; i < sent.Length; i++)
+        {
+            if (sent[i] != slotData.Ai[i])
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>把这一格当前的 <c>Ai</c> 记成"已经写进包里了"，<see cref="AiChanged"/> 随之回到 <see langword="false"/>。</summary>
+    /// <param name="slot">槽位。</param>
+    public void AcceptAi(int slot)
+    {
+        if (!InRange(slot))
+            return;
+
+        if (data[slot] is not { } slotData)
+        {
+            sentAi[slot] = null;
+            return;
+        }
+
+        float[] sent = sentAi[slot] is { } existing && existing.Length == slotData.Ai.Length
+            ? existing
+            : sentAi[slot] = new float[slotData.Ai.Length];
+
+        Array.Copy(slotData.Ai, sent, sent.Length);
+    }
+
+    /// <summary>有没有哪一格"在场的、该同步的"槽位的 <c>Ai</c> 变了。实体要不要发一次同步看它。</summary>
+    /// <param name="syncOf">按槽位问该不该同步（游戏侧是 <see cref="MonoBuff.SyncAi"/>）。</param>
+    public bool AnyAiDirty(Func<int, bool> syncOf)
+    {
+        ArgumentNullException.ThrowIfNull(syncOf);
+
+        for (int slot = 0; slot < current.Length; slot++)
+        {
+            if (current[slot] && syncOf(slot) && AiChanged(slot))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 把该同步的槽位的 <c>Ai</c> 写进包：先一个字节的槽位数，然后每项"槽位号、数组长度、各值"。
+    /// <para>
+    /// <paramref name="all"/> 为 <see langword="false"/> 时只写值变过的（平时用的就是它）；
+    /// 为 <see langword="true"/> 时把在场的都写一遍，用于新玩家加入世界那种全量补齐。
+    /// </para>
+    /// <para>写出去的格子会按"已发送"记账，于是同一份值不会被重复发。</para>
+    /// </summary>
+    /// <param name="syncOf">按槽位问该不该同步。</param>
+    /// <param name="all">是否连没变过的也写。</param>
+    /// <param name="writer">包体。</param>
+    /// <returns>写进去的槽位数。</returns>
+    public int WriteSync(Func<int, bool> syncOf, bool all, BinaryWriter writer)
+    {
+        ArgumentNullException.ThrowIfNull(syncOf);
+        ArgumentNullException.ThrowIfNull(writer);
+
+        int count = 0;
+        for (int slot = 0; slot < current.Length; slot++)
+        {
+            if (Syncable(slot, syncOf, all))
+                count++;
+        }
+
+        writer.Write((byte)count);
+
+        for (int slot = 0; slot < current.Length; slot++)
+        {
+            if (!Syncable(slot, syncOf, all))
+                continue;
+
+            float[] ai = data[slot]!.Ai;
+            writer.Write((byte)slot);
+            writer.Write((byte)ai.Length);
+            for (int i = 0; i < ai.Length; i++)
+                writer.Write(ai[i]);
+
+            AcceptAi(slot);
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// 从包里读回一批 <c>Ai</c> 并落进槽位。落不过去的格子（槽位越界、值比本地数组多）只把字节读掉，
+    /// 不落值——少读一个字节会让后面全部错位。
+    /// </summary>
+    /// <param name="reader">包体。</param>
+    public void ReadSync(BinaryReader reader)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+
+        int count = reader.ReadByte();
+        for (int i = 0; i < count; i++)
+        {
+            int slot = reader.ReadByte();
+            int size = reader.ReadByte();
+
+            MonoBuffSlotData? data = InRange(slot) ? GetOrCreateData(slot, size) : null;
+            for (int k = 0; k < size; k++)
+            {
+                float value = reader.ReadSingle();
+                if (data is not null && k < data.Ai.Length)
+                    data.Ai[k] = value;
+            }
+
+            if (InRange(slot))
+                AcceptAi(slot);
+        }
+    }
+
+    /// <summary>这一格要不要进包：在场的、有数据的、声明了要同步的，并且（全量 或 值变过）。</summary>
+    private bool Syncable(int slot, Func<int, bool> syncOf, bool all)
+        => current[slot] && data[slot] is not null && syncOf(slot) && (all || AiChanged(slot));
 
     /// <summary>槽位落在这张表里吗。</summary>
     private bool InRange(int slot) => (uint)slot < (uint)current.Length;

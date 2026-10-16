@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shadow;
 using FargosPhantasmMode.Content.Projectiles;
 using Fargowiltas.Projectiles;
@@ -11,8 +11,6 @@ using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Toggler;
 using FargowiltasSouls.Core.Toggler.Content;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -22,6 +20,10 @@ using Terraria;
 using Terraria.Enums;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Nature
 {
@@ -63,10 +65,10 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 Projectile.NewProjectile(player.GetSource_EffectItem<TimeFrozenRitualEffect>(), player.Center, Vector2.Zero, type, 0, 2, Main.myPlayer);
         }
     }
-    public class SnowTrailProj : ModProjectile, IPixelatedPrimitiveRenderer
+    public class SnowTrailProj : ModProjectile, IMonoPixelatedPrimitive
     {
         public float radius = 64;
-        public PixelationPrimitiveLayer LayerToRenderTo => PixelationPrimitiveLayer.AfterProjectiles;
+        public MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.AfterProjectiles;
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public override void SetStaticDefaults()
         {
@@ -92,13 +94,13 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            if (Utilities.CircularHitboxCollision(Projectile.Center, radius, targetHitbox))
+            if (MonoUtil.Intersect.CircleAABB(Projectile.Center, radius, targetHitbox))
             {
                 return true;
             }
             for (int i = 0; i < Projectile.oldPos.Length; i += 4)
             {
-                if (Utilities.CircularHitboxCollision(Projectile.oldPos[i], WidthFunction(i / (float)Projectile.oldPos.Length), targetHitbox))
+                if (MonoUtil.Intersect.CircleAABB(Projectile.oldPos[i], WidthFunction(i / (float)Projectile.oldPos.Length), targetHitbox))
                     return true;
             }
             return false;
@@ -108,7 +110,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             Player player = Main.player[Projectile.owner];
             bool hasForce = player.ForceEffect<SnowTrailEffect>();
             bool hasNature = player.HasEffect<NatureEffect>();
-            int slot = player.FindAccessorySlot(ModContent.ItemType<SnowEnchant>());
+            int slot = MonoUtil.FindAccessorySlot(player, ModContent.ItemType<SnowEnchant>());
             //Main.NewText(slot);
             radius = hasForce ? 128 : 64;
             radius *= hasNature ? 2 : 1;
@@ -170,7 +172,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         }
         public override bool? CanHitNPC(NPC target)
         {
-            Projectile.GetGlobalProjectile<PModeGlobalProj>().IceAttribute = true;
+            Projectile.MonoTag().Add(MonoDamageTag.Ice);
             return !target.townNPC;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
@@ -184,11 +186,11 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             }
         }
         public override bool PreDraw(ref Color lightColor) => false;
-        public void RenderPixelatedPrimitives(SpriteBatch spriteBatch)
+        public void RenderPixelatedPrimitives()
         {
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            PrimitiveRenderer.RenderTrail(Projectile.oldPos, new(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, Pixelate: true, Shader: shader), 100);
+            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 100);
         }
     }
     public class TimeFrozenRitualProj : ModProjectile
@@ -213,7 +215,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
             Projectile.FargoSouls().CanSplit = false;
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
-            => Utilities.CircularHitboxCollision(Projectile.Center, radius, targetHitbox);
+            => MonoUtil.Intersect.CircleAABB(Projectile.Center, radius, targetHitbox);
 
         public override void AI()
         {
@@ -245,18 +247,18 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
                 dust.noGravity = true;
             }
             foreach (NPC npc in Main.npc.Where(n => n.active && !n.HasBuff(ModContent.BuffType<TimeFrozenBuff>()) && 
-                Utilities.CircularHitboxCollision(Projectile.Center, radius, n.Hitbox)))
+                MonoUtil.Intersect.CircleAABB(Projectile.Center, radius, n.Hitbox)))
             {
                 npc.AddBuff(ModContent.BuffType<TimeFrozenBuff>(), 3);
             }
-            foreach (Projectile proj in Main.projectile.Where(p => Utilities.CircularHitboxCollision(Projectile.Center, radius, p.Hitbox) && p.active && !(p.minion && !ProjectileID.Sets.MinionShot[p.type]) && !p.FargoSouls().TimeFreezeImmune && p.FargoSouls().TimeFrozen == 0))
+            foreach (Projectile proj in Main.projectile.Where(p => MonoUtil.Intersect.CircleAABB(Projectile.Center, radius, p.Hitbox) && p.active && !(p.minion && !ProjectileID.Sets.MinionShot[p.type]) && !p.FargoSouls().TimeFreezeImmune && p.FargoSouls().TimeFrozen == 0))
             {
                 proj.FargoSouls().TimeFrozen = 3;
             }
         }
         public override bool? CanHitNPC(NPC target)
         {
-            Projectile.GetGlobalProjectile<PModeGlobalProj>().IceAttribute = true;
+            Projectile.MonoTag().Add(MonoDamageTag.Ice);
             return !target.townNPC;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)

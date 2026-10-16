@@ -1,4 +1,7 @@
-﻿namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
+﻿using Monochrome.Common.MonoUtil;
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
+namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
     /*
     public class PHRetinazer : Retinazer
@@ -197,7 +200,7 @@
                                         {
                                             Vector2 particleVel = (vel2 * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                 .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                            Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel - vel2,
+                                            MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel - vel2,
                                                 particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                                             p.Spawn();
                                         }
@@ -412,7 +415,7 @@
                                 P2flag = 0;
                                 DeathrayState = 0;
                                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
-                                ScreenShakeSystem.StartShake(20f);
+                                MonoScreenEffectsSystem.StartShakeByAmplitude(20f);
                                 Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<CalcloneWave>(), 0, 0, Main.myPlayer, ai1: 0, ai2: 20);
                                 Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<CalcloneWave>(), 0, 0, Main.myPlayer, ai1: 0, ai2: 16);
                             }
@@ -442,7 +445,7 @@
                                         {
                                             Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                 .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                            Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                            MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                                 particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                                             p.Spawn();
                                         }
@@ -461,7 +464,7 @@
                                             {
                                                 Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                     .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                                Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                                MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                                     particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                                 p.Spawn();
                                             }
@@ -509,7 +512,7 @@
                                     {
                                         Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                        Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                        MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                             particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                                         p.Spawn();
                                     }
@@ -571,7 +574,7 @@
                                 {
                                     Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                         .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                    Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                    MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                         particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                                     p.Spawn();
                                 }
@@ -1015,7 +1018,7 @@
                                     {
                                         Vector2 particleVel = (shotVel * 1.2f).RotatedBy(MathHelper.PiOver2 * 0.1f * i)
                                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                        Particle p = new ElectricSpark(shootPos - shotVel,
+                                        MonoParticle p = new FargoElectricSparkParticle(shootPos - shotVel,
                                             particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                         p.Spawn();
                                     }
@@ -1202,7 +1205,7 @@
                                         {
                                             Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                 .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                            Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                            MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                                 particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                             p.Spawn();
                                         }
@@ -1236,7 +1239,7 @@
                                     {
                                         Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                        Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                        MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                             particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                         p.Spawn();
                                     }
@@ -1264,7 +1267,7 @@
                                     {
                                         Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                        Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                        MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                             particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                         p.Spawn();
                                     }
@@ -1359,7 +1362,7 @@
                                 P2flag = 0;
                                 npc.dontTakeDamage = false;
                                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
-                                ScreenShakeSystem.StartShake(20f);
+                                MonoScreenEffectsSystem.StartShakeByAmplitude(20f);
                                 Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<CalcloneWave>(), 0, 0, Main.myPlayer, ai1: 1, ai2: 20);
                                 Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<CalcloneWave>(), 0, 0, Main.myPlayer, ai1: 1, ai2: 16);
                             }
@@ -1389,7 +1392,7 @@
                                         {
                                             Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                 .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                            Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                            MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                                 particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                                             p.Spawn();
                                         }
@@ -1405,7 +1408,7 @@
                                             {
                                                 Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                                     .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                                Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                                MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                                     particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                                 p.Spawn();
                                             }
@@ -1447,7 +1450,7 @@
                                     {
                                         Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                                        Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                                        MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                                             particleVel, Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                                         p.Spawn();
                                     }
@@ -1511,7 +1514,7 @@
                                     30*Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(-rangeangle)), ModContent.ProjectileType<MechElectricOrbPolyline>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0f,
                                     Main.myPlayer, npc.target,-1, ai2: MechElectricOrb.Green);
                                 npc.velocity -= 0.9f * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
-                                ScreenShakeSystem.StartShake(3f);
+                                MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
                             }
                             if (++P2Timer >= 180)
                             {
@@ -1580,7 +1583,7 @@
                                         Main.myPlayer, npc.target, ai2: MechElectricOrb.Green);
                                     }
                                 }
-                                ScreenShakeSystem.StartShake(3f);
+                                MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
                                 npc.velocity -= (Main.zenithWorld ? 0.6f : 0.4f) * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
                             }
                             if (++P2Timer > 120 + 360)

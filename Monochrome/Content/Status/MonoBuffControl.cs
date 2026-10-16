@@ -20,7 +20,7 @@ public static class MonoBuffControl
     /// <summary>取玩家的剩余时长；没有这个状态时返回 -1。</summary>
     /// <param name="player">玩家。</param>
     /// <param name="type">buff 类型。</param>
-    public static int TimeLeft(Player player, int type)
+    public static int TimeLeft(this Player player, int type)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -34,7 +34,7 @@ public static class MonoBuffControl
     /// <summary>取 NPC 的剩余时长；没有这个状态时返回 -1。</summary>
     /// <param name="npc">NPC。</param>
     /// <param name="type">buff 类型。</param>
-    public static int TimeLeft(NPC npc, int type)
+    public static int TimeLeft(this NPC npc, int type)
     {
         ArgumentNullException.ThrowIfNull(npc);
 
@@ -49,7 +49,7 @@ public static class MonoBuffControl
     /// <param name="player">玩家。</param>
     /// <param name="type">buff 类型。</param>
     /// <param name="time">要写入的剩余 tick，小于 0 时按 0 处理。</param>
-    public static void SetTime(Player player, int type, int time)
+    public static void SetTime(this Player player, int type, int time)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -65,7 +65,7 @@ public static class MonoBuffControl
     /// <param name="npc">NPC。</param>
     /// <param name="type">buff 类型。</param>
     /// <param name="time">要写入的剩余 tick，小于 0 时按 0 处理。</param>
-    public static void SetTime(NPC npc, int type, int time)
+    public static void SetTime(this NPC npc, int type, int time)
     {
         ArgumentNullException.ThrowIfNull(npc);
 
@@ -83,7 +83,7 @@ public static class MonoBuffControl
     /// <param name="delta">增量，可以是负数。</param>
     /// <param name="max">上限。</param>
     /// <returns>写入后的剩余 tick；没有这个状态时返回 -1。</returns>
-    public static int AddTime(Player player, int type, int delta, int max = int.MaxValue)
+    public static int AddTime(this Player player, int type, int delta, int max = int.MaxValue)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -103,7 +103,7 @@ public static class MonoBuffControl
     /// <param name="delta">增量，可以是负数。</param>
     /// <param name="max">上限。</param>
     /// <returns>写入后的剩余 tick；没有这个状态时返回 -1。</returns>
-    public static int AddTime(NPC npc, int type, int delta, int max = int.MaxValue)
+    public static int AddTime(this NPC npc, int type, int delta, int max = int.MaxValue)
     {
         ArgumentNullException.ThrowIfNull(npc);
 
@@ -123,7 +123,7 @@ public static class MonoBuffControl
     /// <param name="time">时长。</param>
     /// <param name="quiet">是否不弹提示。</param>
     /// <returns>施加之后身上到底有没有它；被 <c>buffImmune</c> 挡掉时是 <see langword="false"/>。</returns>
-    public static bool Give(Player player, int type, int time, bool quiet = true)
+    public static bool Give(this Player player, int type, int time, bool quiet = true)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -140,7 +140,7 @@ public static class MonoBuffControl
     /// <param name="time">时长。</param>
     /// <param name="quiet">是否不弹提示。</param>
     /// <returns>施加之后身上到底有没有它；被 <c>buffImmune</c> 挡掉时是 <see langword="false"/>。</returns>
-    public static bool Give(NPC npc, int type, int time, bool quiet = true)
+    public static bool Give(this NPC npc, int type, int time, bool quiet = true)
     {
         ArgumentNullException.ThrowIfNull(npc);
 
@@ -155,7 +155,7 @@ public static class MonoBuffControl
     /// <param name="player">玩家。</param>
     /// <param name="type">buff 类型。</param>
     /// <returns>真的移除了才返回 <see langword="true"/>。</returns>
-    public static bool Take(Player player, int type)
+    public static bool Take(this Player player, int type)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -174,7 +174,7 @@ public static class MonoBuffControl
     /// <param name="npc">NPC。</param>
     /// <param name="type">buff 类型。</param>
     /// <returns>真的移除了才返回 <see langword="true"/>。</returns>
-    public static bool Take(NPC npc, int type)
+    public static bool Take(this NPC npc, int type)
     {
         ArgumentNullException.ThrowIfNull(npc);
 
@@ -196,7 +196,7 @@ public static class MonoBuffControl
     /// <param name="time">目标状态的时长。</param>
     /// <param name="quiet">是否不弹提示。</param>
     /// <returns>目标状态最终在不在身上。</returns>
-    public static bool Replace(Player player, int from, int to, int time, bool quiet = true)
+    public static bool Replace(this Player player, int from, int to, int time, bool quiet = true)
     {
         ArgumentNullException.ThrowIfNull(player);
 
@@ -216,7 +216,7 @@ public static class MonoBuffControl
     /// <param name="time">目标状态的时长。</param>
     /// <param name="quiet">是否不弹提示。</param>
     /// <returns>目标状态最终在不在身上。</returns>
-    public static bool Replace(NPC npc, int from, int to, int time, bool quiet = true)
+    public static bool Replace(this NPC npc, int from, int to, int time, bool quiet = true)
     {
         ArgumentNullException.ThrowIfNull(npc);
 

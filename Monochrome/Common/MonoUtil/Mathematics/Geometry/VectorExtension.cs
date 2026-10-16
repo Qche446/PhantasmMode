@@ -10,7 +10,7 @@ namespace Monochrome.Common.MonoUtil
         /// </summary>
         public static Vector2 VecLerp(Vector2 start, Vector2 end, float progress) => new(MathHelper.Lerp(start.X, end.X, progress), MathHelper.Lerp(start.Y, end.Y, progress));
         /// <summary>
-        /// 矢量贝塞尔曲线插值；次数为填入矢量的数量+1
+        /// 矢量贝塞尔曲线插值；次数为填入矢量的数量-1
         /// </summary>
         public static Vector2 BezierLerp(float amout, params Vector2[] veclist)
         {

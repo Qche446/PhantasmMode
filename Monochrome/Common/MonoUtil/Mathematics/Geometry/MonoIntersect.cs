@@ -390,6 +390,17 @@ namespace Monochrome.Common.MonoUtil
             /// <param name="box">轴对齐盒。</param>
             public static bool CircleAABB(MonoCircle circle, MonoAABB box) => box.IntersectsCircle(circle.Center, circle.Radius);
 
+            /// <summary>圆 × 整数矩形（当成轴对齐盒）。</summary>
+            /// <param name="circle">圆。</param>
+            /// <param name="box">矩形。</param>
+            public static bool CircleAABB(MonoCircle circle, Rectangle box) => CircleAABB(circle, MonoAABB.FromRectangle(box));
+
+            /// <summary>圆 × 整数矩形（直接给圆心与半径）。</summary>
+            /// <param name="center">圆心。</param>
+            /// <param name="radius">半径。</param>
+            /// <param name="box">矩形。</param>
+            public static bool CircleAABB(Vector2 center, float radius, Rectangle box) => CircleAABB(new MonoCircle(center, radius), box);
+
             /// <summary>圆 × 有向盒。</summary>
             /// <param name="circle">圆。</param>
             /// <param name="box">有向盒。</param>

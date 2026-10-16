@@ -1,7 +1,7 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -13,9 +13,9 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantMark1 : MutantMark1, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantMark1 : MutantMark1, IMonoOwnedProj<MutantBoss>
     {
-        bool IProjOwnedByBoss<MutantBoss>.SetActiveFalseInsteadOfKill => true;
+        bool IMonoOwnedProj<MutantBoss>.SetActiveFalseInsteadOfKill => true;
         //会发射激光的幻影球
         public override void AI()
         {

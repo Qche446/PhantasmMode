@@ -12,11 +12,12 @@ Monochrome 是面向 tModLoader 内容模组的图形与特效基础库，主要
 | 物理模块：绳索求解器、参数指南、这一版做什么不做什么 | [`Core/Physics/README.md`](Core/Physics/README.md) |
 | 蠕虫段链：布局描述、走链导航、体节跟随与头部移动 | [`Content/Worms/README.md`](Content/Worms/README.md) |
 | 状态 / Buff 系统：层数、每实体数据、实体级钩子、图标角标 | [`Content/Status/README.md`](Content/Status/README.md) |
+| 伤害与防御管线：规则表、段、内置规则、命中追踪、边界清单 | [`Content/Damage/README.md`](Content/Damage/README.md) |
 | 整个库的设计蓝图：分层、模块清单、优先级、工程规范、反模式 | [`docs/构建蓝图.md`](docs/构建蓝图.md) |
 | 数学与几何工具 | [`Common/MonoUtil/`](Common/MonoUtil/)（每类都有 XML 注释，IDE 里直接看） |
 
-游戏内的诊断命令都挂在 `/mono` 下，只读的那些随时可用，会改状态的（重编着色器、染色自检）只在开发期生效，见本文末尾。
-核心层另外有 `/mono core`（子系统、事件总线、时钟、调度器、日志，以及用 `alloc` 实测每帧分配），见 [`Core/README.md`](Core/README.md)。
+游戏内的诊断命令有四条：`/monocore`、`/monoshader`、`/mononet`、`/monodamage`。只读的随时可用，会改状态的（重编着色器、染色自检、开启命中追踪）只在开发期生效，见本文末尾；每条输入 `help` 都能看自己的子命令清单。
+核心层那条还带 `alloc`，用来实测每帧分配，见 [`Core/README.md`](Core/README.md)。
 
 ## 图形入口
 
@@ -110,21 +111,21 @@ glow.SetParameter("uIntensity", 1.5f)
 改完 `.fx` **不用重启游戏也不用手动编译**：
 
 ```
-/mono shader status                                  # 列出注册名、装入时间、资产路径
-/mono shader reload                                  # 全部重载
-/mono shader reload Monochrome.StandardPrimitive     # 重载单个
-/mono shader reload all                              # 强制全部重编（忽略 mtime 预筛）
-/mono capture status                                 # 屏幕后处理链的注册情况与捕获申请状态
-/mono capture test on                                # 自检：把整个世界染成暖色（界面不受影响）
-/mono capture fx                                     # 列出 6 个内置屏幕特效与各自的着色器状态
-/mono capture fx vignette on                         # 单独开关一条（用"一眼能看出来"的演示参数）
+/monoshader status                                   # 列出注册名、装入时间、资产路径
+/monoshader reload                                   # 全部重载
+/monoshader reload Monochrome.StandardPrimitive      # 重载单个
+/monoshader reload all                               # 强制全部重编（忽略 mtime 预筛）
+/monoshader capture                                  # 屏幕后处理链的注册情况与捕获申请状态
+/monoshader capture test on                          # 自检：把整个世界染成暖色（界面不受影响）
+/monoshader capture fxs                              # 列出 6 个内置屏幕特效与各自的着色器状态
+/monoshader capture fx vignette on                   # 单独开关一条（用"一眼能看出来"的演示参数）
 ```
 
 它编到临时文件 → 构造成功**才**替换正在用的 `Effect` → 最后原子写回源目录的 `.fxc`。所以**编译失败只会回一行错误，旧特效原样保留**，不会让画面上的东西消失。
 
 第一个可用资产是**图元默认着色器模板**：`MonoShaderManager.GetShader("Monochrome.StandardPrimitive")`，pass 名 `AutoloadPass`，贴图绑在**采样槽 1**（槽 0 留给 SpriteBatch）。它的 `debugMode ≥ 0.5` 会输出顶点契约可视化（R = 截面、G = 像素跨度 / 64、B = 长度参数），可用来肉眼验证契约；`useTexture` 默认 0，即纯顶点色。
 
-> **只改 `.fx` 而不重新编译 `.fxc`，等于什么都没改。** 产物必须与源一起提交。两条路都能重编：构建（自动重编比 `.fxc` 新的 `.fx`，`-Force` 强制全编）或游戏里 `/mono shader reload`（会顺带把 `.fxc` 写回源目录）。
+> **只改 `.fx` 而不重新编译 `.fxc`，等于什么都没改。** 产物必须与源一起提交。两条路都能重编：构建（自动重编比 `.fxc` 新的 `.fx`，`-Force` 强制全编）或游戏里 `/monoshader reload`（会顺带把 `.fxc` 写回源目录）。
 
 ### 其它
 
@@ -157,7 +158,7 @@ MonoPostFxPipeline pipeline = MonoPostFxSystem.GetOrCreate("Monochrome.Main");
 MonoScreenFx.AddTo(pipeline, "colorgrade", order: 20);   // 内置：blur / colorgrade / chromatic / scanline / grain / vignette
 pipeline.Add(new MonoVignettePass { Strength = 0.6f });  // 或者直接手搓一条
 MonoScreenCaptureSystem.Register(pipeline);
-// 自检：/mono capture test on（整幅染色，验证通路）；/mono capture fx <名字> on（逐条验证特效）
+// 自检：/monoshader capture test on（整幅染色，验证通路）；/monoshader capture fx <名字> on（逐条验证特效）
 ```
 
 **屏幕后处理的作用范围是「世界 + 世界内界面」，不含 HUD / 聊天 / 战斗文字 / 光标**——因为原版在 `FilterManager.EndCapture`（`Main.cs:60145`）之后才开始画界面，而那正是唯一的合法插入点。想让特效连 UI 一起处理需要另一条完全不同的路由，本库不做。
@@ -177,17 +178,20 @@ MonoCameraFollow.FollowPlayer();                     // 或 Follow(某个世界�
 ## 诊断命令与开发期开关
 
 ```
-/mono shader status                                  # 列出注册名、装入时间、资产路径
-/mono capture status                                 # 屏幕后处理链的注册情况与捕获申请状态
-/mono capture fx                                     # 列出内置屏幕特效与各自的着色器状态
-```
+/monoshader status                                   # 列出注册名、装入时间、资产路径
+/monoshader capture                                  # 屏幕后处理链的注册情况与捕获申请状态
+/monoshader capture fxs                              # 列出内置屏幕特效与各自的着色器状态
+/monodamage rules                                    # 伤害规则表：段、次序、目标、冻结状态
+/monodamage tags                                     # 已登记的伤害标签与位号
+/monodamage trace                                    # 命中追踪的开关状态
 
-上面三条**只读**，任何情况下都能用。下面这些会改动状态——热重载会把编译产物写回磁盘，自检会把整个画面染色——所以**只在开发期生效**：
+上面这些**只读**，任何情况下都能用。下面这些会改动状态——热重载会把编译产物写回磁盘、自检会把整个画面染色、开启追踪会给每次命中多存一份快照——所以**只在开发期生效**：
 
 ```
-/mono shader reload [名字|all|*]
-/mono capture test [on|off]
-/mono capture fx <名字|all> on|off
+/monoshader reload [名字|all|*]
+/monoshader capture test [on|off]
+/monoshader capture fx <名字|all> on|off
+/monodamage trace on
 ```
 
 "开发期"指**有调试器附加**（从 IDE 启动游戏，或给进程附加调试器）。之所以不用编译配置当判据，是因为 tML 构建模组时默认就是 Debug 配置，那样等于永远放行。

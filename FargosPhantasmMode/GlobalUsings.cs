@@ -10,3 +10,7 @@ global using Terraria.Graphics.Effects;
 global using Terraria.ID;
 global using System.Reflection;
 
+// 伤害规则表：标签与规则类型。
+global using Monochrome.Common.MonoUtil.Damage;
+global using Monochrome.Content.Damage;
+

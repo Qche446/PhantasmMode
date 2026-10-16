@@ -12,9 +12,6 @@ using FargowiltasSouls.Content.Projectiles;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.NPCMatching;
-using Luminance.Assets;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,7 +28,11 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using static FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins.P_Retinazer;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics.Screen;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
     /// <summary>
@@ -205,7 +206,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     }
                     */
                 }
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
                 npc.velocity -= 0.8f * vel;
             }
             if (++npc.ai[1] > chaseDuration + 30)
@@ -245,7 +246,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     {
                         Vector2 shotVel2 = vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
                         Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStarAcc>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
-                        SpawnElectricSpark(npc, vel);
+                        SpawnFargoElectricSparkParticle(npc, vel);
                     }
                 }
                 npc.velocity -= 0.5f * vel;
@@ -303,7 +304,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 {
                     Vector2 toTarget = npc.DirectionTo(Main.player[npc.target].Center);
                     npc.velocity += toTarget * 0.27f;
-                    npc.velocity = npc.velocity.RotateTowards(toTarget.ToRotation(), 0.007f);
+                    npc.velocity = MonoUtil.RotateTowards(npc.velocity, toTarget.ToRotation(), 0.007f);
                 }
             }
             if (npc.ai[2] >= 80) // 冲刺结束
@@ -418,7 +419,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     float chargeSpeed = MathHelper.SmoothStep(30, 40f, progress);
                     npc.velocity = chargeSpeed * npc.SafeDirectionTo(player.Center);
                     npc.rotation = npc.velocity.ToRotation() - 1.57f;
-                    ScreenShakeSystem.StartShake(3f);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
                     npc.netUpdate = true;
                 }
 
@@ -442,7 +443,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 {
                     Vector2 toTarget = npc.DirectionTo(Main.player[npc.target].Center);
                     npc.velocity += toTarget * MathHelper.SmoothStep(0.3f, 0.4f, progress);
-                    npc.velocity = npc.velocity.RotateTowards(toTarget.ToRotation(), 0.007f);
+                    npc.velocity = MonoUtil.RotateTowards(npc.velocity, toTarget.ToRotation(), 0.007f);
                 }
             }
             Vector2 targetPos = player.Center;// + 600 * player.SafeDirectionTo(npc.Center);
@@ -673,7 +674,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         }
                     }
                 }
-                ScreenShakeSystem.StartShake(3f);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
                 npc.velocity -= 0.4f * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
             }
             if (++npc.ai[1] > 120 + 360)
@@ -768,7 +769,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
                             10 * Vector2.UnitX.RotatedBy(i * MathHelper.TwoPi / max - 4 * MathHelper.Pi * npc.ai[2] / 180f), projType2, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer,
                             0, ai2: MechElectricOrb.Yellow);
-                    SpawnElectricSpark(npc, vel);
+                    SpawnFargoElectricSparkParticle(npc, vel);
                 }
                 npc.ai[2]++;
             }
@@ -827,7 +828,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     Main.myPlayer, npc.target, ai2: pT.OrbColor);
                 Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 10 * vel.RotatedByRandom(0.05f * MathF.PI), ProjectileID.EyeFire, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 1, Main.myPlayer);
                 Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 10 * vel.RotatedByRandom(0.05f * MathF.PI), ModContent.ProjectileType<ShadowFlame>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 1, Main.myPlayer);
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
             }
             if (npc.ai[1] >= prepTime)
             {
@@ -880,7 +881,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                                 continue;
                             Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
                             Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
-                            SpawnElectricSpark(npc, vel);
+                            SpawnFargoElectricSparkParticle(npc, vel);
                         }
                     }
                 }
@@ -978,7 +979,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                             Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
                                 30 * vel.RotatedBy(i * MathHelper.Pi / 6), ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f,
                                 Main.myPlayer, ai2: self.OrbColor);
-                            SpawnElectricSpark(npc, vel);
+                            SpawnFargoElectricSparkParticle(npc, vel);
                         }
                         for (float i = 0.7f; i <= 1.6f; i += 0.2f)
                         {
@@ -1036,7 +1037,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         {
                             Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
                             Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, ModContent.ProjectileType<DarkStar>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
-                            SpawnElectricSpark(npc, vel);
+                            SpawnFargoElectricSparkParticle(npc, vel);
                         }
                         //Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, vel, ModContent.ProjectileType<DarkStarTwins>(), FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target);
                     }
@@ -1046,7 +1047,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         {
                             Vector2 shotVel2 = 20 * vel.RotatedBy(MathHelper.PiOver2 * spreadAngle * i);
                             Projectile.NewProjectile(npc.GetSource_FromThis(), spawnPos, shotVel2, laserType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer, npc.target, ai2: MechElectricOrb.Yellow);
-                            SpawnElectricSpark(npc, vel);
+                            SpawnFargoElectricSparkParticle(npc, vel);
                         }
                     }
                 }
@@ -1327,7 +1328,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 npc.dontTakeDamage = false;
                 ChooseAttack(npc);
                 SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
-                ScreenShakeSystem.StartShake(20f);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(20f);
                 if (FargoSoulsUtil.HostCheck)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, npc.type, 0, 20);
@@ -1355,7 +1356,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc),
                         10 * vel, projType, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 1f, Main.myPlayer,
                         0, 1, MechElectricOrb.Yellow);
-                        SpawnElectricSpark(npc, vel);
+                        SpawnFargoElectricSparkParticle(npc, vel);
                     }
                 }
                 npc.ai[2]++;
@@ -1543,7 +1544,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 {
                     Vector2 toTarget = npc.DirectionTo(Main.player[npc.target].Center);
                     npc.velocity += toTarget * 0.28f;
-                    npc.velocity = npc.velocity.RotateTowards(toTarget.ToRotation(), 0.007f);
+                    npc.velocity = MonoUtil.RotateTowards(npc.velocity, toTarget.ToRotation(), 0.007f);
                 }
             }
             if (npc.ai[2] >= 80) // 冲刺结束
@@ -1642,7 +1643,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Main.NewText(npc.ai[2] + bro.ai[2]);
                         //Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsFireBackground>(), 0, 0, Main.myPlayer, ai0: npc.whoAmI, 0);
                         //SoundEngine.PlaySound(SoundID.ForceRoarPitched, npc.Center);
-                        //ScreenShakeSystem.StartShake(20f);
+                        //MonoScreenEffectsSystem.StartShakeByAmplitude(20f);
                         //Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center, Vector2.Zero, ModContent.ProjectileType<TwinsWave>(), 0, 0, Main.myPlayer, ai1: 0, ai2: 20);
                     }
                     else
@@ -1756,7 +1757,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                             npc.target, ai2: MechElectricOrb.Green);
                     }
                 }
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
                 npc.velocity -= Main.rand.NextFloat(0.3f, 0.6f) * vel;
                 npc.netUpdate = true;
             }
@@ -1914,7 +1915,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         }
                     }
                 }
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
                 float num = isLocked ? 15: Main.rand.NextFloat(15f, 21f);
                 npc.velocity -= num * vel;
                 npc.ai[2]++;
@@ -1977,7 +1978,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 else
                     flagY *= -1;
                 npc.velocity -= 5 * vel;
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
                 npc.netUpdate = true;
             }
             if (++npc.ai[1] > 360)
@@ -2049,7 +2050,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     Main.myPlayer, npc.target, ai2: pT.OrbColor);
                 p.timeLeft = q.timeLeft = 180;
                 Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, 10 * vel.RotatedByRandom(0.05f * MathF.PI), ProjectileID.EyeFire, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 1, Main.myPlayer);
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
             }
             if (npc.ai[1] >= prepTime)
             {
@@ -2218,7 +2219,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     {
                         Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                             .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                        Particle p = new ElectricSpark(npc.Center + (npc.width - 24) * vel,
+                        MonoParticle p = new FargoElectricSparkParticle(npc.Center + (npc.width - 24) * vel,
                             particleVel, Color.Yellow, Main.rand.NextFloat(0.7f, 1f), 20);
                         p.Spawn();
                     }
@@ -2312,7 +2313,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                         Main.myPlayer, npc.target, ai2: npc.type == NPCID.Retinazer ? MechElectricOrb.Yellow : MechElectricOrb.Green);
                     Main.projectile[p].timeLeft = 150;
                 }
-                SpawnElectricSpark(npc, vel);
+                SpawnFargoElectricSparkParticle(npc, vel);
                 npc.velocity -= 2f * vel;
             }
             if (++npc.ai[1] > 240)
@@ -2334,7 +2335,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     Projectile.NewProjectile(npc.GetSource_FromThis(), ShootPos(npc), Main.rand.NextFloat(0.8f * speed, speed) * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2 + MathHelper.ToRadians(Main.rand.NextFloat(-5, 5))),
                         ProjectileID.EyeFire, FargoSoulsUtil.ScaledProjectileDamage(npc.damage), 0f, Main.myPlayer);
                 }
-                ScreenShakeSystem.StartShake(3f);
+                MonoScreenEffectsSystem.StartShakeByAmplitude(3f);
             }
             #region 主逻辑
             float rotationInterval = 1.05f * 2f * (float)Math.PI * 1.2f / 4f / 60f;
@@ -2555,7 +2556,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 Vector2 vec = r * Main.rand.NextVector2Unit();
                 Vector2 spawn = ShootPos(npc) + vec;
                 Color c = npc.type == NPCID.Retinazer ? Color.Red : Color.Green;
-                SparkParticle spark = new SparkParticle(spawn, -0.04f * vec, c, 0.5f, 20);
+                MonoParticle spark = new FargoSparkParticle(spawn, -0.04f * vec, c, 0.5f, 20);
                 spark.Spawn();
                 //FireMetaBall fm = ModContent.GetInstance<FireMetaBall>();
                 //fm.CreateParticle(ShootPos(npc), vec, 60f);
@@ -2629,7 +2630,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         public static void RotateTowards(NPC npc, Vector2 targetPos, float turnSpeed = 0.18f) => P_EyeOfCthulhu.RotateTowards(npc, targetPos, turnSpeed);
         public static Vector2 ShootPos(NPC npc) => npc.Center + (npc.width - 24) * Vector2.UnitX.RotatedBy(npc.rotation + MathHelper.PiOver2);
 
-        public static void SpawnElectricSpark(NPC npc, Vector2 vel)
+        public static void SpawnFargoElectricSparkParticle(NPC npc, Vector2 vel)
         {
             if (FargoSoulsUtil.HostCheck)
             {
@@ -2637,7 +2638,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 {
                     Vector2 particleVel = (vel * 1.1f).RotatedBy(MathHelper.PiOver2 * 0.075f * j)
                         .RotatedByRandom(MathHelper.PiOver2 * 0.04f) * Main.rand.NextFloat(0.8f, 1.2f);
-                    Particle p = new ElectricSpark(ShootPos(npc),
+                    MonoParticle p = new FargoElectricSparkParticle(ShootPos(npc),
                         particleVel, npc.type == NPCID.Retinazer ? Color.Yellow : Color.Green, Main.rand.NextFloat(0.7f, 1f), 20);
                     p.Spawn();
                 }
@@ -2751,13 +2752,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 return false;
             return base.CanHitPlayer(npc, target, ref cooldownSlot);
         }
-        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            if (AIState == TwinsAtt.CurvedDeathRay)
-                modifiers.FinalDamage /= 2;
-            base.ModifyIncomingHit(npc, ref modifiers);
-        }
-
         public override bool CheckDead(NPC npc) => Checkdead(npc);
 
         public override Color? GetAlpha(NPC npc, Color drawColor)
@@ -2807,7 +2801,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     return;
                 var maxOpacity = npc.Opacity * AuraOpacity;
 
-                ManagedShader borderShader = ShaderManager.GetShader("FargowiltasSouls.TwinsAuraShader");
+                MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.TwinsAuraShader");
                 borderShader.TrySetParameter("colorMult", 7.35f);
                 borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
                 borderShader.TrySetParameter("radius", radius);
@@ -2837,7 +2831,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
             Vector2 offset = ShootPos(npc);
             Vector2 position = npc.Center + offset;
-            Texture2D flare = MiscTexturesRegistry.BloomFlare.Value;
+            Texture2D flare = FargosTextureRegistry.BloomFlareTexture.Value;
             float flarescale = Main.rand.NextFloat(0.1f, 0.15f);
 
 
@@ -2976,13 +2970,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 return false;
             return base.CanHitPlayer(npc, target, ref cooldownSlot);
         }
-        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            if (AIState == TwinsAtt.RollingShoot)
-                modifiers.FinalDamage /= 2;
-            base.ModifyIncomingHit(npc, ref modifiers);
-        }
-
         public override bool CheckDead(NPC npc) => Checkdead(npc);
 
         public override Color? GetAlpha(NPC npc, Color drawColor)

@@ -11,7 +11,6 @@ using FargowiltasSouls.Content.Items.Summons;
 using FargowiltasSouls.Content.WorldGeneration;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.StateMachines;
-using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Monochrome.Core.Net;
 using ReLogic.Content;
@@ -19,6 +18,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics.Shaders;
 using Terraria.ModLoader.IO;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.Coffin
 {
@@ -106,7 +106,10 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                         for (int i = 0; i < count; i++)
                             Self(npc).StateMachine.StateStack.Push(Self(npc).StateMachine.StateRegistry[(BehaviorStates)reader.ReadByte()]);
                     });
-
+        public override GlobalNPC NewInstance(NPC target)
+        {
+            return null;
+        }
         private static P_CursedCoffin Self(NPC npc) => npc.GetGlobalNPC<P_CursedCoffin>();
 
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);

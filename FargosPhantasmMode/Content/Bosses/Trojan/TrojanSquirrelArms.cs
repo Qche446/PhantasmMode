@@ -5,8 +5,7 @@ using FargowiltasSouls.Content.Bosses.Champions.Timber;
 using FargowiltasSouls.Content.Bosses.TrojanSquirrel;
 using FargowiltasSouls.Content.Projectiles.Minions;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Sounds;
+using Monochrome.Core.Sounds;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
@@ -20,6 +19,7 @@ using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.Trojan
 {
@@ -27,7 +27,7 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
     {
         public NPC body;
         public bool Ghost = false;
-        public LoopedSoundInstance Loop;
+        public MonoLoopedSound Loop;
         int looptimer;
         public override int NPCType => ModContent.NPCType<TrojanSquirrelArms>();
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot) => !Ghost;
@@ -151,7 +151,7 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
         {
             if (++looptimer >= 90)
             {
-                Loop ??= LoopedSoundManager.CreateNew(FargosSoundRegistry.TrojanHookLoop with { Volume = 0.5f }, () =>
+                Loop ??= MonoLoopedSoundManager.CreateNew(FargosSoundRegistry.TrojanHookLoop with { Volume = 0.5f }, () =>
                 {
                     return npc == null || !npc.active || npc.ai[0] != 1;
                 });

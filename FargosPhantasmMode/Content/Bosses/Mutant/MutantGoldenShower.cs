@@ -3,7 +3,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Masomode;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantGoldenShower : GoldenShowerWOF, IProjOwnedByBoss<MutantBoss>
+    public class MutantGoldenShower : GoldenShowerWOF, IMonoOwnedProj<MutantBoss>
     {
         public override void SetDefaults()
         {

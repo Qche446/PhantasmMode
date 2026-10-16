@@ -2,14 +2,15 @@
 using FargowiltasSouls.Common.Graphics.Particles;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Common.MonoUtil;
 
+using FargosPhantasmMode.Common.Particles;
+using Monochrome.Core.Graphics.Particles;
 namespace FargosPhantasmMode.Content.Bosses.Abom
 {
     public class AbomScytheSplit : ModProjectile
@@ -128,7 +129,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             Color purpl = new(102f / 255f, 84f / 255f, 150f / 255f);
             for (int i = 0; i < sparkMax; i++)
             {
-                Particle p = new SparkParticle(Projectile.Center, Main.rand.NextVector2CircularEdge(speed, speed) * Main.rand.NextFloat(0.4f, 0.7f), purpl, Main.rand.NextFloat(1f, 1.5f), 17, true, Color.White);
+                MonoParticle p = new FargoSparkParticle(Projectile.Center, Main.rand.NextVector2CircularEdge(speed, speed) * Main.rand.NextFloat(0.4f, 0.7f), purpl, Main.rand.NextFloat(1f, 1.5f), 17, true, Color.White);
                 p.Spawn();
             }
             EnhancedDeathEffect();

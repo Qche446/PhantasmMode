@@ -1,14 +1,12 @@
-﻿using FargosPhantasmMode.Content.Buffs.Global;
+﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.InfoDisplays;
+using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Expert;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.Toggler;
 using System.Collections.Generic;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
 namespace FargosPhantasmMode.Content.Items.Accessories
 {
     public class Germ : ModItem
@@ -25,10 +23,11 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Item.accessory = true;
             Item.rare = ItemRarityID.Master;
             Item.value = Item.sellPrice(0, 1, 0, 0);
+            Item.GetGlobalItem<PModeGlobalItem>().Phantasm = true;
         }
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
-            var pp = player.GetModPlayer<PModeBuffPlayer>();
+            var pp = player.Phantasm();
             pp.DotCanDie = true;
             pp.DotCrit = true;
             player.AddEffect<GermDotEffect>(Item);

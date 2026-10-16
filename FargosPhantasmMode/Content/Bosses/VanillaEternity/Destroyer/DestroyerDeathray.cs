@@ -3,7 +3,6 @@ using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -11,6 +10,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
 {
     public class DestroyerDeathray : BaseDeathray
@@ -142,11 +144,11 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
             Color brightColor = new Color(0, 150, 255, 100);
 
             // 获取着色器
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.WillBigDeathray");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillBigDeathray");
             shader.TrySetParameter("mainColor", brightColor);
             Texture2D fademap = ModContent.Request<Texture2D>("FargowiltasSouls/Assets/ExtraTextures/Trails/WillStreak").Value;
             FargoSoulsUtil.SetTexture1(fademap);
-            PrimitiveRenderer.RenderTrail(baseDrawPoints, new(WidthFunction, ColorFunction, Shader: shader), 30);
+            MonoPrim.RenderTrail(baseDrawPoints, new MonoPrimitiveSettings(WidthFunction, ColorFunction, Shader: shader), 30);
 
 
             return false;

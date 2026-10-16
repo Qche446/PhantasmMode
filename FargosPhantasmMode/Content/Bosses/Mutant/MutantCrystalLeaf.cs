@@ -1,17 +1,17 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantCrystalLeaf : MutantCrystalLeaf, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantCrystalLeaf : MutantCrystalLeaf, IMonoOwnedProj<MutantBoss>
     {
         //ai0传mark2参数,ai1传初始角度，ai2传旋转方向(大小)
         float Length = 100f;

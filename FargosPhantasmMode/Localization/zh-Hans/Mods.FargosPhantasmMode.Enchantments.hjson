@@ -12,7 +12,7 @@ CobaltEnchant:
 	'''
 MythrilEnchant: 减少停止使用物品后秘银条的充能延迟，略微提升秘银条充能速度
 OrichalcumEnchant: 强化后的减益伤害提升增加至300%，[c/FF0000:但你受到的减益伤害也会增加20%]
-PalladiumEnchant: 钯金治疗将强化[c/FF8000:快速治疗]增益，提供5点防御和部分减益伤害的减免
+PalladiumEnchant: 钯金治疗将强化[pbuff:RapidHealing]增益，提供5点防御和部分减益伤害的减免
 TitaniumEnchant:
 	'''
 	击中敌人时积攒钛金充能，充能完成后生成数个钛金碎片光环
@@ -27,9 +27,9 @@ TurtleEnchant: 无
 ChlorophyteEnchant: 获得丛林魔石强化能力
 CrimsonEnchant:
 	'''
-	再次受击时会刷新[c/C8364B:猩红治愈]而不是仅仅只是清除
+	再次受击时会刷新[pbuff:FargowiltasSouls/CrimsonRegenBuff]而不是仅仅只是清除
 	猩红治愈期间额外增加伤害加成和伤害减免，效果正比于该状态的持续时间
-	"[c/FF0000:猩红治愈单次治疗量不会超过100]"
+	"[pbuff:FargowiltasSouls/CrimsonRegenBuff][c/FF0000:单次治疗量不会超过100]"
 	'''
 FrostEnchant: 发射的弹幕会不断坠落雪花，攻击造成霜冻减益
 JungleEnchant: 增强丛林系列物品，增强的物品会被特殊标记
@@ -58,8 +58,8 @@ ForbiddenEnchant: 无
 FossilEnchant: 无
 HallowEnchant:
 	'''
-	使用治疗物品时为自身施加[c/FFF230:圣灼]，该效果能让你免疫药水疾病，但是会全方位消减你的生存能力
-	期间再次使用治疗物品会增加效果的持续时间和强度，最高10层，同时你的攻击也将附带[c/FFF230:圣灼]
+	使用治疗物品时为自身施加[pbuff:FargosPhantasmMode/HallowFlameBuff]，该效果能让你免疫药水疾病，但是会全方位消减你的生存能力
+	期间再次使用治疗物品会增加效果的持续时间和强度，最高10层，同时你的攻击也将附带[pbuff:FargosPhantasmMode/HallowFlameBuff]
 	'''
 SpectreEnchant: 攻击时能生成幽魂弹幕，能伤害敌人或治疗你
 TikiEnchant: 鞭子长度获得最小值，强化时该最小值提升
@@ -103,7 +103,7 @@ EarthForce:
 	[i:FargowiltasSouls/CobaltEnchant]进一步提升跳跃能力
 	[i:FargowiltasSouls/MythrilEnchant]大幅提升秘银条充能速度
 	[i:FargowiltasSouls/OrichalcumEnchant]减益伤害提升增加至300%
-	[i:FargowiltasSouls/PalladiumEnchant]钯金治疗将强化[c/FF8000:快速治疗]增益，提供5点防御和部分减益伤害的减免
+	[i:FargowiltasSouls/PalladiumEnchant]钯金治疗将强化[pbuff:RapidHealing]增益，提供5点防御和部分减益伤害的减免
 	[i:FargowiltasSouls/TitaniumEnchant]击中敌人时积攒钛金充能，充能完成后生成数个钛金碎片光环
 	"星球之核，隆隆作响……"
 	'''
@@ -117,7 +117,7 @@ LifeForce:
 NatureForce:
 	'''
 	[i:FargowiltasSouls/SnowEnchant][i:FargowiltasSouls/FrostEnchant]发射的弹幕产生伤害性尾迹
-	[i:FargowiltasSouls/CrimsonEnchant]受击时获得[c/C8364B:猩红治愈]，期间提升伤害，增加伤害减免
+	[i:FargowiltasSouls/CrimsonEnchant]受击时获得[pbuff:FargowiltasSouls/CrimsonRegenBuff]，期间提升伤害，增加伤害减免
 	[i:FargowiltasSouls/JungleEnchant]强化丛林系列物品
 	[i:FargowiltasSouls/MoltenEnchant]受击时产生爆炸并击退你
 	[i:FargowiltasSouls/ShroomiteEnchant]发射的弹幕穿透次数提升，但是伤害降低
@@ -136,7 +136,7 @@ SpiritForce:
 	[i:FargowiltasSouls/AncientHallowEnchant]召唤一个可以手操的泰拉棱镜
 	[i:FargowiltasSouls/FossilEnchant]你会以幽魂姿态复活
 	[i:FargowiltasSouls/SpectreEnchant]攻击时能生成幽魂弹幕，能伤害敌人或治疗你
-	[i:FargowiltasSouls/HallowEnchant]使用治疗物品时为自身施加[c/FFF230:圣灼]，最大层数解放为15
+	[i:FargowiltasSouls/HallowEnchant]使用治疗物品时为自身施加[pbuff:FargosPhantasmMode/HallowFlameBuff]，最大层数解放为15
 	[i:FargowiltasSouls/TikiEnchant]鞭子长度获得最小值
 	"瞿烁精神，振奋人心……"
 	'''

@@ -5,9 +5,7 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
-using Luminance.Common.DataStructures;
-using Luminance.Common.Utilities;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,6 +13,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Screen;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
@@ -22,7 +24,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// ai0控制初始生成激光的角偏，ai1=whomi，ai2控制旋转方向（正负号）
     /// 激光个数固定为4，弹幕总生存时间120帧，旋转速度从零线性增加，120帧内旋转完90°
     /// </summary>
-    public class MutantWillBomb : WillBomb, IProjOwnedByBoss<MutantBoss>
+    public class MutantWillBomb : WillBomb, IMonoOwnedProj<MutantBoss>
     {
         float speed = 0;
         public override string Texture => "FargowiltasSouls/Content/Bosses/Champions/Will/WillBomb";
@@ -56,7 +58,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 SoundEngine.PlaySound(SoundID.Item92, Projectile.Center);
 
                 if (Main.LocalPlayer.active)
-                    ScreenShakeSystem.StartShake(10, shakeStrengthDissipationIncrement: 10f / 30);
+                    MonoScreenEffectsSystem.StartShakeByAmplitude(10, 10f / 30);
 
                 if (FargoSoulsUtil.HostCheck)
                 {
@@ -141,7 +143,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
         }
     }
-    public class MutantWillDeathray : BaseDeathray, IProjOwnedByBoss<MutantBoss>
+    public class MutantWillDeathray : BaseDeathray, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "FargowiltasSouls/Content/Bosses/Champions/Will/WillDeathray";
         float omiga = 0;
@@ -297,7 +299,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return false;
             }
 
-            ManagedShader shader = ShaderManager.GetShader("FargowiltasSouls.WillDeathray");
+            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillDeathray");
             Vector2 value = base.Projectile.Center + base.Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance;
             Vector2 value2 = base.Projectile.Center - base.Projectile.velocity * 150f;
             Vector2[] array = new Vector2[8];
@@ -309,7 +311,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Color color = new Color(252, 252, 192, 100);
             shader.TrySetParameter("mainColor", color);
             ModContent.Request<Texture2D>("FargowiltasSouls/Assets/ExtraTextures/Trails/WillStreak").Value.SetTexture1();
-            PrimitiveRenderer.RenderTrail(array, new PrimitiveSettings(WidthFunction, ColorFunction, null, Smoothen: true, Pixelate: false, shader), 30);
+            MonoPrim.RenderTrail(array, new MonoPrimitiveSettings(WidthFunction, ColorFunction, null, Smoothen: true, Shader: shader), 30);
             return false;
         }
     }

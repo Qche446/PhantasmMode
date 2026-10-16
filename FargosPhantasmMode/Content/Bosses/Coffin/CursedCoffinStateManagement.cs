@@ -5,9 +5,9 @@ using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.WorldGeneration;
 using FargowiltasSouls.Core.Systems;
 using Luminance.Common.StateMachines;
-using Luminance.Common.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Bosses.Coffin
 {
@@ -107,7 +107,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
                 LockVector1 = Player.Top - Vector2.UnitY * 250f;
                 npc.velocity.Y = -4f;
                 npc.velocity.X /= 2f;
-                if ((float)Utilities.NonZeroSign(npc.velocity.X) != Utilities.HorizontalDirectionTo((Entity)npc, Player.Center))
+                if ((float)MonoUtil.NonZeroSign(npc.velocity.X) != MonoUtil.HorizontalDirectionTo((Entity)npc, Player.Center))
                 {
                     npc.velocity.X = 0f;
                 }

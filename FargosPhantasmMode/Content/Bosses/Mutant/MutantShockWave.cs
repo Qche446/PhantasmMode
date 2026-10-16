@@ -1,21 +1,21 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
-using Luminance.Common.DataStructures;
-using Luminance.Core.Graphics;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
     /// <summary>
     /// ai0持续时间，ai1扩散速度,ai2为计时器
     /// </summary>
-    public class MutantShockWave : ModProjectile, IProjOwnedByBoss<MutantBoss>
+    public class MutantShockWave : ModProjectile, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public override Color? GetAlpha(Color lightColor) => lightColor * Projectile.Opacity;
@@ -44,7 +44,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             var diagonalNoise = FargosTextureRegistry.WavyNoise;
             var blackTile = TextureAssets.MagicPixel;
             float R = Projectile.ai[1] * Timer;
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
             shader.TrySetParameter("screenPosition", Main.screenPosition);
             shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
             shader.TrySetParameter("color1", Color.Teal);
@@ -67,7 +67,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
     /// <summary>
     /// ai0持续时间，ai1初始半径,ai2为计时器
     /// </summary>
-    public class MutantContractionRing : MutantShockWave, IProjOwnedByBoss<MutantBoss>
+    public class MutantContractionRing : MutantShockWave, IMonoOwnedProj<MutantBoss>
     {
         ref float Timer => ref Projectile.ai[2];
         private float Vel => Projectile.ai[1] / Projectile.ai[0];
@@ -85,7 +85,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             var diagonalNoise = FargosTextureRegistry.WavyNoise;
             var blackTile = TextureAssets.MagicPixel; 
             float R = Math.Abs(Projectile.ai[1] - Vel * Timer);
-            ManagedShader shader = ShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
+            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
             shader.TrySetParameter("screenPosition", Main.screenPosition);
             shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
             shader.TrySetParameter("color1", Color.Teal);

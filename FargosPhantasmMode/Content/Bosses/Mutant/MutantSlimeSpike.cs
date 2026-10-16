@@ -1,7 +1,7 @@
 ﻿using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Core.Globals;
-using Luminance.Common.DataStructures;
+using Monochrome.Common.MonoUtil;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class PHMutantSlimeSpike : MutantSlimeSpike, IProjOwnedByBoss<MutantBoss>
+    public class PHMutantSlimeSpike : MutantSlimeSpike, IMonoOwnedProj<MutantBoss>
     {
         public override void AI()
         {
