@@ -85,6 +85,22 @@ namespace FargosPhantasmMode.Content.Items.Weapons
         }
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            for (int i = -1; i <= 1; i++)
+            {
+                Vector2 dir = (Projectile.velocity.ToRotation() + i * MathHelper.TwoPi / 6f).ToRotationVector2();
+                var p = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), target.Center + 30 * dir, dir, ModContent.ProjectileType<BloodBullets>(), (int)(Projectile.damage * 0.5f), Projectile.knockBack, Projectile.owner);
+                p.localAI[2] = 1;
+                p.penetrate = 4;
+                p.Phantasm().CaseCrush += 1;
+                for (int j = -1; j <= 1; j++)
+                {
+                    Vector2 dir2 = (p.velocity.ToRotation() + j * MathHelper.TwoPi / 6f).ToRotationVector2();
+                    var p2 = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), target.Center + 90 * dir + 30 * dir2, dir2, ModContent.ProjectileType<BloodBullets>(), (int)(Projectile.damage * 0.5f), Projectile.knockBack, Projectile.owner);
+                    p2.localAI[2] = 1;
+                    p2.penetrate = 4;
+                    p2.Phantasm().CaseCrush += 1;
+                }
+            }
             Owner.velocity = Owner.SafeDirectionTo(target.Center) * -18f;
             Projectile.Kill();
             int time1 = 5;

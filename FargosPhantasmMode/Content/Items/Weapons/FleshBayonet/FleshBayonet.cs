@@ -1,6 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls.Content.Items.Weapons.Challengers;
 using Monochrome.Common.MonoUtil;
 using Terraria.DataStructures;
@@ -13,7 +12,6 @@ namespace FargosPhantasmMode.Content.Items.Weapons
         public override string Texture => TexturePath + "FleshBayonet";
 
         public Color Color1 => Color.Red;
-
         public Color Color2 => Color.Yellow;
 
         public override void SetStaticDefaults()
@@ -24,7 +22,7 @@ namespace FargosPhantasmMode.Content.Items.Weapons
         {
             Item.width = 80;
             Item.height = 80;
-            Item.SetWeaponValues(33, 4, 0);
+            Item.SetWeaponValues(36, 4, 0);
             Item.DamageType = DamageClass.MeleeNoSpeed;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.useTime = 30;
@@ -122,13 +120,13 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                             max = (int)(max * 2f);
                         for (int i = 0; i < max; i++)
                         {
-                            ShootBloodBullet(1, 0.4f, Main.MouseWorld + Main.rand.NextVector2Unit() * Main.rand.NextFloat(0, 200), BloodBullets.Diffusion, Main.rand.Next(1, 3));
+                            ShootBloodBullet(1, 0.5f, Main.MouseWorld + Main.rand.NextVector2Unit() * Main.rand.NextFloat(0, 200), BloodBullets.Diffusion, Main.rand.Next(1, 3));
                         }
                     }
                     break;
                 case 3:
                     {
-                        Projectile.NewProjectileDirect(source, position, velocity, ModContent.ProjectileType<FleshBayonet_Dash>(), (int)(damage * (hyper ? 8 : 4)), knockback, player.whoAmI, ai2: hyper ? 1 : 0);
+                        Projectile.NewProjectileDirect(source, position, velocity, ModContent.ProjectileType<FleshBayonet_Dash>(), (int)(damage * (hyper ? 4 : 2)), knockback, player.whoAmI, ai2: hyper ? 1 : 0);
                     }
                     break;
             };

@@ -2,5 +2,5 @@ displayName = Fargo's Souls Phantasm Mode
 author = Qche
 version = 0.3
 buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Cache\*, Folders to Port\*, lib\*
-modReferences = FargowiltasSouls@1.7.3.9,Fargowiltas@3.3.6, Luminance@1.0.3, Monochrome@1.0.0
+modReferences = FargowiltasSouls@1.7.3.9,Fargowiltas@3.3.6, Monochrome@1.0.0
 sortAfter = FargowiltasSouls, Monochrome

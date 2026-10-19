@@ -1,4 +1,5 @@
 using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common.ChatTag;
 using FargosPhantasmMode.Content.Buffs;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Shadow;
 using FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Spirit;
@@ -9,12 +10,15 @@ using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using Mono.Cecil.Cil;
+using Monochrome.Common.MonoUtil;
 using MonoMod.Cil;
 using System.Collections.Generic;
+using System.Linq;
+using Terraria.GameInput;
 using Terraria.Localization;
-using Monochrome.Common.MonoUtil;
+using Terraria.UI.Chat;
 
-namespace FargosPhantasmMode.Content.Items.Global
+namespace FargosPhantasmMode.Content.Items
 {
     public class PModeGlobalItem : GlobalItem
     {
@@ -72,6 +76,7 @@ namespace FargosPhantasmMode.Content.Items.Global
         {
             if (Phantasm)
                 tooltips.Add(new TooltipLine(Mod, $"{Mod.Name}:Phantasm", Language.GetTextValue("Mods.FargosPhantasmMode.Items.Extra.Phantasm")));
+            AddBuffInfomation(item, tooltips);
         }
         public override bool PreDrawTooltipLine(Item item, DrawableTooltipLine line, ref int yOffset)
         {
@@ -99,6 +104,75 @@ namespace FargosPhantasmMode.Content.Items.Global
             }
             return true;
 
+        }
+        private void AddBuffInfomation(Item item, List<TooltipLine> tooltips)
+        {
+            var buffIdsInTooltip = new HashSet<int>();
+            foreach (var tooltip in tooltips)
+            {
+                var snippets = ChatManager.ParseMessage(tooltip.Text, Color.White);
+                foreach (var snippet in snippets)
+                {
+                    if (snippet is PModeBuffTag.Snippet buffSnippet)
+                    {
+                        buffIdsInTooltip.Add(buffSnippet.BuffId);
+                    }
+                }
+            }
+            if (buffIdsInTooltip.Count > 0)
+            {
+                bool showTheTip = false;
+                bool foundDebuff = false;
+                foreach (int buffId in buffIdsInTooltip)
+                {
+                    string tooltipKey = "";
+                    if (buffId < BuffID.Count)
+                    {
+                        tooltipKey = $"Mods.Terraria.Buffs.{BuffID.Search.GetName(buffId)}.ItemTooltip";
+                    }
+                    else
+                    {
+                        //模组buff
+                        var modBuff = BuffLoader.GetBuff(buffId);
+                        tooltipKey = $"Mods.{modBuff.Mod.Name}.Buffs.{modBuff.Name}.ItemTooltip";
+                    }
+
+                    if (!Language.Exists(tooltipKey))
+                    {
+                        continue;
+                    }
+
+                    var text = Language.GetTextValue(tooltipKey);
+                    if (string.IsNullOrWhiteSpace(text))
+                    {
+                        continue;
+                    }
+
+                    foundDebuff = true;
+                    if (!PlayerInput.Triggers.Current.SmartCursor)
+                    {
+                        showTheTip = true;
+                        break;
+                    }
+
+                    tooltips.Add(new TooltipLine(Mod, "FPM:AltExpandTooltip" + buffId, $"[pbuff:{buffId}]\n{text}"));
+                }
+
+                if (showTheTip)
+                {
+                    var str = PlayerInput.CurrentProfile.InputModes[InputMode.Keyboard].KeyStatus["SmartCursor"].First().ToString();
+                    tooltips.Add((new TooltipLine(Mod, "FPM:AltExpandTooltip", Language.GetTextValue("Mods.FargosPhantasmMode.UI.AltExpand").Replace("{0}", str))));
+                    tooltips[^1].OverrideColor = new Color(170, 170, 170);
+                }
+                else if (foundDebuff)
+                {
+                    foreach (var item1 in tooltips)
+                    {
+                        if (item1.Name.Contains("Tooltip") && !item1.Name.Contains("AltExpandTooltip"))
+                            item1.Hide();
+                    }
+                }
+            }
         }
     }
 }

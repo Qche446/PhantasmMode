@@ -18,3 +18,4 @@ ExpandedFeatures:
 PhantasmOn: "[c/2FD6FF:Masochist Mode trembles; Phantasm Mode is now enabled.]"
 PhantasmOff: "[c/2FD6FF:Phantasm Mode has been disabled.]"
 PhantasmFTWWarning: "[c/2FD6FF:Legendary Masochist blooms anew; Legendary Phantasm is enabled. Good luck ^ ^]"
+AltExpand: Hold {0} to see buff information

@@ -1,11 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\tModLoader.targets" />
 	
 	<PropertyGroup>
 		<LangVersion>preview</LangVersion>
 		<TargetFramework>net8.0</TargetFramework>
 	</PropertyGroup>
-	
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/Generated</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+		<None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="Fargowiltas">
 			<HintPath>lib\Fargowiltas.dll</HintPath>
@@ -19,6 +26,7 @@
 			<HintPath>lib\Luminance.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
+		<ProjectReference Include="..\FargosPhantasmMode.SourceGenerator\FargosPhantasmMode.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Monochrome\Monochrome.csproj" />
 	</ItemGroup>
 	<ItemGroup>

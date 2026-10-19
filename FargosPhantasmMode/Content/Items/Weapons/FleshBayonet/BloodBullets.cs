@@ -1,8 +1,4 @@
 ﻿using FargosPhantasmMode.Common;
-using FargosPhantasmMode.Common.Particles;
-using Monochrome.Common.MonoUtil;
-using static Terraria.GameContent.Animations.IL_Actions.Sprites;
-
 namespace FargosPhantasmMode.Content.Items.Weapons
 {
     public class BloodBullets : ModProjectile
@@ -80,8 +76,8 @@ namespace FargosPhantasmMode.Content.Items.Weapons
             if (Timer < 20)
             {
                 Projectile.Opacity += 0.1f;
-                Projectile.scale = Projectile.Opacity * 0.5f;
-                Dust dust3 = Dust.NewDustPerfect(Projectile.Center + Main.rand.NextVector2Circular(16f, 16f), 5, Projectile.velocity * MathHelper.Lerp(0.2f, 0.5f, Main.rand.NextFloat()));
+                Projectile.scale = Projectile.Opacity * 0.6f;
+                Dust dust3 = Dust.NewDustPerfect(Projectile.Center + Main.rand.NextVector2Circular(16f, 16f), DustID.Blood, Projectile.velocity * MathHelper.Lerp(0.2f, 0.5f, Main.rand.NextFloat()));
                 dust3.velocity += Main.rand.NextVector2Circular(0.5f, 0.5f);
                 dust3.velocity *= 0.5f;
                 dust3.scale = 0.8f + Main.rand.NextFloat() * 0.5f;
@@ -116,7 +112,7 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 Vector2 dir = (Projectile.rotation + i * MathHelper.TwoPi / 3f).ToRotationVector2();
                 var p = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), Projectile.Center + 30 * dir, dir, Type, (int)(Projectile.damage * 0.5f), Projectile.knockBack, Projectile.owner);
                 p.localAI[2] = 1;
-                p.penetrate = -1;
+                p.penetrate = 4;
                 p.Phantasm().CaseCrush += 1;
             }
         }
@@ -130,7 +126,7 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 Vector2 dir = (Projectile.rotation + i * MathHelper.TwoPi / 3f).ToRotationVector2();
                 var p = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), Projectile.Center + 30 * dir, dir, Type, (int)(Projectile.damage * 0.5f), Projectile.knockBack, Projectile.owner);
                 p.localAI[2] = 1;
-                p.penetrate = -1;
+                p.penetrate = 4;
                 p.Phantasm().CaseCrush += 1;
             }
         }

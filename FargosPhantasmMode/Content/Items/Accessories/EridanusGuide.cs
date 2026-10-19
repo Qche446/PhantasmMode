@@ -1,5 +1,4 @@
 ﻿using FargosPhantasmMode.Common;
-using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Armor;

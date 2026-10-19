@@ -1,5 +1,4 @@
 ﻿using FargosPhantasmMode.Content.Buffs;
-using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.UI.Elements;

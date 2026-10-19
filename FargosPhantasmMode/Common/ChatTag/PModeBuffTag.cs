@@ -111,16 +111,15 @@ namespace FargosPhantasmMode.Common.ChatTag
             }
             return def;
         }
-        public static readonly List<int> redBuff = [BuffID.OnFire3, ModContent.BuffType<PungentGazeBuff>(), ModContent.BuffType<BerserkedBuff>(), 
-        ModContent.BuffType<HeartBrokenBuff>(), ModContent.BuffType<NanoErosionBuff>()];
-        public static readonly List<int> orangeBuff = [BuffID.RapidHealing, ModContent.BuffType<SmiteBuff>(), BuffID.OnFire, BuffID.Ichor, ModContent.BuffType<HallowFlameBuff>(), 
-        BuffID.Daybreak];
-        public static readonly List<int> yellowBuff = [BuffID.Honey, ModContent.BuffType<InfestedBuff>()];
-        public static readonly List<int> greenBuff = [BuffID.CursedInferno, BuffID.Poisoned, ModContent.BuffType<IvyVenomBuff>()];
-        public static readonly List<int> cyanBuff = [ModContent.BuffType<CurseoftheMoonBuff>(), ModContent.BuffType<MutantFangBuff>()];
-        public static readonly List<int> blueBuff = [BuffID.Frostburn, BuffID.Frostburn2, BuffID.Frozen, ModContent.BuffType<OceanicMaulBuff>()];
-        public static readonly List<int> purpleBuff = [BuffID.Venom, ModContent.BuffType<HunterMark>(), BuffID.ShadowFlame];
-        public static readonly List<int> garyBuff = [ModContent.BuffType<NeurotoxinBuff>(), ModContent.BuffType<MutantNibbleBuff>(), ModContent.BuffType<FractureBuff>()];
-        public static readonly List<int> whitebuff = [ModContent.BuffType<PhSublimationBuff>(), ModContent.BuffType<TimeGodsTrickBuff>(), ModContent.BuffType<FlawlessBuff>()];
+        public static readonly List<int> redBuff = [BuffID.OnFire3, PBuffID.PungentGazeBuff, PBuffID.BerserkedBuff, PBuffID.BulletReload, PBuffID.PrayerofTaintedBlood,
+            PBuffID.HeartBrokenBuff, PBuffID.NanoErosionBuff];
+        public static readonly List<int> orangeBuff = [BuffID.RapidHealing, PBuffID.SmiteBuff, BuffID.OnFire, BuffID.Ichor, PBuffID.HallowFlameBuff, BuffID.Daybreak];
+        public static readonly List<int> yellowBuff = [BuffID.Honey, PBuffID.InfestedBuff];
+        public static readonly List<int> greenBuff = [BuffID.CursedInferno, BuffID.Poisoned, PBuffID.IvyVenomBuff];
+        public static readonly List<int> cyanBuff = [PBuffID.CurseoftheMoonBuff, PBuffID.MutantFangBuff];
+        public static readonly List<int> blueBuff = [BuffID.Frostburn, BuffID.Frostburn2, BuffID.Frozen, PBuffID.OceanicMaulBuff];
+        public static readonly List<int> purpleBuff = [BuffID.Venom, PBuffID.HunterMark, BuffID.ShadowFlame];
+        public static readonly List<int> garyBuff = [PBuffID.NeurotoxinBuff, PBuffID.MutantNibbleBuff, PBuffID.FractureBuff];
+        public static readonly List<int> whitebuff = [PBuffID.PhSublimationBuff, PBuffID.TimeGodsTrickBuff, PBuffID.FlawlessBuff];
     }
 }

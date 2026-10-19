@@ -7,6 +7,7 @@ using Terraria.GameContent.Creative;
 using Terraria.ID;
 using static Terraria.GameContent.Creative.CreativePowers;
 using Monochrome.Common.MonoUtil;
+using FargosPhantasmMode.Content.Bosses.Coffin;
 
 namespace FargosPhantasmMode.Core.Systems
 {

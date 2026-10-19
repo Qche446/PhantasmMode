@@ -308,7 +308,7 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
                 for(int i = 0; i < max; i++)
                 {
                     Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center + 50 * Main.rand.NextVector2Unit(), 5 * Main.rand.NextVector2Unit(), ModContent.ProjectileType<SqBomb>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 0, Main.myPlayer,
-                        end - start / 2 + i * 10 - max * 5, i * 30 - max * 15, ai2: npc.target);
+                        end - start / 2 + i * 10 - max * 5, i * 30 - max * 15, npc.target);
                 }
             }
             if (npc.ai[1] % 4 == 0)

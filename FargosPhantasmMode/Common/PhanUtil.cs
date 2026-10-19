@@ -1,11 +1,7 @@
 using FargowiltasSouls;
-using Luminance.Common.StateMachines;
 using MonoMod.Cil;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Monochrome.Common.MonoUtil;
 using FargosPhantasmMode.Content.NPCs.PGlobalNPC;
 using FargosPhantasmMode.Core.Players;
 using FargosPhantasmMode.Content.Projectiles;

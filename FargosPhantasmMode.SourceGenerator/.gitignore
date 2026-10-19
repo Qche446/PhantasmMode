@@ -1,0 +1,10 @@
+# 构建产物
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+docs/

@@ -4,6 +4,8 @@ using Monochrome.Content.Damage;
 using Monochrome.Content.Damage.Rules;
 
 using Monochrome.Common.MonoUtil;
+using FargosPhantasmMode.Content.Bosses.Coffin;
+using FargowiltasSouls.Content.Bosses.CursedCoffin;
 namespace FargosPhantasmMode.Common.DamageRules
 {
     /// <summary>
@@ -20,6 +22,18 @@ namespace FargosPhantasmMode.Common.DamageRules
         {
             MonoDamage.Register(new PModeElementRule());
 
+            // 史莱姆王与克苏鲁之眼：对荆棘旋刃的减伤。
+            MonoDamage.Register(new MonoConditionalReductionRule(0.25f,
+                when: IsThornChakram, targetType: NPCID.KingSlime));
+
+            MonoDamage.Register(new MonoConditionalReductionRule(0.15f,
+                when: IsThornChakram, targetType: NPCID.EyeofCthulhu));
+
+            //棺材
+            MonoDamage.Register(new MonoConditionalReductionRule(0.75f, 
+                when: CoffinPhaseChange, 
+                targetType: ModContent.NPCType<CursedCoffin>()));
+
             // 双子：死亡射线与滚动射击期间各自减伤一半。
             MonoDamage.Register(new MonoConditionalReductionRule(0.5f,
                 when: static info => TwinsInState<P_Retinazer>(info, TwinsAtt.CurvedDeathRay),
@@ -28,14 +42,6 @@ namespace FargosPhantasmMode.Common.DamageRules
             MonoDamage.Register(new MonoConditionalReductionRule(0.5f,
                 when: static info => TwinsInState<P_Spazmatism>(info, TwinsAtt.RollingShoot),
                 targetType: NPCID.Spazmatism));
-
-            // 史莱姆王与克苏鲁之眼：对荆棘旋刃的减伤。
-            MonoDamage.Register(new MonoConditionalReductionRule(0.25f,
-                when: IsThornChakram, targetType: NPCID.KingSlime));
-
-            MonoDamage.Register(new MonoConditionalReductionRule(0.15f,
-                when: IsThornChakram, targetType: NPCID.EyeofCthulhu));
-
             // 状态带来的破甲与易伤都在这一条里，加新效果直接改 PModeBuffDamageRule。
             MonoDamage.Register(new PModeBuffDamageRule());
         }
@@ -51,5 +57,10 @@ namespace FargosPhantasmMode.Common.DamageRules
             => MonoDamageSource.TryTargetNpc(info, out NPC npc)
                && npc.GetGlobalNPC<T>() is IPTwins twins
                && twins.AIState == state;
+
+        ///棺材是否在阶段转换状态
+        private static bool CoffinPhaseChange(MonoDamageInfo info)
+            => MonoDamageSource.TryTargetNpc(info, out NPC npc) && npc.TryGetGlobalNPC<P_CursedCoffin>(out var p) &&
+            (p.Fsm.Current == P_CursedCoffin.State.PhaseTransition1st || p.Fsm.Current == P_CursedCoffin.State.PhaseTransition2nd);
     }
 }

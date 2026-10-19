@@ -117,7 +117,7 @@ PrayerofTaintedBlood: {
 	Description: 流失生命值，强化血肉铳剑的攻击方式
 	ItemTooltip:
 		'''
-		对玩家：5dps
-		对地怪：25dps
+		对玩家：12.5dps
+		对敌怪：25dps
 		'''
 }

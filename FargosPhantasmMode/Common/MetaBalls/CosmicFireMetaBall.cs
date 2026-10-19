@@ -1,6 +1,5 @@
 using FargosPhantasmMode.Assets.ExtraTextures;
 using FargosPhantasmMode.Common.Particles;
-using Luminance.Core.Graphics;
 using Monochrome.Core.Graphics.Metaballs;
 using Monochrome.Core.Graphics.Shaders;
 

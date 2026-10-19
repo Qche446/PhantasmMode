@@ -35,8 +35,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
         public override void SetDefaults(NPC npc)
         {
             if (!Main.getGoodWorld)
-                npc.lifeMax = (int)(1.2f * npc.lifeMax);
-            else
                 npc.lifeMax = (int)(1.1f * npc.lifeMax);
         }
         /// <summary>
@@ -105,8 +103,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                                 Main.npc[slime].ai[0] = Math.Sign(player.Center.X - npc.Center.X);
                                 Main.npc[slime].velocity.X = Main.rand.NextFloat(10, 16) * 0.4f * -npc.HorizontalDirectionTo(player.Center);
                             }
-                            // 速度与 ai[0] 是刷完之后才赋的：让这一只自己把改好的值发出去
-                            // （新 NPC 本身由原版的 NPC.NewNPC 广播，不必再手发一包）
                             Main.npc[slime].netUpdate = true;
                         }
                     }
@@ -377,7 +373,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                 if (PhanUtil.HostCheck)
                 {
                     npc.ai[0] = -100f;
-                    npc.TargetClosest();
+                    //npc.TargetClosest();
                     npc.netUpdate = true;
                 }
             }
@@ -624,6 +620,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     if (SuperSpecialJump)
                     {
                         npc.velocity *= 0;
+                        /*
                         if (Main.rand.NextBool(2))
                         {
                             float distance = 0;
@@ -641,6 +638,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                                 Main.dust[dust2].noGravity = true;
                             }
                         }
+                        */
                     }
                     if (npc.ai[0] >= 30f && Main.netMode != NetmodeID.MultiplayerClient)
                     {
@@ -656,7 +654,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                         }
                         npc.ai[0] = 0f;
                         npc.netUpdate = true;
-                        npc.TargetClosest();
+                        //npc.TargetClosest();
                     }
                     // 状态机只由权威端推进；客户端靠同步下来的 ai 值与 SendExtraAI 里的 SuperSpecialJump 跟随。
 
@@ -690,6 +688,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     {
                         SoundEngine.PlaySound(SoundID.Item21, player.Center);
                         MonoScreenEffectsSystem.StartShakeByAmplitude(10);
+                        SoundEngine.PlaySound(in SoundID.Dig, npc.Center);
+                        for (int i = 0; i < 20; i++)
+                        {
+                            Dust.NewDust(npc.BottomLeft, npc.width, 1, DustID.Dirt, Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-2f, 0f), 0, default, 2f);
+                            Dust.NewDust(npc.BottomLeft, npc.width, 1, DustID.GemDiamond, Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-2f, 0f), 0, default, 2f);
+                        }
                         if (PhanUtil.HostCheck && npc.HasValidTarget)
                         {
                             //Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Zero, ModContent.ProjectileType<KSShockWave>(), 0, 0, Main.myPlayer, 60, 30);
@@ -717,9 +721,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
                     if (npc.ai[3] > SuperSpecialJumpWindupTimer + 2 * Waittime && Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         npc.ai[1] = npc.ai[3] = 0;
-                        npc.TargetClosest();
+                        //npc.TargetClosest();
                         npc.ai[0] = -120;
-                        // 少了这一句，改了 ai 也不会下发，客户端会一直停在放大状态。
                         npc.netUpdate = true;
                     }
                     break;

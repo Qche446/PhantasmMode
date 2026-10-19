@@ -50,12 +50,6 @@ namespace FargosPhantasmMode.Content.Bosses.Trojan
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter) => Fields.Write(npc, binaryWriter);
 
         public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader) => Fields.Read(npc, binaryReader);
-        public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
-        {
-            LeadingConditionRule rule = new(new Conditions.NotExpert());
-            rule.OnSuccess(ItemDropRule.OneFromOptions(1, BaseForce.EnchantsIn<TimberForce>()));
-            npcLoot.Add(rule);
-        }
         #endregion
         public override void OnFirstTick(NPC npc)
         {

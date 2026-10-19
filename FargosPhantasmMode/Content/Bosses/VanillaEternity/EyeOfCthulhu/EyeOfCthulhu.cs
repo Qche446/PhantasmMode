@@ -19,6 +19,8 @@ using Monochrome.Core.Graphics.Screen;
 
 using FargosPhantasmMode.Common.Particles;
 using Monochrome.Core.Graphics.Particles;
+using Monochrome.Core;
+using FargosPhantasmMode.Common;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     /// <summary>
@@ -28,7 +30,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
     public class P_EyeOfCthulhu : PModeNPCBehaviour
     {
         public override int NPCType => NPCID.EyeofCthulhu;
-
         public bool recolor = true;
         public bool DroppedSummon;
         public int TeleportDirection;
@@ -570,6 +571,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.netUpdate = true;
                 }
             }
+            ShotScytheNormal(npc);
         }
         private void NormalTpDash(NPC npc, Player player)//tp冲刺
         {
@@ -828,6 +830,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                     npc.netUpdate = true;
                 }
             }
+            ShotScytheNormal(npc);
         }
         private void FastTpDashs(NPC npc,Player player)//高频tp冲刺
         {
@@ -2034,6 +2037,12 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
         #endregion
         #region 辅助方法
+        private static void ShotScytheNormal(NPC npc)
+        {
+            if (PhanUtil.HostCheck)
+                if (MonoScheduler.Cooldown("eocscycle", 6))
+                    Projectile.NewProjectile(npc.GetSource_FromThis(), npc.Center, Vector2.Normalize(npc.velocity) * 1.2f, ModContent.ProjectileType<BloodScythe>(), FargoSoulsUtil.ScaledProjectileDamage(npc.defDamage), 1f, Main.myPlayer);
+        }
         private static void FancyFireballs(NPC npc, int repeats)
         {
             float modifier = 0;

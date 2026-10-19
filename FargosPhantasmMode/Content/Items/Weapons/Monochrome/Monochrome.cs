@@ -1,5 +1,4 @@
-﻿using FargosPhantasmMode.Content.Items.Global;
-using Terraria.DataStructures;
+﻿using Terraria.DataStructures;
 
 namespace FargosPhantasmMode.Content.Items.Weapons;
 

@@ -1,6 +1,5 @@
 ﻿using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.InfoDisplays;
-using FargosPhantasmMode.Content.Items.Global;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
 using FargowiltasSouls.Content.Items.Accessories.Expert;
