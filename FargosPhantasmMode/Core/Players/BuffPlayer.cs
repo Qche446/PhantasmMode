@@ -14,6 +14,7 @@ namespace FargosPhantasmMode.Core.Players
         public bool CrushBuff;
         public int CrushCumulative;
         public const int MaxCrushCumulative = 100;
+        public bool RottenAirFlow;
         private void BuffReset()
         {
             Sublimation = false;
@@ -24,6 +25,7 @@ namespace FargosPhantasmMode.Core.Players
             BulletReload = false;
             PrayerofTaintedBlood = false;
             CrushBuff = false;
+            RottenAirFlow = false;
         }
         private void BuffPostUpdateEquips()
         {
@@ -33,6 +35,11 @@ namespace FargosPhantasmMode.Core.Players
             {
                 Player.AddBuff(ModContent.BuffType<CrushBuff>(), 120);
                 CrushCumulative = 0;
+            }
+            if (RottenAirFlow)
+            {
+                if (Player.wingTime < Player.wingTimeMax)
+                    Player.wingTime += 0.3f;
             }
         }
         private void DrawBuffEffect(PlayerDrawSet drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)

@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Common.Particles;
 using FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins;
 using FargosPhantasmMode.Content.Buffs;
@@ -43,8 +43,8 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 MinDistance = 0f,
                 PointsToCreate = 40,
                 UseUnscaledMatrix = true,
-                WidthFunction = t => MathHelper.SmoothStep(base.Projectile.scale * base.Projectile.width, 3.5f, 1f - t),
-                ColorFunction = t => Color.Lerp(Color.White, Color.Transparent, 1 - t) * 0.6f,
+                WidthFunction = t => MathHelper.SmoothStep(base.Projectile.scale * base.Projectile.width * 0.5f, 1.75f, t),
+                ColorFunction = t => Color.Lerp(Color.White, Color.Transparent, t) * 0.6f,
                 Texture = FargosTextureRegistry.FadedStreak.Value,
                 Offset = 0.5f * Projectile.Size
             };
@@ -126,8 +126,12 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 Main.EntitySpriteDraw(glow, value4 + Projectile.Size / 2f - Main.screenPosition + new Vector2(0, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(glowrectangle), color27,
                     Projectile.velocity.ToRotation() + MathHelper.PiOver2, gloworigin2, scale, SpriteEffects.None, 0);
             }
-            trail?.DrawFrom(Projectile.oldPos);
             return false;
+        }
+        // 基类 DarkStar 的 trail 这里从不绘制，只画自己这条。
+        public override void RenderPixelatedPrimitives()
+        {
+            trail?.DrawFrom(Projectile.oldPos);
         }
         public override void PostDraw(Color lightColor)
         {

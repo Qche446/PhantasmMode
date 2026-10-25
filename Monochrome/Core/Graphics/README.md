@@ -35,7 +35,7 @@ Monochrome 的图形与特效层：图元网格、渲染目标、着色器与热
 - [8. 性能红线](#8-性能红线)
 - [9. 已知缺口与历史](#9-已知缺口与历史)
 - [10. 常见错误速查](#10-常见错误速查)
-- [附录：Z（像素跨度）验证配方](#附录z像素跨度验证配方)
+- [附录：Z（截面半宽）验证配方](#附录z截面半宽验证配方)
 
 ---
 
@@ -99,7 +99,7 @@ Main.spriteBatch.ResetToDefault(end: false);
 
 #### 三个设计取舍
 
-1. **图元层不复用 `SpriteBatch`**：`SpriteBatch` 的顶点格式里没有"沿轨迹参数 / 截面坐标 / 像素宽度"
+1. **图元层不复用 `SpriteBatch`**：`SpriteBatch` 的顶点格式里没有"沿轨迹参数 / 截面坐标 / 截面半宽"
    这三个量，而自定义特效需要它们。代价是自己管缓冲、绕行与状态恢复，这些被收敛进
    `MonoPrimitiveRenderer` 一个类。
 2. **坐标空间做成显式枚举而不是重载**：`DrawCircleWorld` / `DrawCircleScreen` 这类重载会让"忘了选"
@@ -261,14 +261,20 @@ Monochrome/Core/Graphics/
 | 分量 | 含义 |
 |---|---|
 | **X** | 沿形状的长度/角度参数 `t ∈ [0,1]`。拖尾沿路径、圆与圆弧按角度、贴图四边形为真实纹理横坐标 |
-| **Y** | 截面坐标 `[0,1]`。`0` / `1` 是截面两侧，`0.5` 恒为正中。拖尾是左缘→右缘，圆与圆环是圆心/内径→边缘/外径 |
-| **Z** | `Y` 从 0 走到 1 跨越的**真实像素距离**。拖尾是条带全宽、圆环是环厚、圆是半径 |
+| **Y** | 截面坐标，**已按半宽偏移**：两侧是 `0.5 ∓ 半宽/2`，中线恒为 `0.5`。拖尾是左缘→右缘 |
+| **Z** | 截面半宽的**真实像素数**。拖尾是条带全宽的一半；圆、圆环、四边形这类没有像素截面的形状固定为 `1` |
 
-于是 `Y * Z` 就是"距截面 0 侧边缘的像素数"，这就是柔边能恒定 3 像素、虚线能在像素上等长的原因。
-布局与 Luminance 的 `VertexPosition2DColorTexture` 逐字段一致，所以顶点声明不需要试错。
+两种编码共用同一个还原公式 `section = (Y - 0.5) / Z + 0.5`，所以着色器只有一套写法：
 
-> **Z 已经实测验证过**，配方见文末附录。等宽拖尾证明不了它——`Solid(32f)` 的 Z 处处都是 32，
-> 无论它是"像素宽度""半宽"还是"常数"，画面都长得一样。
+- 拖尾、线段、虚线带真实半宽（`Z` 是像素），`section` 就是 0→1 的截面参数。距中线的像素数 = `2 * (Y - 0.5)`，
+  到边的最大偏移正好是 `Z`。柔边能恒定 3 像素、虚线能在像素上等长，都靠这个换算。
+- 圆、圆环、胶囊、多边形、贴图四边形、渐变矩形用归一化编码（`Z = 1`），`section` 直接就是 `Y`。
+
+布局与编码都与 Luminance 的 `VertexPosition2DColorTexture` 逐字段一致（它的条带顶点就是
+`(t, 0.5 ∓ width/2)` 配 `width`），所以为它写的像素着色器可以直接拿来用。
+
+> **Z 已经实测验证过**，配方见文末附录。等宽拖尾证明不了它——`Solid(32f)` 的 Z 处处都是 16，
+> 无论它是"半宽""全宽"还是"常数"，画面都长得一样。
 
 #### 5.2.2 绘制设置
 
@@ -278,14 +284,17 @@ Monochrome/Core/Graphics/
 | `MonoCircleSettings` | 实心圆 | `RadiusFunction`（沿角度的半径，可做心形/星形） |
 | `MonoCircleEdgeSettings` | 圆环带 | `RadiusFunction`（内径）+ `EdgeWidthFunction`（环厚，向外展开） |
 
-等宽单色拖尾用 `MonoPrimitiveSettings.Solid(width, color)`。三者都是 record，用命名参数构造。
+等宽单色拖尾用 `MonoPrimitiveSettings.Solid(width, color)`——它的 `width` 是条带全宽，内部折半写进设置；`WidthFunction` 本身返回的是半宽。三者都是 record，用命名参数构造。
 
 ```csharp
 // 沿轨迹收细、渐隐的拖尾
 MonoPrim.RenderTrail(projectile.oldPos, new MonoPrimitiveSettings(
-    WidthFunction: t => MathHelper.Lerp(12f, 1f, t),
+    WidthFunction: t => MathHelper.Lerp(6f, 0.5f, t),
     ColorFunction: t => Color.Cyan * (1f - t)));
 ```
+
+零值点当"未填充"处理，重采样前会被滤掉（`Projectile.oldPos` 还没被写过的槽就是零值）。
+不平滑与平滑两条路径都这么做，所以刚生成的弹幕不会有一条拉到世界原点的条带。
 
 #### 5.2.3 MonoPrimitiveRenderer —— 内部结构
 
@@ -293,7 +302,7 @@ MonoPrim.RenderTrail(projectile.oldPos, new MonoPrimitiveSettings(
 |---|---|
 | 缓冲 | **动态**顶点/索引缓冲，容量 `MaxPoints = 4096` 点 → 16384 顶点 / 24576 索引；每次提交 `SetDataOptions.Discard` 覆盖写 |
 | 索引类型 | `short`。最大顶点索引 16383 < `short` 上限，所以安全 |
-| 一次提交 | 一个形状一次 `DrawIndexedPrimitives`。这是图元层存在的全部意义 |
+| 一次提交 | 一个形状一次 `DrawIndexedPrimitives`；批次里同一块缓冲只上传一次，形状仍按调用顺序各画一次 |
 | 状态 | `Flush` 前后自己保存/恢复顶点缓冲绑定、索引缓冲、光栅化（`CullNone`）与混合状态，**不污染 `SpriteBatch`** |
 | 零分配 | 复用静态 `scratch[]` / `quadCorners[]` / `scratchList`；弧、贝塞尔、虚线都不 `new[]` |
 | 着色器 | 没传 `shader` 就用默认图元着色器；连它也没加载到才回退 `BasicEffect`（只用顶点色）。成功取到会缓存，失败则下次重试 |
@@ -338,8 +347,34 @@ public class MyLaser : ModProjectile, IMonoPixelatedPrimitive
 三条边界：
 
 - **不要在 `RenderPixelatedPrimitives` 里开关 `SpriteBatch`**，它已经在原始绘制路径上（与 `MonoPrim.*` 同一约定）。接口也因此不带 `SpriteBatch` 参数。
-- **`UseUnscaledMatrix = true` 只管矩阵、不改坐标换算**：`Space` 保持默认的 `World`，位置照旧给世界坐标。它也意味着宽度单位是全宽——见 5.2.2 里与 Luminance 的差异。
-- 目标**按需创建**：某个层从没出现过内容就不建它。建过而某一帧空了的层仍会被清一次，所以效果结束时不会留下最后一帧。
+- **`UseUnscaledMatrix = true` 只管矩阵、不改坐标换算**：`Space` 保持默认的 `World`，位置照旧给世界坐标。它不影响宽度单位：`WidthFunction` 一律是半宽，与 Luminance 相同。
+- **`t` 的方向跟着点列走**：0 是传进来的第一个点、1 是最后一个。用 `Projectile.oldPos` 时 0 就是头（最新那个点），与 Luminance 的 `completionRatio` 完全一致，从那边搬来的宽度/颜色函数不用在参数上做任何翻转。
+- 目标**按需创建、空层不贴出**：某个层从没出现过内容就不建它；这一帧没有内容的层连贴出都不做，所以效果结束时不会留下最后一帧。连续约 10 秒没有内容的层会连同目标一起回收，下次有内容时重建。
+
+#### 5.2.6 MonoPrimitiveBatch —— 批次
+
+多条拖尾、多个粒子一起画时，逐个提交的代价在"每个形状一次缓冲上传与状态切换"。用批次把它们攒起来：
+
+```csharp
+using MonoPrimitiveBatch batch = MonoPrim.Batch();
+foreach (MonoTrail trail in trails)
+    trail.Draw();
+```
+
+提交时仍按调用顺序各画一次，所以叠色结果与逐个绘制完全一致；省下的是缓冲上传。
+一块装不下（顶点超过 `MaxVertices = 16384`）会先提交当前块再继续，调用方不用管容量。
+
+库内已有两个消费者接上：`MonoPixelationSystem` 每层一个批次、`MonoTrailSystem` 每帧一个批次。
+
+**边界**：批次不能嵌套，重复开会在 `MonoPrim.Batch()` 处抛 `InvalidOperationException`。
+作用域里不要再做别的原始绘制或开 `SpriteBatch`——命令是延迟执行的，会和它们错开。
+诊断读 `MonoPrimitiveRenderer.LastFrameSubmissions` 与 `LastFrameVertices`（上一 tick 的提交批数与顶点数）。
+
+**索引要用缓冲里的绝对下标**：每个图元先取自己的基准顶点（`vertexCount`），再按它偏移着连三角形。批次里前面可能已经躺着别的图元，索引从 0 数会把后面的形状画成第一个的形状。
+
+**状态怎么跟着走**：绘制被推迟了，所以"边攒边设的着色器状态"必须按命令回放，否则整批会用最后一个实体的参数去画。
+回放覆盖三样：`shader.SetTexture(...)`、`shader.TrySetParameter(...)`，以及**直接写采样槽 1 的调用**（例如
+`FargoSoulsUtil.SetTexture1(...)`——录制时快照槽 1，提交时逐条还原）。采样槽 1 是这层唯一的贴图约定，其它槽不在回放范围内。
 
 ---
 
@@ -452,7 +487,7 @@ PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回
 #### 第一个资产：`Monochrome.StandardPrimitive`
 
 图元的默认着色器模板，pass 名 `AutoloadPass`，贴图绑在采样槽 1。`debugMode ≥ 0.5` 输出顶点契约可视化
-（R = 截面、G = 像素跨度 / 64、B = 长度参数），可用来肉眼验证契约；`useTexture` 默认 0，即纯顶点色。
+（R = 还原后的截面、G = 半宽 / 32、B = 长度参数），可用来肉眼验证契约；`useTexture` 默认 0，即纯顶点色。
 
 ---
 
@@ -970,7 +1005,7 @@ recorded.Update(Projectile.Center);
 | 只画不想记 | `MonoPrim.RenderTrail(点列, MonoPrimitiveSettings)`（§5.2） |
 | 内置的条纹贴图 | `MonoTrailTextures.Streak`（程序生成，横向无缝） |
 
-`Source` 与 `DrawFrom` 都是按 **"新的在前"** 理解输入的（`oldPos` 就是这个顺序），库负责翻成 `RenderTrail` 要的"尾巴在前"，并跳过零值槽（`oldPos` 里还没被填过的那几个就是零）。所以宽度/颜色函数里的 `t` 仍然 **0 为尾、1 为头**。
+`Source` 与 `DrawFrom` 都是按 **"新的在前"** 理解输入的（`oldPos` 就是这个顺序），库只跳过零值槽（`oldPos` 里还没被填过的那几个就是零），顺序原样使用。所以宽度/颜色函数里的 `t` 是 **0 为头、1 为尾**，与 Luminance 的 `completionRatio` 一致：那边把 `oldPos` 交给 `RenderTrail` 时，0 也是最新那个点。
 
 **两种画法**：`Spawn()` 过的拖尾由 `MonoTrailSystem` 在世界绘制相位（`On_Main.DrawDust`）每帧自动画一次，调用方只要负责 `Update`——FPM 的 `HunterMark_Black` 走的就是这条；界面空间的拖尾别 `Spawn`，自己在界面相位调 `Draw`。**它不自己推进时间**：`Update` 什么时候被调、调几次，由调用方决定。
 
@@ -979,8 +1014,8 @@ recorded.Update(Projectile.Center);
 **边界：**
 
 - **头部会滞后一个 `velocity`**：`Projectile.Update` 是先 `AI()`（`Projectile.cs:14926`）后 `UpdatePosition()`（`17457`），所以在 `AI` 里 `Update(Center)` 采到的头点必然差最后那一步，`PostAI` 也在积分之前、帮不上。**推荐直接用 `Source = () => Projectile.oldPos`**——那是引擎维护的旧位置，顺序与零值都由库处理，比自己采样省事也少一步滞后。**采样点不要塞进 `Draw`**：绘制必须保持纯的（一帧可能画 0 次，开了 `CaptureEntities` 时又可能画两次），而且往轨迹里插一个合成点只会让它出现突起。
-- **宽度单位是"全宽"**：`WidthFunction` 返回条带总宽，条带以中心线向两侧各展开一半。**Luminance 的是半宽**（`PrimitiveRenderer` 里两个顶点各 `± width`），同一个函数从那边搬过来要 <b>× 2</b>——不乘就画细一半，而症状只是"看着有点细"，很容易被当成贴图或着色器的问题去查。
-- `MonoTrailBuffer` 的容量至少 2；下标 0 是最旧的点，`Count-1` 是最新的。
+- **宽度单位是"半宽"**：`WidthFunction` 返回条带以中心线为轴向两侧各展开多少像素，与 Luminance 的 `PrimitiveRenderer`（两个顶点各 `± width`）完全一致，从那边搬来的函数直接用、不用换算。顶点上的 `Z` 就是这个半宽，所以为 lumi 写的像素着色器拿到的 `Z` 逐位相同。`Solid` 是例外：它的标量参数是条带全宽，内部折半后再写进设置。
+- `MonoTrailBuffer` 的容量至少 2；下标 0 是最新的点（头），`Count-1` 是最旧的；这个顺序与 `oldPos` 相同，可以直接喂 `RenderTrail`。
 - `MinDistance` 是"慢速时不堆点"的闸门，设成 0 就逐帧都记。
 - 着色器没加载到（缺 `.fxc`）时 `Draw` 退回默认图元着色器 + 顶点色路径，画出来是一条纯色条带，不会什么都不显示。
 
@@ -1001,8 +1036,8 @@ recorded.Update(Projectile.Center);
         ▼
 ③ 组装顶点：每个点推 2 个顶点（法线左右各一个）
         · 法线 = 切线的 90° 旋转；切线 = 当前点指向下一个点（末点用前一段）
-        · width = WidthFunction(t)，左右各展开 width/2
-        · 附加数据位：左 (t, 0, width)、右 (t, 1, width)
+        · half = WidthFunction(t)，左右各展开 half
+        · 附加数据位：左 (t, 0, 2·half)、右 (t, 1, 2·half)
         ▼
 ④ 组装索引：每相邻两点一个四边形（6 个索引）→ 共 2N 顶点、6(N−1) 索引
         ▼
@@ -1139,9 +1174,10 @@ recorded.Update(Projectile.Center);
 
 ---
 
-## 附录：Z（像素跨度）验证配方
+## 附录：Z（截面半宽）验证配方
 
-**结论：已验证通过。** 实测是一条从尾巴到头由细变粗的楔形，颜色由暗红渐变到亮青，与预测逐项吻合：
+**结论：已验证通过**（旧编码下实测；新编码的 `G` 读数与它完全重合，见文末"读数的巧合"）。
+实测是一条从尾巴到头由细变粗的楔形，颜色由暗红渐变到亮青，与预测逐项吻合：
 
 | 观察 | 预测 | 实测 |
 |---|---|---|
@@ -1150,10 +1186,10 @@ recorded.Update(Projectile.Center);
 | 右端颜色 | G≈255、B≈255 → 亮青 | 符合 |
 | 沿厚度方向 | R 从 0 到 255 | 符合 |
 
-也就是说 `TextureCoordinates.z` 确实等于"截面 0→1 跨越的像素距离"，量纲与数值都对。
+也就是说 `TextureCoordinates.z` 确实等于"截面半宽的像素数"——条带全宽是 `2Z`，量纲与数值都对。
 以后动过顶点写入或 `StandardPrimitive.fx`，重跑一次即可。
 
-**为什么必须用变宽拖尾**：`Solid(32f)` 的 Z 处处都是 32，无论它是"像素宽度""半宽"还是"常数"，
+**为什么必须用变宽拖尾**：`Solid(32f)` 的 Z 处处都是 16，无论它是"半宽""全宽"还是"常数"，
 画面都长得一样——等宽拖尾证明不了这件事。
 
 ### 配方
@@ -1166,12 +1202,12 @@ recorded.Update(Projectile.Center);
 const int N = 61;                                    // 等距密集点 → t 同时等于索引比与归一化弧长
 Vector2[] axis = new Vector2[N];
 for (int i = 0; i < N; i++)
-    axis[i] = new Vector2(100f + 1000f * i / (N - 1f), 300f);   // 横平竖直：厚度 = 宽度函数
+    axis[i] = new Vector2(100f + 1000f * i / (N - 1f), 300f);   // 横平竖直：厚度 = 2 × 宽度函数
 
 MonoShader prim = MonoShaderManager.GetShader(MonoPrimitiveRenderer.DefaultShaderName);
 prim.SetParameter("debugMode", 1f);
 MonoPrim.RenderTrail(axis, new MonoPrimitiveSettings(
-    WidthFunction: t => 4f + 60f * t,
+    WidthFunction: t => 2f + 30f * t,
     ColorFunction: _ => Color.White,
     Smoothen: false,
     Shader: prim,
@@ -1179,15 +1215,15 @@ MonoPrim.RenderTrail(axis, new MonoPrimitiveSettings(
 prim.SetParameter("debugMode", 0f);                  // 参数带缓存，必须显式还原
 ```
 
-`debugMode` 下每个像素是 `float4(coord.y, coord.z / 64, coord.x, 1)`，所以应该看到：**R 在同一个 x 上
-沿厚度从 0 到 255**（证明 Y 是左缘 0 / 右缘 1）、**G 在同一个 x 上恒定，只沿长度从 ≈16 爬到 ≈255**
-（这就是 Z）、**B 沿长度从 0 到 255**。
+`debugMode` 下每个像素是 `float4((coord.y - 0.5) / max(coord.z, 0.0001) + 0.5, coord.z / 32, coord.x, 1)`，
+所以应该看到：**R 在同一个 x 上沿厚度从 0 到 255**（截面还原成 0→1；原始 Y 已被半宽偏移过，不能直接看）、
+**G 在同一个 x 上恒定，只沿长度从 ≈16 爬到 ≈255**（这就是 Z）、**B 沿长度从 0 到 255**。
 
-| 位置 | 全宽 | 预期 G |
-|---|---|---|
-| 尾巴 `t = 0` | 4 px | 16/255 |
-| 中间 `t = 0.5` | 34 px | 135/255 |
-| 头 `t = 1` | 64 px | 255/255 |
+| 位置 | 全宽 | Z（半宽） | 预期 G（Z / 32） |
+|---|---|---|---|
+| 尾巴 `t = 0` | 4 px | 2 px | 16/255 |
+| 中间 `t = 0.5` | 34 px | 17 px | 135/255 |
+| 头 `t = 1` | 64 px | 32 px | 255/255 |
 
 ### 交叉验证：用尺子，不信着色器
 
@@ -1200,7 +1236,13 @@ G 来自顶点 Z 属性经着色器换算。两边对上，契约才成立。
 | 假设的缺陷 | G 的表现 | 与厚度是否对得上 |
 |---|---|---|
 | Z 恒为 0 | 全黑 | 对不上 |
-| Z 是常数（1 或 32） | 一条水平纯色（≈4 或 128） | 对不上 |
-| Z 是半宽而不是全宽 | 8 → 128 | 对不上（厚度量出来仍是 4→64） |
+| Z 是常数（1 或 32） | 一条水平纯色（≈8，或饱和到 255） | 对不上 |
+| Z 是全宽而不是半宽 | 8 → 255（中间就饱和） | 对不上（厚度量出来仍是 4→64） |
 | Z 被 zoom 乘过 | 跟着缩放变 | 只有 zoom = 1 时才对得上 |
-| Z 正确 | 16 → 255 | 对得上 |
+| Z 正确（= 半宽） | 16 → 255 | 对得上 |
+
+**读数的巧合**：旧编码是 `Z = 全宽` 配 `G = Z / 64`，新编码是 `Z = 半宽` 配 `G = Z / 32`，
+两者的 G 逐点相同——所以上面这套读数认不出编码换过，它当时证明的是"Z 与真实厚度同步、量纲是像素"。
+编码本身由两处钉住：`MonoPrimitiveVertex.SegmentCoordinate` 的单元用例（`Monochrome.CoreTests`），
+以及 Luminance `PrimitiveRenderer` 里 `(t, 0.5 ∓ width/2)` 配 `width` 的同一份写法。
+要肉眼分辨新旧编码，得上真正的贴图着色器：新编码下 `uv.y` 铺满整个截面，旧编码会把它压成中间一条窄带。

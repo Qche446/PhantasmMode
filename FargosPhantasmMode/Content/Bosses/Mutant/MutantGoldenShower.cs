@@ -1,15 +1,17 @@
-﻿using FargowiltasSouls.Assets.ExtraTextures;
+using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Core.Systems;
 using Monochrome.Common.MonoUtil;
+using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 using Monochrome.Core.Graphics.Trails;
 using Terraria.GameContent;
 
 namespace FargosPhantasmMode.Content.Bosses.Mutant
 {
-    public class MutantGoldenShower : ModProjectile, IMonoOwnedProj<MutantBoss>
+    public class MutantGoldenShower : ModProjectile, IMonoPixelatedPrimitive, IMonoOwnedProj<MutantBoss>
     {
         public override string Texture => "Terraria/Images/Projectile_288";
         private MonoTrail trail;
@@ -48,11 +50,13 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             }
             trail ??= new()
             {
-                WidthFunction = t => WidthFunction(1 - t),
-                ColorFunction = t => ColorFunction(1 - t),
+                Space = MonoGraphicsSpace.World,
+                WidthFunction = t => WidthFunction(t),
+                ColorFunction = t => ColorFunction(t),
                 PointsToCreate = 5,
                 Texture = FargosTextureRegistry.FadedStreak.Value,
                 UseUnscaledMatrix = true,
+                Offset = Projectile.Size * 0.5f,
             };
         }
         public override void OnHitPlayer(Player target, Player.HurtInfo info)
@@ -93,8 +97,11 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             Rectangle rectangle = new Rectangle(0, y, value.Width, num);
             Vector2 origin = rectangle.Size() / 2f;
             Main.EntitySpriteDraw(value, base.Projectile.Center - Main.screenPosition + new Vector2(0f, base.Projectile.gfxOffY), rectangle, Color.White, base.Projectile.rotation, origin, base.Projectile.scale, SpriteEffects.None);
-            trail?.DrawFrom(Projectile.oldPos);
             return false;
+        }
+        public void RenderPixelatedPrimitives()
+        {
+            trail?.DrawFrom(Projectile.oldPos);
         }
     }
 }

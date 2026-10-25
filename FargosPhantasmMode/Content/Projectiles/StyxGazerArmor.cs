@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.AbomBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
@@ -63,7 +63,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             value4.SetTexture1();
             for (int j = 0; j < 2; j++)
             {
-                MonoPrimitiveSettings settings = new MonoPrimitiveSettings(t => widthFunction(t) * 2f, ColorFunction, null, Smoothen: true, Shader: shader);
+                MonoPrimitiveSettings settings = new MonoPrimitiveSettings(t => widthFunction(t), ColorFunction, null, Smoothen: true, Shader: shader);
                 MonoPrim.RenderTrail(array, settings, 30);
             }
 

@@ -2,8 +2,8 @@
 //
 // 顶点契约（与 MonoPrimitiveVertex 一致）：
 //   Coord.x = 角度参数 t
-//   Coord.y = 0 圆心 → 1 边缘
-//   Coord.z = 半径（像素）
+//   Coord.y = 0 圆心 → 1 边缘（已归一化，本效果直接使用）
+//   Coord.z = 截面半宽；圆这类形状固定为 1，本效果不读它
 //
 // 关键性质：Coord.y 在扇形三角形上**线性插值**，因此三角形内部恒有 Y = d / r
 // （d 为到圆心的像素距离）。于是 (1 - Y) 与 CPU 侧 MonoMetaball.Influence 的线性衰减

@@ -45,7 +45,7 @@ public static class PhantomTextRender
     // 丝带参数。
     private const int RibbonCount = 3;
     private const int RibbonPoints = 28;
-    private const float RibbonThickness = 7f;
+    private const float RibbonThickness = 3.5f;
     private const float RibbonAmplitude = 2.2f;
     private const float RibbonSpread = 4.5f;
     private const float RibbonOpacity = 0.55f;

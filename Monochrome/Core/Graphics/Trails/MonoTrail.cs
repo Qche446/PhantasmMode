@@ -43,7 +43,7 @@ public class MonoTrail
         Buffer = new MonoTrailBuffer(capacity);
     }
 
-    /// <summary>轨迹点。下标 0 是尾巴、最后一个是头。</summary>
+    /// <summary>轨迹点。下标 0 是头（最新的点）、最后一个是尾巴。</summary>
     public MonoTrailBuffer Buffer { get; }
 
     /// <summary>记录时加到每个点上的偏移（例如把它从中心挪到贴图边缘）。</summary>
@@ -53,10 +53,10 @@ public class MonoTrail
     public float MinDistance = 0f;
 
     /// <summary>
-    /// 沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（0 为尾巴，1 为头），返回条带<b>全宽</b>（像素）。默认尾巴细、头粗。
-    /// <para><b>从 Luminance 搬过来时要乘 2</b>：那边的 <c>WidthFunction</c> 是半宽，同一个函数在这里会画细一半。</para>
+    /// 沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（<b>0 为头、1 为尾巴</b>），返回条带<b>半宽</b>（像素）。默认头粗、尾细。
+    /// <para>与 Luminance 的 <c>WidthFunction</c> 同义，从那边搬来的函数可以直接用。</para>
     /// </summary>
-    public Func<float, float> WidthFunction = static t => 26f * t;
+    public Func<float, float> WidthFunction = static t => 13f * (1f - t);
 
     /// <summary>沿轨迹的颜色函数，入参同上；颜色由 GPU 在顶点间插值。</summary>
     public Func<float, Color> ColorFunction = static _ => Color.White;
@@ -86,7 +86,7 @@ public class MonoTrail
     /// 是否强制用不含缩放的正交投影（像素化图元）。等价于 Luminance 那套里的 <c>Pixelate</c>：
     /// 打开之后条带的粗细按屏幕像素算、不随游戏缩放变化。
     /// </summary>
-    public bool UseUnscaledMatrix;
+    public bool UseUnscaledMatrix = true;
 
     /// <summary>重采样后的点数；<see langword="null"/> 表示按轨迹点数来。</summary>
     public int? PointsToCreate;
@@ -113,10 +113,9 @@ public class MonoTrail
     /// <summary>
     /// 外部点列来源，例如 <c>() =&gt; Projectile.oldPos</c>。
     /// <para>
-    /// 给了它就不必自己 <see cref="Update"/> 记点：每帧绘制时按它取一次。**两点由库负责**，
-    /// 这样调用方不用各写一遍：① 输入按"新的在前"理解（<c>oldPos</c> 就是这个顺序），会翻成
-    /// <c>RenderTrail</c> 要的"尾巴在前"，所以 <see cref="WidthFunction"/> 的 <c>t</c> 仍然是 0 为尾；
-    /// ② 跳过零值——<c>oldPos</c> 里那些还没被填过的槽就是零。
+    /// 给了它就不必自己 <see cref="Update"/> 记点：每帧绘制时按它取一次。点的顺序原样使用——
+    /// <c>oldPos</c> 的"新的在前"正好就是绘制要的方向，所以 <see cref="WidthFunction"/> 的 <c>t</c>
+    /// 与 Luminance 一样 0 为头。库只负责跳过零值槽（<c>oldPos</c> 里那些还没被填过的槽就是零）。
     /// </para>
     /// <para>
     /// 与 Luminance 的用法一致（那边是 <c>PrimitiveRenderer.RenderTrail(Projectile.oldPos, …)</c>），
@@ -125,7 +124,7 @@ public class MonoTrail
     /// </summary>
     public Func<IReadOnlyList<Vector2>>? Source;
 
-    /// <summary>把 <see cref="Source"/> 那串点整理成"尾巴在前"的复用的表。</summary>
+    /// <summary>把 <see cref="Source"/> 那串点整理成"头在前"的复用的表。</summary>
     private readonly List<Vector2> scratch = [];
 
     /// <summary>用一个新的起点重新开始记录。</summary>
@@ -146,7 +145,7 @@ public class MonoTrail
 
     /// <summary>
     /// 用一串现成的点画一次（例如 <c>Projectile.oldPos</c>），不碰自己的缓冲、也不需要 <see cref="Spawn"/>。
-    /// <para>顺序与零值的处理同 <see cref="Source"/>：输入是"新的在前"，库负责翻过来并跳过零。</para>
+    /// <para>顺序与零值的处理同 <see cref="Source"/>：输入按"新的在前"（<c>oldPos</c> 的顺序），库只跳过零值。</para>
     /// </summary>
     /// <param name="positions">外部点列。</param>
     public void DrawFrom(IReadOnlyList<Vector2> positions)
@@ -193,14 +192,14 @@ public class MonoTrail
     }
 
     /// <summary>
-    /// 把外部点列整理成"尾巴在前"写进 <see cref="scratch"/>，返回点数。
-    /// 输入按"新的在前"理解（<c>oldPos</c> 的顺序），所以倒着取；零值槽与间距过近的点都跳过。
+    /// 把外部点列整理成"头在前"写进 <see cref="scratch"/>，返回点数。
+    /// 输入按"新的在前"理解（<c>oldPos</c> 的顺序），正序收；零值槽与间距过近的点都跳过。
     /// </summary>
     private int FillFromSource(IReadOnlyList<Vector2> positions)
     {
         scratch.Clear();
 
-        for (int i = positions.Count - 1; i >= 0; i--)
+        for (int i = 0; i < positions.Count; i++)
         {
             Vector2 point = positions[i];
             if (point == Vector2.Zero)

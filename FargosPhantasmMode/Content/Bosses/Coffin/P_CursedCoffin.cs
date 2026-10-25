@@ -34,6 +34,10 @@ public partial class P_CursedCoffin : PModeNPCBehaviour
         .Byte("lac1", static n => (byte)n.LastAttackChoice1, static (n, value) => n.LastAttackChoice1 = (State)value)
         .Byte("lac2", static n => (byte)n.LastAttackChoice2, static (n, value) => n.LastAttackChoice2 = (State)value)
         .Byte("phase", static n => n.Phase, static (n, value) => n.Phase = value);
+    public override void SetDefaults(NPC npc)
+    {
+        npc.damage = 25;//原来是35
+    }
     public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
     {
         if (npc.IsABestiaryIconDummy)

@@ -5,6 +5,7 @@ using System.Linq;
 using FargosPhantasmMode.Content.NPCs.PGlobalNPC;
 using FargosPhantasmMode.Core.Players;
 using FargosPhantasmMode.Content.Projectiles;
+using Monochrome.Core.Graphics.Shaders;
 namespace FargosPhantasmMode.Common
 {
     public static class PhanUtil
@@ -39,6 +40,7 @@ namespace FargosPhantasmMode.Common
         public static PmodeGlobalNPC Phantasm(this NPC npc) => npc.GetGlobalNPC<PmodeGlobalNPC>();
         public static PmodePlayer Phantasm(this Player player) => player.GetModPlayer<PmodePlayer>();
         public static PModeGlobalProj Phantasm(this Projectile proj) => proj.GetGlobalProjectile<PModeGlobalProj>();
+        public readonly static MonoShader TrailShader_F = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
         /// <summary>
         /// 80
         /// </summary>

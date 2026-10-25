@@ -84,8 +84,12 @@ public sealed class MonoTrailSystem : ModSystem
         if (Main.dedServ)
             return;
 
-        // 倒着走：某条拖尾的 Draw 里若把自己 Stop 掉，索引也不会错。
-        for (int i = autoDrawn.Count - 1; i >= 0; i--)
-            autoDrawn[i].Draw();
+        // 所有自动绘制的拖尾攒成一个批次提交：见 MonoPrimitiveBatch。
+        using (MonoPrim.Batch())
+        {
+            // 倒着走：某条拖尾的 Draw 里若把自己 Stop 掉，索引也不会错。
+            for (int i = autoDrawn.Count - 1; i >= 0; i--)
+                autoDrawn[i].Draw();
+        }
     }
 }

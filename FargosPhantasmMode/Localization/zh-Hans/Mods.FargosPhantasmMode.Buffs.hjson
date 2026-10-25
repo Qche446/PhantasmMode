@@ -38,7 +38,7 @@ TimeGodsTrickBuff: {
 	ItemTooltip: 加速技能冷却
 }
 
-HypothermiaBuff: {
+Hypothermia: {
 	DisplayName: 失温症
 	Description:
 		'''
@@ -120,4 +120,9 @@ PrayerofTaintedBlood: {
 		对玩家：12.5dps
 		对敌怪：25dps
 		'''
+}
+
+RottenAirFlow: {
+	DisplayName: 腐朽之风
+	Description: 伤害减免-10%，缓慢恢复飞行时间，机动性大幅提升
 }

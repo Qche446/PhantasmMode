@@ -14,7 +14,7 @@ using Monochrome.Core.Graphics.Particles;
 using Monochrome.Core.Graphics.Trails;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 {
-    public class DarkStar : ModProjectile
+    public class DarkStar : ModProjectile, IMonoPixelatedPrimitive
     {
         public override string Texture => "Terraria/Images/Projectile_12";
         private MonoTrail trail;
@@ -123,9 +123,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             {
                 UseUnscaledMatrix = true,
                 PointsToCreate = 40,
-                WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 1.3f, 3.5f, 1 - t),
-                ColorFunction = t => Color.Lerp(Color.OrangeRed, Color.Transparent, 1 - t),
+                WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 0.65f, 1.75f, t),
+                ColorFunction = t => Color.Lerp(Color.OrangeRed, Color.Transparent, t),
                 Texture = FargosTextureRegistry.FadedStreak.Value,
+                Shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail"),
                 Offset = 0.5f * Projectile.Size
             };
 
@@ -167,7 +168,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
 
         public override bool PreDraw(ref Color lightColor)
         {
-            trail?.DrawFrom(Projectile.oldPos);
             Texture2D glow = ModContent.Request<Texture2D>("FargosPhantasmMode/Content/Bosses/VanillaEternity/Twins/DarkStar_Glow", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
             int rect1 = glow.Height / Main.projFrames[Projectile.type];
             int rect2 = rect1 * Projectile.frame;
@@ -221,13 +221,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
         {
             return Color.Lerp(Color.OrangeRed, Color.Transparent, completionRatio);
         }
-        /*
-        public void RenderPixelatedPrimitives()
+        // 派生类（RendingSpiral_White）自己维护一条 trail，需要覆写以免画出基类那条。
+        public virtual void RenderPixelatedPrimitives()
         {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
-            FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader));
+            trail?.DrawFrom(Projectile.oldPos);
         }
-        */
     }
 }

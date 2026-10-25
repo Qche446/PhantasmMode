@@ -12,7 +12,7 @@ namespace Monochrome.Core.Graphics.Primitives;
 /// <param name="position">屏幕坐标（写入前已按坐标空间减去 <c>Main.screenPosition</c>）。</param>
 /// <param name="color">顶点颜色，三角形内部由 GPU 线性插值。</param>
 /// <param name="textureCoordinate">
-/// 附加数据位：<c>X</c>/<c>Y</c> 是归一化参数，<c>Z</c> 是像素跨度。详见
+/// 附加数据位：<c>X</c> 是长度参数，<c>Y</c> 是截面坐标，<c>Z</c> 是截面半宽。详见
 /// <see cref="TextureCoordinate"/>。
 /// </param>
 public readonly struct MonoPrimitiveVertex(Vector2 position, Color color, Vector3 textureCoordinate) : IVertexType
@@ -25,13 +25,16 @@ public readonly struct MonoPrimitiveVertex(Vector2 position, Color color, Vector
 
     /// <summary>
     /// 附加数据位。没有贴图被采样，这三个分量是留给图元着色器的自由数据：
-    /// <b>X</b> = 沿形状的长度/角度参数 <c>t ∈ [0,1]</c>；<b>Y</b> = 截面坐标 <c>[0,1]</c>，
-    /// <c>0</c> / <c>1</c> 是截面两侧、<c>0.5</c> 恒为正中；<b>Z</b> = <c>Y</c> 从 0 走到 1 所跨越的
-    /// 真实像素距离（拖尾是条带全宽、圆环是环厚、圆是半径）。于是 <c>Y * Z</c> 就是"距截面 0 侧的像素数"。
+    /// <b>X</b> = 沿形状的长度/角度参数 <c>t ∈ [0,1]</c>；<b>Y</b> = 截面坐标，已按半宽偏移过；
+    /// <b>Z</b> = 截面半宽（像素），截面本身已归一化的形状固定写 <c>1</c>。
     /// <para>
-    /// 需要 Z 是因为归一化的 Y 只知道"在截面的百分之几"，不知道这一段实际多宽——想让柔边恒定 3 像素、
-    /// 想让虚线在像素上等长，就必须拿到真实宽度。Luminance 的 <c>VertexPosition2DColorTexture</c>
-    /// 出于同样理由把宽度放在 Z，两者布局一致。
+    /// 着色器用 <c>(Y - 0.5) / Z + 0.5</c> 把 Y 还原成 <c>[0,1]</c> 的归一化截面：条带的两侧还原成 0 / 1，
+    /// 圆与四边形这类本来就归一化的还原成它自己。编码方式与 Luminance 的
+    /// <c>VertexPosition2DColorTexture</c> 相同，两边的着色器可以互换。
+    /// </para>
+    /// <para>
+    /// 两个分量由 <see cref="SegmentCoordinate"/> 与 <see cref="NormalizedCoordinate"/> 统一生成，
+    /// 调用方不要手写。
     /// </para>
     /// </summary>
     public readonly Vector3 TextureCoordinate = textureCoordinate;
@@ -49,4 +52,20 @@ public readonly struct MonoPrimitiveVertex(Vector2 position, Color color, Vector
         new VertexElement(8, VertexElementFormat.Color, VertexElementUsage.Color, 0),
         new VertexElement(12, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0)
     ]);
+
+    /// <summary>
+    /// 条带类图元（拖尾、描边、虚线）的 <c>(Y, Z)</c>。<paramref name="pixelSpan"/> 是条带全宽，
+    /// <paramref name="section01"/> 的 <c>0</c> / <c>1</c> 落在两侧、<c>0.5</c> 落在中线。
+    /// </summary>
+    public static Vector2 SegmentCoordinate(float section01, float pixelSpan)
+    {
+        float half = MathF.Max(pixelSpan, 1e-4f) * 0.5f;
+        return new Vector2(0.5f + (section01 - 0.5f) * half, half);
+    }
+
+    /// <summary>
+    /// 截面已经归一化的图元（圆、圆环、多边形填充、贴图四边形）的 <c>(Y, Z)</c>：Y 原样传出，
+    /// Z 固定 1，着色器那条还原公式因此恒等于 Y。
+    /// </summary>
+    public static Vector2 NormalizedCoordinate(float section01) => new(section01, 1f);
 }

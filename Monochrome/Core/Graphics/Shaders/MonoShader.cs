@@ -19,6 +19,48 @@ public sealed class MonoShader : IDisposable
     private string? cachedPassName;
     private bool warnedMissingPass;
 
+    /// <summary>
+    /// 一条被记下来的状态写入：参数或贴图槽。批次提交时按命令逐条回放，
+    /// 这样"每个实体各写各的"在延迟提交之后仍然是各写各的。
+    /// </summary>
+    internal readonly struct Write
+    {
+        public readonly MonoShader Shader;
+        public readonly string? Name;
+        public readonly object? Value;
+        public readonly int Slot;
+        public readonly Texture2D? Texture;
+        public readonly SamplerState? Sampler;
+
+        public Write(MonoShader shader, string name, object? value)
+        {
+            Shader = shader;
+            Name = name;
+            Value = value;
+            Slot = 0;
+            Texture = null;
+            Sampler = null;
+        }
+
+        public Write(MonoShader shader, int slot, Texture2D texture, SamplerState? sampler)
+        {
+            Shader = shader;
+            Name = null;
+            Value = null;
+            Slot = slot;
+            Texture = texture;
+            Sampler = sampler;
+        }
+
+        public bool IsTexture => Name is null;
+    }
+
+    /// <summary>批次录制期间的写入日志；为 null 表示不录制。生命周期由 <c>MonoPrimitiveRenderer</c> 管。</summary>
+    internal static List<Write>? WriteLog;
+
+    /// <summary>回放期间关掉录制，免得"把自己写回去"这件事又被记一遍。</summary>
+    internal static bool SuppressRecording;
+
     /// <summary>注册用的名字（形如 <c>模组名.文件名</c>）。</summary>
     public string Name { get; }
 
@@ -87,6 +129,18 @@ public sealed class MonoShader : IDisposable
         if (parameterCache.TryGetValue(name, out object? old) && Equals(old, value))
             return false;
 
+        if (!ApplyParameterValue(parameter, name, value))
+            return false;
+
+        parameterCache[name] = value;
+        if (WriteLog is not null && !SuppressRecording)
+            WriteLog.Add(new Write(this, name, value));
+        return true;
+    }
+
+    /// <summary>把值写进一个参数。返回值是否成功；类型不认识或 GPU 拒绝时返回 false。</summary>
+    private bool ApplyParameterValue(EffectParameter parameter, string name, object? value)
+    {
         try
         {
             switch (value)
@@ -118,8 +172,33 @@ public sealed class MonoShader : IDisposable
             return false;
         }
 
-        parameterCache[name] = value;
         return true;
+    }
+
+    /// <summary>回放一条参数写入：绕过"值没变就跳过"，直接写并刷新缓存。</summary>
+    internal void ReplayParameter(string name, object? value)
+    {
+        if (Main.dedServ || IsDisposed)
+            return;
+
+        EffectParameter? parameter = Effect.Parameters[name];
+        if (parameter is null)
+            return;
+
+        if (ApplyParameterValue(parameter, name, value))
+            parameterCache[name] = value;
+    }
+
+    /// <summary>回放一条贴图绑定。</summary>
+    internal void ReplayTexture(int slot, Texture2D texture, SamplerState? sampler)
+    {
+        if (Main.dedServ || IsDisposed)
+            return;
+
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+        device.Textures[slot] = texture;
+        if (sampler is not null)
+            device.SamplerStates[slot] = sampler;
     }
 
     /// <summary>
@@ -156,6 +235,8 @@ public sealed class MonoShader : IDisposable
         Main.instance.GraphicsDevice.Textures[textureIndex] = texture;
         if (samplerState is not null)
             Main.instance.GraphicsDevice.SamplerStates[textureIndex] = samplerState;
+        if (WriteLog is not null && !SuppressRecording)
+            WriteLog.Add(new Write(this, textureIndex, texture, samplerState));
         TrySetParameter($"textureSize{textureIndex}", texture.Size());
         return this;
     }

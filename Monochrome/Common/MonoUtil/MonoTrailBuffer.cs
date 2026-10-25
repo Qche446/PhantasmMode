@@ -5,8 +5,9 @@ namespace Monochrome.Common.MonoUtil;
 /// <summary>
 /// 固定容量的轨迹点缓冲：新点从头部进，满了挤掉最旧的。
 /// <para>
-/// 下标 0 是<b>最旧</b>的点（尾巴），<c>Count-1</c> 是最新的点（头），也就是 <c>MonoPrim.RenderTrail</c>
-/// 要求的顺序，所以它可以直接当作那个参数传进去。
+/// 下标 0 是<b>最新</b>的点（头），<c>Count-1</c> 是最旧的点（尾巴）——与 <c>Projectile.oldPos</c>
+/// 的顺序相同，也正是 Luminance 的 <c>PrimitiveRenderer.RenderTrail</c> 看待点列的方向，
+/// 所以它能直接当作 <c>MonoPrim.RenderTrail</c> 的参数传进去，而且宽度/颜色函数里的 <c>t</c> 0 为头。
 /// </para>
 /// <para><b>不引用任何 Terraria 类型</b>，能直接进离线验收台：容量回绕、按距离丢弃、取点这些
 /// 只在轨迹很长或速度很慢时才显形，正适合用用例钉住。</para>
@@ -36,7 +37,7 @@ public sealed class MonoTrailBuffer : IReadOnlyList<Vector2>
     /// <summary>最新的那个点；还没有点时是 <see cref="Vector2.Zero"/>。</summary>
     public Vector2 Head => count == 0 ? Vector2.Zero : points[(head - 1 + points.Length) % points.Length];
 
-    /// <summary>按"尾巴在前"取点：0 最旧，<c>Count-1</c> 最新。</summary>
+    /// <summary>按"头在前"取点：0 最新，<c>Count-1</c> 最旧。</summary>
     /// <param name="index">下标。</param>
     public Vector2 this[int index]
     {
@@ -45,8 +46,8 @@ public sealed class MonoTrailBuffer : IReadOnlyList<Vector2>
             if ((uint)index >= (uint)count)
                 throw new ArgumentOutOfRangeException(nameof(index), index, "轨迹点下标越界。");
 
-            int start = (head - count + points.Length) % points.Length;
-            return points[(start + index) % points.Length];
+            int start = ((head - 1 - index) % points.Length + points.Length) % points.Length;
+            return points[start];
         }
     }
 
@@ -87,15 +88,14 @@ public sealed class MonoTrailBuffer : IReadOnlyList<Vector2>
         return true;
     }
 
-    /// <summary>按"尾巴在前"拷进目标；返回拷了几个。</summary>
+    /// <summary>按"头在前"拷进目标；返回拷了几个。</summary>
     /// <param name="destination">目标跨度。</param>
     public int CopyTo(Span<Vector2> destination)
     {
         int copied = Math.Min(count, destination.Length);
-        int start = (head - count + points.Length) % points.Length;
 
         for (int i = 0; i < copied; i++)
-            destination[i] = points[(start + i) % points.Length];
+            destination[i] = this[i];
 
         return copied;
     }

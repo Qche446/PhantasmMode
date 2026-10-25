@@ -2,8 +2,8 @@
 //
 // 顶点契约（与 MonoPrimitiveVertex.Declaration 一致）：
 //   TextureCoordinates.x = 沿路径的长度 / 角度参数 t，取值 [0,1]
-//   TextureCoordinates.y = 归一化截面坐标，取值 [0,1]，0.5 恒为截面中线
-//   TextureCoordinates.z = 截面 0→1 所跨越的像素距离
+//   TextureCoordinates.y = 截面坐标，已按半宽偏移：两侧是 0.5 ∓ 半宽/2，中线是 0.5
+//   TextureCoordinates.z = 截面半宽（像素）；圆、圆环、四边形这类归一化形状固定为 1
 //
 // 顶点输入签名逐字沿用 Luminance 的 StandardPrimitiveShader.fx：两边的顶点声明
 // (0:Vector2/Position, 8:Color/Color, 12:Vector3/TextureCoordinate) 逐字段相同，
@@ -52,8 +52,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
     float3 coord = input.TextureCoordinates;
 
-    // 截面展开：把归一化截面映射到贴图的截面位置，coord.z 是这一整段的像素跨度。
-    float2 uv = float2(coord.x, (coord.y - 0.5) / coord.z + 0.5);
+    // 截面展开：还原成 [0,1] 的归一化截面，再映射到贴图的截面位置。
+    float2 uv = float2(coord.x, (coord.y - 0.5) / max(coord.z, 0.0001) + 0.5);
 
     // ps_2_0 没有动态分支，所以三态一律用 lerp/saturate 表达。
     // **要动态分支就写 ps_3_0**：效果目标仍然必须是 fx_2_0（FNA 只认 D3DX9 效果头），
@@ -63,8 +63,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float4 textured = tex2D(uTexture, uv) * input.Color;
     float4 result = lerp(solid, textured, saturate(useTexture));
 
-    // 契约可视化：R = 截面（应沿法线 0→1 线性变化），G = 像素跨度 / 64，B = 长度参数
-    float4 debug = float4(coord.y, saturate(coord.z / 64.0), coord.x, 1.0);
+    // 契约可视化：R = 归一化截面（应沿法线 0→1 线性变化），G = 半宽 / 32，B = 长度参数
+    float4 debug = float4(saturate((coord.y - 0.5) / max(coord.z, 0.0001) + 0.5), saturate(coord.z / 32.0), coord.x, 1.0);
     return lerp(result, debug, step(0.5, debugMode));
 }
 

@@ -4,6 +4,7 @@ using FargowiltasSouls.Assets.ExtraTextures;
 using Mono.Cecil;
 using Monochrome.Content.Status;
 using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 using Monochrome.Core.Graphics.Shaders;
 using Monochrome.Core.Graphics.Trails;
 using Terraria.GameContent;
@@ -11,7 +12,7 @@ using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode.Content.Items.Weapons
 {
-    public class HunterMark_Black : ModProjectile
+    public class HunterMark_Black : ModProjectile, IMonoPixelatedPrimitive
     {
         /// <summary>身后那条拖尾。第一帧 AI 里建，交给 <see cref="MonoTrailSystem"/> 自动绘制。</summary>
         private MonoTrail trail;
@@ -47,8 +48,8 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 MinDistance = 0f,
                 PointsToCreate = 30,
                 UseUnscaledMatrix = true,
-                WidthFunction = t => MathHelper.SmoothStep(base.Projectile.scale * base.Projectile.width, 3.5f, 1f - t),
-                ColorFunction = t => Color.Lerp(Color.Purple, Color.Black, 1 - t) * 0.8f,
+                WidthFunction = t => MathHelper.SmoothStep(base.Projectile.scale * base.Projectile.width * 0.5f, 1.75f, t),
+                ColorFunction = t => Color.Lerp(Color.Purple, Color.Black, t) * 0.8f,
                 Texture = FargosTextureRegistry.FadedStreak.Value,
                 Offset = 0.5f * Projectile.Size
             };
@@ -217,8 +218,12 @@ namespace FargosPhantasmMode.Content.Items.Weapons
             Color drawColor = lightColor * alphaMultiplier;
             Main.EntitySpriteDraw(value, base.Projectile.Center + vector - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), rectangle, base.Projectile.GetAlpha(drawColor), base.Projectile.rotation, origin, base.Projectile.scale, effects);
 
-            trail?.DrawFrom(Projectile.oldPos);
             return false;
+        }
+
+        public void RenderPixelatedPrimitives()
+        {
+            trail?.DrawFrom(Projectile.oldPos);
         }
 
         public override Color? GetAlpha(Color lightColor)

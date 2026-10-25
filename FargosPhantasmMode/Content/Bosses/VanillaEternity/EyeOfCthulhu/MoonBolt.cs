@@ -8,16 +8,19 @@ using Monochrome.Core.Net;
 using System;
 using Terraria.GameContent;
 using Monochrome.Core.Graphics.Trails;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics;
+using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
     /// <summary>
     /// ai[0]ai[1]记录目标地点，ai[2]记录延时（40）localAI[0]计时,localAI[1]AI[2]记录初始速度
     /// </summary>
-    public class MoonBolt : ModProjectile
+    public class MoonBolt : ModProjectile, IMonoPixelatedPrimitive
     {
         private readonly int Maxspeed = 24;
-        private MonoTrail trail;
         public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.PhantasmalBolt;
         public override void SetDefaults()
         {
@@ -115,15 +118,17 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             }
             DelegateMethods.v3_1 = new Vector3(1f, 0.6f, 0.2f);
             Utils.PlotTileLine(Projectile.Center, Projectile.Center + Projectile.velocity * 4f, 40f, DelegateMethods.CastLightOpen);
+            /*
             trail ??= new(30)
             {
                 PointsToCreate = 60,
                 UseUnscaledMatrix = true,
-                WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 1.3f, 3.5f, 1 - t),
-                ColorFunction = t => Color.Lerp(Color.Teal, Color.Transparent, 1 - t),
+                WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 0.65f, 1.75f, t),
+                ColorFunction = t => Color.Lerp(Color.Teal, Color.Transparent, t),
                 Texture = FargosTextureRegistry.FadedStreak.Value,
                 Offset = 0.5f * Projectile.Size
             };
+            */
         }
         /// <summary>本类只带三个 <c>localAI</c> 格，写读由字段表统一。</summary>
         private static readonly MonoNetFields<Projectile> Fields =
@@ -133,11 +138,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 .Float("localAI2", static p => p.localAI[2], static (p, value) => p.localAI[2] = value);
 
         public override void SendExtraAI(BinaryWriter binaryWriter) => Fields.Write(Projectile, binaryWriter);
-
         public override void ReceiveExtraAI(BinaryReader binaryReader) => Fields.Read(Projectile, binaryReader);
         public override bool PreDraw(ref Color lightColor)
         {
-            trail?.DrawFrom(Projectile.oldPos);
             Texture2D value = TextureAssets.Projectile[Projectile.type].Value;
             int num = TextureAssets.Projectile[Projectile.type].Value.Height / Main.projFrames[Projectile.type];
             int y = num * Projectile.frame;
@@ -159,7 +162,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         }
         public override void OnKill(int timeLeft)
         {
-            trail = null;
             int num371 = Main.rand.Next(5, 10);
             for (int num372 = 0; num372 < num371; num372++)
             {
@@ -186,6 +188,15 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 
             target.AddBuff(ModContent.BuffType<BerserkedBuff>(), 120);
             target.AddBuff(ModContent.BuffType<CurseoftheMoonBuff>(), 120);
+        }
+        public float WidthFuction(float t) => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 1.3f, 3f, t) * 0.5f;
+        public Color ColorFunction(float t) => Color.Lerp(Color.Teal, Color.Transparent, t) * 0.8f;
+
+        public void RenderPixelatedPrimitives()
+        {
+            var shader = PhanShader.StreakTrail;
+            shader.SetTexture(FargosTextureRegistry.FadedStreak.Value, 1);
+            MonoPrim.RenderTrail(Projectile.oldPos, new(WidthFuction, ColorFunction, _ => Projectile.Size * 0.5f, Shader: shader, UseUnscaledMatrix: true), 60);
         }
     }
 }

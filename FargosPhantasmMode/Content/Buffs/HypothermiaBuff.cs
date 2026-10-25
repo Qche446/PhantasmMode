@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace FargosPhantasmMode.Content.Buffs
 {
-    public class HypothermiaBuff : ModBuff
+    public class Hypothermia : ModBuff
     {
         public override string Texture => "FargosPhantasmMode/Content/Buffs/PlaceholderDebuff";
         public override void SetStaticDefaults()

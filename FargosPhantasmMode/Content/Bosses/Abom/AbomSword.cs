@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Common.Graphics.Particles;
@@ -272,7 +272,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             FargoSoulsUtil.SetTexture1(fademap);
             for (int j = 0; j < 2; j++)
             {
-                MonoPrimitiveSettings primSettings = new(t => widthFunction(t) * 2f, ColorFunction, Shader: shader);
+                MonoPrimitiveSettings primSettings = new(t => widthFunction(t), ColorFunction, Shader: shader);
                 MonoPrim.RenderTrail(baseDrawPoints, primSettings, 30);
                 /*
                 for (int i = 0; i < baseDrawPoints.Length / 2; i++)

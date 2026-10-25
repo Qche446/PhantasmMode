@@ -1,15 +1,16 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Common.Particles;
 using FargosPhantasmMode.Content.Buffs;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using Monochrome.Common.MonoUtil;
 using Monochrome.Core.Graphics;
+using Monochrome.Core.Graphics.Primitives;
 using Monochrome.Core.Graphics.Trails;
 
 namespace FargosPhantasmMode.Content.Items.Weapons
 {
-    public class FleshBayonet_Dash : FleshBayonet_Reload
+    public class FleshBayonet_Dash : FleshBayonet_Reload, IMonoPixelatedPrimitive
     {
         public override bool? CanDamage() => true;
         public override bool ShouldUpdatePosition() => true;
@@ -77,8 +78,8 @@ namespace FargosPhantasmMode.Content.Items.Weapons
                 Space = MonoGraphicsSpace.World,
                 PointsToCreate = 40,
                 UseUnscaledMatrix = true,
-                ColorFunction = t => Color.Lerp(Color.Transparent, Color.Red, t) * 0.5f,
-                WidthFunction = t => MathHelper.SmoothStep(Projectile.width * Projectile.scale * 0.4f, 3f, 1 - t),
+                ColorFunction = t => Color.Lerp(Color.Transparent, Color.Red, 1 - t) * 0.5f,
+                WidthFunction = t => MathHelper.SmoothStep(Projectile.width * Projectile.scale * 0.2f, 1.5f, t),
                 Offset = Projectile.Size * 0.5f,
                 Texture = FargosTextureRegistry.FadedStreak.Value
             };
@@ -119,9 +120,12 @@ namespace FargosPhantasmMode.Content.Items.Weapons
         public override bool PreDraw(ref Color lightColor)
         {
             base.PreDraw(ref lightColor);
-            if (Time <= 20 )
-                trail?.DrawFrom(Projectile.oldPos);
             return false;
+        }
+        public void RenderPixelatedPrimitives()
+        {
+            if (Time <= 20)
+                trail?.DrawFrom(Projectile.oldPos);
         }
         public override void OnKill(int timeLeft)
         {

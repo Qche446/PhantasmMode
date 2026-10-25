@@ -34,9 +34,9 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Masomode.HeartMaso
                     }
                     //int slowDuration = freezeDuration + 180;
 
-                    foreach (NPC n in Main.npc.Where(n => n.active && !n.friendly && n.damage > 0 && player.Distance(FargoSoulsUtil.ClosestPointInHitbox(n, player.Center)) < freezeRange && !n.dontTakeDamage && !n.buffImmune[ModContent.BuffType<HypothermiaBuff>()]))
+                    foreach (NPC n in Main.npc.Where(n => n.active && !n.friendly && n.damage > 0 && player.Distance(FargoSoulsUtil.ClosestPointInHitbox(n, player.Center)) < freezeRange && !n.dontTakeDamage && !n.buffImmune[ModContent.BuffType<Hypothermia>()]))
                     {
-                        n.AddBuff(ModContent.BuffType<HypothermiaBuff>(), HypothermiaDuration);
+                        n.AddBuff(ModContent.BuffType<Hypothermia>(), HypothermiaDuration);
                     }
                 }
             }

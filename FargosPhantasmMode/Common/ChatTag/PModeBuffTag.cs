@@ -111,15 +111,15 @@ namespace FargosPhantasmMode.Common.ChatTag
             }
             return def;
         }
-        public static readonly List<int> redBuff = [BuffID.OnFire3, PBuffID.PungentGazeBuff, PBuffID.BerserkedBuff, PBuffID.BulletReload, PBuffID.PrayerofTaintedBlood,
+        public static readonly List<int> redBuff = [BuffID.OnFire3, FBuffID.PungentGazeBuff, FBuffID.BerserkedBuff, PBuffID.BulletReload, PBuffID.PrayerofTaintedBlood,
             PBuffID.HeartBrokenBuff, PBuffID.NanoErosionBuff];
-        public static readonly List<int> orangeBuff = [BuffID.RapidHealing, PBuffID.SmiteBuff, BuffID.OnFire, BuffID.Ichor, PBuffID.HallowFlameBuff, BuffID.Daybreak];
-        public static readonly List<int> yellowBuff = [BuffID.Honey, PBuffID.InfestedBuff];
-        public static readonly List<int> greenBuff = [BuffID.CursedInferno, BuffID.Poisoned, PBuffID.IvyVenomBuff];
-        public static readonly List<int> cyanBuff = [PBuffID.CurseoftheMoonBuff, PBuffID.MutantFangBuff];
-        public static readonly List<int> blueBuff = [BuffID.Frostburn, BuffID.Frostburn2, BuffID.Frozen, PBuffID.OceanicMaulBuff];
+        public static readonly List<int> orangeBuff = [BuffID.RapidHealing, FBuffID.SmiteBuff, BuffID.OnFire, BuffID.Ichor, PBuffID.HallowFlameBuff, BuffID.Daybreak];
+        public static readonly List<int> yellowBuff = [BuffID.Honey, FBuffID.InfestedBuff];
+        public static readonly List<int> greenBuff = [BuffID.CursedInferno, BuffID.Poisoned, FBuffID.IvyVenomBuff];
+        public static readonly List<int> cyanBuff = [FBuffID.CurseoftheMoonBuff, FBuffID.MutantFangBuff];
+        public static readonly List<int> blueBuff = [BuffID.Frostburn, BuffID.Frostburn2, BuffID.Frozen, FBuffID.OceanicMaulBuff];
         public static readonly List<int> purpleBuff = [BuffID.Venom, PBuffID.HunterMark, BuffID.ShadowFlame];
-        public static readonly List<int> garyBuff = [PBuffID.NeurotoxinBuff, PBuffID.MutantNibbleBuff, PBuffID.FractureBuff];
+        public static readonly List<int> garyBuff = [FBuffID.NeurotoxinBuff, FBuffID.MutantNibbleBuff, PBuffID.FractureBuff];
         public static readonly List<int> whitebuff = [PBuffID.PhSublimationBuff, PBuffID.TimeGodsTrickBuff, PBuffID.FlawlessBuff];
     }
 }

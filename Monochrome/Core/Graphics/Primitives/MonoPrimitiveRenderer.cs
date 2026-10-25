@@ -34,13 +34,68 @@ public static class MonoPrimitiveRenderer
     private static DynamicVertexBuffer? vertexBuffer;
     private static DynamicIndexBuffer? indexBuffer;
     private static BasicEffect? fallbackEffect;
-    private static Texture2D? fallbackTexture;
 
     private static int vertexCount;
     private static int indexCount;
 
+    /// <summary>一条延迟绘制的命令：几何落在缓冲的哪一段，以及它自己的绘制状态。</summary>
+    private struct DrawCommand
+    {
+        public int StartIndex;
+        public int IndexCount;
+        public MonoShader? Shader;
+        public BlendState? BlendState;
+        public MonoGraphicsSpace Space;
+        public int? ProjectionWidth;
+        public int? ProjectionHeight;
+        public Texture2D? Texture;
+        public SamplerState? Sampler;
+        public float UseTexture;
+
+        /// <summary>这条命令画完时，着色器写入日志的长度。回放用它切出"这个实体写过什么"。</summary>
+        public int WriteEnd;
+
+        /// <summary>录制这条命令时设备采样槽 1 上绑着的贴图。有些消费者直接写设备槽（如 <c>SetTexture1()</c>），靠它把状态带回每条命令。</summary>
+        public Texture2D? SnapshotTexture;
+
+        /// <summary>与 <see cref="SnapshotTexture"/> 配套的采样状态。</summary>
+        public SamplerState? SnapshotSampler;
+    }
+
+    /// <summary>一个块最多攒多少条命令的初始容量。块真正的上限是顶点容量，这里只是预分配。</summary>
+    private const int MaxCommands = 512;
+
+    private static readonly List<DrawCommand> commands = new(MaxCommands);
+    /// <summary>当前图元从索引缓冲的哪个下标开始，提交时用它切出这条命令的范围。</summary>
+    private static int commandIndexStart;
+
+    /// <summary>是否处在 <see cref="MonoPrimitiveBatch"/> 的作用域里。</summary>
+    private static bool batching;
+
+    private static Matrix cachedMatrix;
+    private static int cachedWidth;
+    private static int cachedHeight;
+    private static MonoGraphicsSpace cachedSpace;
+    private static bool hasCachedMatrix;
+
+    private static uint statisticsFrame;
+    private static int submissionsThisFrame;
+    private static int verticesThisFrame;
+
+    /// <summary>上一 tick 提交的批数。诊断用。</summary>
+    public static int LastFrameSubmissions { get; private set; }
+
+    /// <summary>上一 tick 送进 GPU 的顶点数。诊断用。</summary>
+    public static int LastFrameVertices { get; private set; }
+
+    /// <summary>当前是否处在批次作用域里。诊断用。</summary>
+    public static bool IsBatching => batching;
+
     /// <summary>重采样、描边、轮廓共用的暂存点列，避免每次绘制都分配数组。</summary>
     private static readonly Vector2[] scratch = new Vector2[MaxPoints];
+
+    /// <summary>滤掉零值槽之后的点列，供重采样的两条分支共用。</summary>
+    private static readonly Vector2[] cleanPositions = new Vector2[MaxPoints];
 
     /// <summary>贴图四边形的四个角，避免每次绘制都分配数组。</summary>
     private static readonly Vector2[] quadCorners = new Vector2[4];
@@ -152,11 +207,14 @@ public static class MonoPrimitiveRenderer
         vertexBuffer = null;
         indexBuffer = null;
         fallbackEffect = null;
-        fallbackTexture = null;
         vertices = null;
         indices = null;
         vertexCount = 0;
         indexCount = 0;
+        commands.Clear();
+        MonoShader.WriteLog = null;
+        batching = false;
+        hasCachedMatrix = false;
     }
 
     private static void WarnOnce(string message)
@@ -187,22 +245,60 @@ public static class MonoPrimitiveRenderer
     {
         vertexCount = 0;
         indexCount = 0;
+        commandIndexStart = 0;
     }
 
     private static bool HasRoomFor(int vertexNeed, int indexNeed)
         => vertexCount + vertexNeed <= MaxVertices && indexCount + indexNeed <= MaxIndices;
 
+    /// <summary>
+    /// 开始一个图元：批次外清空网格，批次里记下它在缓冲中的起点，装不下就先提交当前块。
+    /// <para>
+    /// <paramref name="vertexNeed"/> / <paramref name="indexNeed"/> 是这个图元要用的量，
+    /// 让分块落在图元之间而不是把它劈成两半。
+    /// </para>
+    /// </summary>
+    private static void ReservePrimitive(int vertexNeed, int indexNeed)
+    {
+        if (!batching)
+        {
+            ResetMesh();
+            return;
+        }
+
+        if (vertexCount > 0 && (vertexCount + vertexNeed > MaxVertices || indexCount + indexNeed > MaxIndices))
+            SubmitCommands();
+
+        commandIndexStart = indexCount;
+    }
+
     /// <summary>写入一个顶点，返回它的索引。</summary>
     /// <param name="position">屏幕坐标。</param>
     /// <param name="color">顶点颜色。</param>
     /// <param name="length">沿形状的长度/角度参数，写入附加数据的 X。</param>
-    /// <param name="section">截面坐标 <c>[0,1]</c>，写入附加数据的 Y。</param>
-    /// <param name="pixelSpan">截面 0→1 跨越的像素距离，写入附加数据的 Z。</param>
-    private static int PushVertex(Vector2 position, Color color, float length, float section, float pixelSpan)
+    /// <param name="coordinate">附加数据的 Y/Z，由 <see cref="MonoPrimitiveVertex"/> 的两个契约函数生成。</param>
+    private static int PushVertex(Vector2 position, Color color, float length, Vector2 coordinate)
     {
-        vertices![vertexCount] = new MonoPrimitiveVertex(position, color, new Vector3(length, section, pixelSpan));
+        vertices![vertexCount] = new MonoPrimitiveVertex(position, color, new Vector3(length, coordinate.X, coordinate.Y));
         return vertexCount++;
     }
+
+    /// <summary>写入一个条带顶点：截面由真实像素宽度描述（拖尾、描边、虚线）。</summary>
+    /// <param name="position">屏幕坐标。</param>
+    /// <param name="color">顶点颜色。</param>
+    /// <param name="length">沿形状的长度参数。</param>
+    /// <param name="section"><c>0</c> / <c>1</c> 为条带两侧，<c>0.5</c> 为中线。</param>
+    /// <param name="pixelSpan">条带全宽（像素）。</param>
+    private static int PushSegmentVertex(Vector2 position, Color color, float length, float section, float pixelSpan)
+        => PushVertex(position, color, length, MonoPrimitiveVertex.SegmentCoordinate(section, pixelSpan));
+
+    /// <summary>写入一个归一化顶点：截面本身就是 0→1（圆、圆环、多边形填充、贴图四边形）。</summary>
+    /// <param name="position">屏幕坐标。</param>
+    /// <param name="color">顶点颜色。</param>
+    /// <param name="length">沿形状的长度参数。</param>
+    /// <param name="section">截面坐标。</param>
+    private static int PushNormalizedVertex(Vector2 position, Color color, float length, float section)
+        => PushVertex(position, color, length, MonoPrimitiveVertex.NormalizedCoordinate(section));
 
     private static void PushTriangle(int a, int b, int c)
     {
@@ -244,6 +340,7 @@ public static class MonoPrimitiveRenderer
         if (!HasRoomFor(count * 2, segmentCount * 6))
             return;
 
+        int baseVertex = vertexCount;
         for (int i = 0; i < count; i++)
         {
             Vector2 previous = points[closed ? (i - 1 + count) % count : Math.Max(i - 1, 0)];
@@ -252,16 +349,16 @@ public static class MonoPrimitiveRenderer
             Vector2 normal = new(-forward.Y, forward.X);
             float length = i / (float)Math.Max(count - 1, 1);
             Color color = colorAt(length);
-            PushVertex(points[i] - normal * half, color, length, 0f, thickness);
-            PushVertex(points[i] + normal * half, color, length, 1f, thickness);
+            PushSegmentVertex(points[i] - normal * half, color, length, 0f, thickness);
+            PushSegmentVertex(points[i] + normal * half, color, length, 1f, thickness);
         }
 
         for (int i = 0; i < segmentCount; i++)
         {
-            int a = i * 2;
-            int b = i * 2 + 1;
-            int c = ((i + 1) % count) * 2 + 1;
-            int d = ((i + 1) % count) * 2;
+            int a = baseVertex + i * 2;
+            int b = baseVertex + i * 2 + 1;
+            int c = baseVertex + ((i + 1) % count) * 2 + 1;
+            int d = baseVertex + ((i + 1) % count) * 2;
             PushQuad(a, b, c, d);
         }
     }
@@ -273,12 +370,12 @@ public static class MonoPrimitiveRenderer
         if (!HasRoomFor(segments * 3, segments * 3))
             return;
 
-        int origin = PushVertex(centerScreen, color, 0f, 0f, radius);
+        int origin = PushNormalizedVertex(centerScreen, color, 0f, 0f);
         for (int i = 0; i < segments; i++)
         {
             float t = i / (float)segments;
             Vector2 point = centerScreen + (MathHelper.TwoPi * t).ToRotationVector2() * radius;
-            PushVertex(point, color, t, 1f, radius);
+            PushNormalizedVertex(point, color, t, 1f);
         }
 
         for (int i = 0; i < segments; i++)
@@ -289,66 +386,226 @@ public static class MonoPrimitiveRenderer
 
     #region 提交
 
-    /// <summary>把当前网格一次性上传并绘制，随后恢复设备状态。</summary>
+    /// <summary>
+    /// 收下一个图元：批次里只记一条命令，批次外立刻提交。
+    /// </summary>
     /// <param name="shader">可选的自定义着色器；为 null 时走顶点色 <c>BasicEffect</c> 回退。</param>
     /// <param name="blendState">混合状态；为 null 时用 <see cref="BlendState.AlphaBlend"/>。</param>
     /// <param name="space">坐标空间，决定投影矩阵。</param>
     /// <param name="projectionWidth">投影宽度，null 表示 <c>Main.screenWidth</c>。</param>
     /// <param name="projectionHeight">投影高度，null 表示 <c>Main.screenHeight</c>。</param>
-    private static void Flush(MonoShader? shader, BlendState? blendState, MonoGraphicsSpace space, int? projectionWidth, int? projectionHeight)
+    /// <param name="texture">要绑到采样槽 1 的贴图；为 null 时不动槽 1。</param>
+    /// <param name="sampler">上面那张贴图的采样状态；为 null 时用 <see cref="SamplerState.LinearClamp"/>。</param>
+    /// <param name="useTexture">是否让着色器把槽 1 的贴图乘进颜色。只有 <see cref="RenderQuad"/> 会开。</param>
+    private static void Flush(MonoShader? shader, BlendState? blendState, MonoGraphicsSpace space, int? projectionWidth, int? projectionHeight, Texture2D? texture = null, SamplerState? sampler = null, bool useTexture = false)
     {
         if (vertexCount <= 0 || indexCount <= 0 || !Ready())
-            return;
+        {
+            if (!batching)
+                ResetMesh();
 
-        // 没传 shader 就用默认图元着色器；连它也没加载到才回退到 BasicEffect。
-        shader ??= ResolveDefaultShader();
+            return;
+        }
+
+        Texture2D? snapshotTexture = null;
+        SamplerState? snapshotSampler = null;
+        if (batching)
+        {
+            // 采样槽 1 是"被绘制的那张贴图"的约定位置。录下来，提交时按命令还原，
+            // 这样直接写设备槽的消费者（FargoSoulsUtil.SetTexture1 之类）在批次里也不会被后一条覆盖。
+            GraphicsDevice device = Main.instance.GraphicsDevice;
+            snapshotTexture = device.Textures[1] as Texture2D;
+            snapshotSampler = device.SamplerStates[1];
+        }
+
+        commands.Add(new DrawCommand
+        {
+            StartIndex = commandIndexStart,
+            IndexCount = indexCount - commandIndexStart,
+            Shader = shader,
+            BlendState = blendState,
+            Space = space,
+            ProjectionWidth = projectionWidth,
+            ProjectionHeight = projectionHeight,
+            Texture = texture,
+            Sampler = sampler,
+            UseTexture = useTexture ? 1f : 0f,
+            WriteEnd = MonoShader.WriteLog?.Count ?? 0,
+            SnapshotTexture = snapshotTexture,
+            SnapshotSampler = snapshotSampler,
+        });
+
+        if (!batching)
+            SubmitCommands();
+    }
+
+    /// <summary>
+    /// 提交攒下的命令：整块只上传一次顶点/索引缓冲，然后按命令顺序各画一次。
+    /// <para>
+    /// 顺序不变，所以叠色结果与逐个绘制一致；省掉的是每个图元一次的缓冲上传与状态切换。
+    /// </para>
+    /// </summary>
+    private static void SubmitCommands()
+    {
+        if (commands.Count == 0)
+        {
+            ResetMesh();
+            return;
+        }
+
+        int submittedVertices = vertexCount;
+        int submittedIndices = indexCount;
+        if (submittedVertices <= 0 || submittedIndices <= 0 || !Ready())
+        {
+            commands.Clear();
+            ResetMesh();
+            return;
+        }
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
         VertexBufferBinding[] oldVertexBuffers = device.GetVertexBuffers();
         IndexBuffer? oldIndexBuffer = device.Indices;
         RasterizerState oldRasterizer = device.RasterizerState;
         BlendState oldBlend = device.BlendState;
+        hasCachedMatrix = false;
+
+        // 提交期间写进去的参数属于框架自己的那几项，不能再记一遍日志。
+        bool previousSuppress = MonoShader.SuppressRecording;
+        MonoShader.SuppressRecording = true;
+        int writeStart = 0;
         try
         {
-            Matrix matrix = CalculatePrimitiveMatrix(projectionWidth ?? Main.screenWidth, projectionHeight ?? Main.screenHeight, space);
-            vertexBuffer!.SetData(vertices!, 0, vertexCount, SetDataOptions.Discard);
-            indexBuffer!.SetData(indices!, 0, indexCount, SetDataOptions.Discard);
+            vertexBuffer!.SetData(vertices!, 0, submittedVertices, SetDataOptions.Discard);
+            indexBuffer!.SetData(indices!, 0, submittedIndices, SetDataOptions.Discard);
             device.SetVertexBuffer(vertexBuffer);
             device.Indices = indexBuffer;
             device.RasterizerState = RasterizerState.CullNone;
-            device.BlendState = blendState ?? BlendState.AlphaBlend;
 
-            if (shader is not null)
+            for (int i = 0; i < commands.Count; i++)
             {
-                // "要不要乘 s1 上的贴图"由 fallbackTexture 决定：只有 RenderQuad 会设它。
-                // useTexture **必须每次都显式写**——MonoShader 的参数带缓存，不写会沿用上一次的值，
-                // 于是"先用 RenderQuad 画过贴图、再 DrawLine"就会让线段去采样一张没绑定的贴图。
-                if (fallbackTexture is not null)
-                    shader.SetTexture(fallbackTexture, 1, SamplerState.LinearClamp);
-                shader.SetParameter("uWorldViewProjection", matrix)
-                      .SetCommonParameters()
-                      .SetParameter("useTexture", fallbackTexture is not null ? 1f : 0f)
-                      .Apply();
-            }
-            else
-            {
-                fallbackEffect!.World = Matrix.Identity;
-                fallbackEffect.View = Matrix.Identity;
-                fallbackEffect.Projection = matrix;
-                fallbackEffect.TextureEnabled = fallbackTexture is not null;
-                fallbackEffect.Texture = fallbackTexture;
-                fallbackEffect.CurrentTechnique.Passes[0].Apply();
-            }
+                DrawCommand command = commands[i];
+                if (command.IndexCount <= 0)
+                    continue;
 
-            device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexCount, 0, indexCount / 3);
+                // 没传 shader 就用默认图元着色器；连它也没加载到才回退到 BasicEffect。
+                MonoShader? shader = command.Shader ?? ResolveDefaultShader();
+                device.BlendState = command.BlendState ?? BlendState.AlphaBlend;
+                Matrix matrix = ResolveMatrix(command);
+
+                if (shader is not null)
+                {
+                    // 先还原录制时设备槽 1 的状态（覆盖直接写设备槽的消费者），再按命令绑 settings.Texture。
+                    if (command.SnapshotTexture is not null)
+                    {
+                        device.Textures[1] = command.SnapshotTexture;
+                        if (command.SnapshotSampler is not null)
+                            device.SamplerStates[1] = command.SnapshotSampler;
+                    }
+
+                    // 贴图按命令各自绑：同一块缓冲里可能混着用不同条纹贴图的拖尾。
+                    if (command.Texture is not null)
+                        shader.SetTexture(command.Texture, 1, command.Sampler ?? SamplerState.LinearClamp);
+
+                    // 回放这个实体在录制期间写过的着色器状态。批次把绘制推迟了，
+                    // 而消费者是"边攒边设参数"的：不回放的话，整批会用最后一个实体的参数去画。
+                    ReplayShaderWrites(writeStart, command.WriteEnd);
+                    writeStart = command.WriteEnd;
+
+                    // useTexture **必须每条都显式写**——MonoShader 的参数带缓存，不写会沿用上一条的值。
+                    shader.SetParameter("uWorldViewProjection", matrix)
+                          .SetCommonParameters()
+                          .SetParameter("useTexture", command.Texture is null ? 0f : command.UseTexture)
+                          .Apply();
+                }
+                else
+                {
+                    writeStart = command.WriteEnd;
+
+                    fallbackEffect!.World = Matrix.Identity;
+                    fallbackEffect.View = Matrix.Identity;
+                    fallbackEffect.Projection = matrix;
+                    fallbackEffect.TextureEnabled = command.Texture is not null && command.UseTexture > 0f;
+                    fallbackEffect.Texture = command.Texture;
+                    fallbackEffect.CurrentTechnique.Passes[0].Apply();
+                }
+
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, submittedVertices, command.StartIndex, command.IndexCount / 3);
+            }
         }
         finally
         {
+            MonoShader.SuppressRecording = previousSuppress;
             device.SetVertexBuffers(oldVertexBuffers);
             device.Indices = oldIndexBuffer;
             device.RasterizerState = oldRasterizer;
             device.BlendState = oldBlend;
         }
+
+        commands.Clear();
+        MonoShader.WriteLog?.Clear();
+        ResetMesh();
+        CountSubmission(submittedVertices);
+    }
+
+    /// <summary>
+    /// 回放日志里 <paramref name="from"/>..<paramref name="to"/> 这一段着色器写入。
+    /// <para>
+    /// 消费者是"边攒边设参数"的（<c>shader.SetTexture</c> / <c>TrySetParameter</c>），批次把绘制推迟之后，
+    /// 不回放就会让整批都用最后一个实体写下的状态去画。按命令切段回放，各实体才还是各写各的。
+    /// </para>
+    /// </summary>
+    private static void ReplayShaderWrites(int from, int to)
+    {
+        List<MonoShader.Write>? log = MonoShader.WriteLog;
+        if (log is null)
+            return;
+
+        int end = Math.Min(to, log.Count);
+        for (int i = Math.Max(0, from); i < end; i++)
+        {
+            MonoShader.Write write = log[i];
+            if (write.IsTexture)
+            {
+                if (write.Texture is not null)
+                    write.Shader.ReplayTexture(write.Slot, write.Texture, write.Sampler);
+            }
+            else if (write.Name is not null)
+            {
+                write.Shader.ReplayParameter(write.Name, write.Value);
+            }
+        }
+    }
+
+    /// <summary>同一次提交里投影矩阵通常不变，算一次就复用。</summary>
+    private static Matrix ResolveMatrix(in DrawCommand command)
+    {
+        int width = command.ProjectionWidth ?? Main.screenWidth;
+        int height = command.ProjectionHeight ?? Main.screenHeight;
+        if (hasCachedMatrix && width == cachedWidth && height == cachedHeight && command.Space == cachedSpace)
+            return cachedMatrix;
+
+        cachedMatrix = CalculatePrimitiveMatrix(width, height, command.Space);
+        cachedWidth = width;
+        cachedHeight = height;
+        cachedSpace = command.Space;
+        hasCachedMatrix = true;
+        return cachedMatrix;
+    }
+
+    /// <summary>按 tick 统计提交批数与顶点数，供诊断读取。</summary>
+    private static void CountSubmission(int submittedVertices)
+    {
+        if (statisticsFrame != Main.GameUpdateCount)
+        {
+            statisticsFrame = Main.GameUpdateCount;
+            LastFrameSubmissions = submissionsThisFrame;
+            LastFrameVertices = verticesThisFrame;
+            submissionsThisFrame = 0;
+            verticesThisFrame = 0;
+        }
+
+        submissionsThisFrame++;
+        verticesThisFrame += submittedVertices;
     }
 
     /// <summary>
@@ -382,16 +639,76 @@ public static class MonoPrimitiveRenderer
         return view * projection;
     }
 
-    /// <summary>把 <see cref="MonoPrimitiveSettings.UseUnscaledMatrix"/> 换算成实际使用的坐标空间。</summary>
+    /// <summary>
+    /// 把 <see cref="MonoPrimitiveSettings.UseUnscaledMatrix"/> 换算成实际使用的坐标空间。
+    /// 像素化目标里的坐标已经减过 <c>Main.screenPosition</c>，必须配不含缩放的正交投影：
+    /// 消费者漏写 <c>UseUnscaledMatrix</c> 时在这里兜住，免得整层画到屏幕外。
+    /// </summary>
     private static MonoGraphicsSpace EffectiveSpace(MonoPrimitiveSettings settings)
-        => settings.UseUnscaledMatrix ? MonoGraphicsSpace.Screen : settings.Space;
+        => EffectiveSpace(settings.UseUnscaledMatrix, settings.Space);
+
+    /// <summary><see cref="EffectiveSpace(MonoPrimitiveSettings)"/> 的组件重载，圆与圆环走这里。</summary>
+    private static MonoGraphicsSpace EffectiveSpace(bool useUnscaledMatrix, MonoGraphicsSpace space)
+        => useUnscaledMatrix || MonoPixelationSystem.CurrentlyRendering ? MonoGraphicsSpace.Screen : space;
+
+    /// <summary>像素化目标里如果配了缩放矩阵，图元会画到屏幕外；提示一次，绘制仍按无缩放兜住。</summary>
+    private static void WarnIfUnscaledMissing(bool useUnscaledMatrix, MonoGraphicsSpace space)
+    {
+        if (MonoPixelationSystem.CurrentlyRendering && !useUnscaledMatrix && space == MonoGraphicsSpace.World)
+            WarnOnce("像素化图元：在 RenderPixelatedPrimitives 里绘制时给图元设置 UseUnscaledMatrix = true；本次已按无缩放矩阵绘制。");
+    }
+
+    #endregion
+
+    #region 批次
+
+    /// <summary>
+    /// 开一个批次：作用域内的 <c>MonoPrim.*</c> 不再各自提交，而是一起攒到结束时提交。
+    /// <para>
+    /// 提交时每条命令仍按调用顺序各画一次，叠色结果与逐个绘制一致；省下的是每个图元一次的
+    /// 缓冲上传与状态切换。一块装不下（顶点超过 <c>MaxVertices</c>）会先提交当前块再继续。
+    /// </para>
+    /// </summary>
+    /// <exception cref="InvalidOperationException">已经处在一个批次里（批次不能嵌套）。</exception>
+    public static MonoPrimitiveBatch Batch()
+    {
+        if (batching)
+            throw new InvalidOperationException("MonoPrimitiveBatch 不能嵌套：外面那个批次还没结束。");
+
+        batching = true;
+        commands.Clear();
+        MonoShader.WriteLog = new List<MonoShader.Write>(128);
+        ResetMesh();
+        return new MonoPrimitiveBatch();
+    }
+
+    /// <summary>提交批次里已经攒下的内容，批次本身仍然有效。</summary>
+    internal static void SubmitBatch() => SubmitCommands();
+
+    /// <summary>提交并结束当前批次。重复调用安全。</summary>
+    internal static void EndBatch()
+    {
+        if (!batching)
+            return;
+
+        try
+        {
+            SubmitCommands();
+        }
+        finally
+        {
+            // 提交抛异常时也要退出批次状态，否则之后的绘制会一直卡在"批次里"，谁开新批次都会撞异常。
+            batching = false;
+            MonoShader.WriteLog = null;
+        }
+    }
 
     #endregion
 
     #region 拖尾
 
     /// <summary>把点列渲染成一条一次提交的索引三角形带。</summary>
-    /// <param name="positions">路径点，按 <paramref name="settings"/> 的坐标空间给出。</param>
+    /// <param name="positions">路径点，按 <paramref name="settings"/> 的坐标空间给出。零值点视为"未填充"，重采样前会被滤掉。</param>
     /// <param name="settings">绘制配置。</param>
     /// <param name="pointsToCreate">
     /// 重采样后的点数；越多越细腻也越贵，默认取 <paramref name="positions"/> 的点数。上限 <c>4096</c>。
@@ -401,11 +718,15 @@ public static class MonoPrimitiveRenderer
         if (Main.dedServ || settings is null || positions is null || positions.Count < 2 || !Ready())
             return;
 
+        WarnIfUnscaledMissing(settings.UseUnscaledMatrix, settings.Space);
+
         int requested = Math.Clamp(pointsToCreate ?? positions.Count, 2, MaxPoints);
         if (!TryBuildPositions(positions, settings, requested, out int actualCount))
             return;
 
-        ResetMesh();
+        ReservePrimitive(actualCount * 2, (actualCount - 1) * 6);
+        // 索引一律用缓冲里的绝对下标：同一批次里前面可能已经躺了别的图元，从 0 数会画成别人的形状。
+        int baseVertex = vertexCount;
         for (int i = 0; i < actualCount; i++)
         {
             float t = i / (float)(actualCount - 1);
@@ -413,31 +734,37 @@ public static class MonoPrimitiveRenderer
             Vector2 tangent = i == actualCount - 1 ? current - scratch[i - 1] : scratch[i + 1] - current;
             tangent = SafeNormalize(tangent, Vector2.UnitX);
             Vector2 normal = new(-tangent.Y, tangent.X);
-            float width = Math.Max(0f, settings.WidthFunction(t));
+            // 宽度函数给的是半宽（与 Luminance 的 WidthFunction 同义），条带向两侧各展开这么多。
+            float halfWidth = Math.Max(0f, settings.WidthFunction(t));
+            float span = halfWidth * 2f;
             Color color = settings.ColorFunction(t);
 
-            Vector2 left = current - normal * width * 0.5f;
-            Vector2 right = current + normal * width * 0.5f;
+            Vector2 left = current - normal * halfWidth;
+            Vector2 right = current + normal * halfWidth;
             if (i == 0 && settings.InitialVertexPositionsOverride is { } overrides && overrides.Left != Vector2.Zero && overrides.Right != Vector2.Zero)
             {
                 left = ToScreen(overrides.Left, settings.Space);
                 right = ToScreen(overrides.Right, settings.Space);
             }
 
-            // 截面：左缘 0 → 右缘 1，中心线 0.5；Z 为该处条带全宽。
-            PushVertex(left, color, t, 0f, width);
-            PushVertex(right, color, t, 1f, width);
+            // 截面：左缘 0 → 右缘 1，中心线 0.5；pixelSpan 是该处条带全宽。
+            PushSegmentVertex(left, color, t, 0f, span);
+            PushSegmentVertex(right, color, t, 1f, span);
         }
 
         for (int i = 0; i < actualCount - 1; i++)
-            PushQuad(i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
+            PushQuad(baseVertex + i * 2, baseVertex + i * 2 + 1, baseVertex + i * 2 + 3, baseVertex + i * 2 + 2);
 
-        // 拖尾常配"条纹贴图 + 自定义着色器"，这里把贴图绑到槽 1。放在 Flush 之前是对的：
-        // Flush 只在 RenderQuad 那条路上碰槽 1，走拖尾这条路时它不会覆盖这里绑的东西。
-        if (settings.Texture is not null)
-            settings.Shader?.SetTexture(settings.Texture, 1, settings.Sampler ?? SamplerState.LinearWrap);
-
-        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings), settings.ProjectionWidth, settings.ProjectionHeight);
+        // 拖尾常配"条纹贴图 + 自定义着色器"：贴图由 Flush 记进命令、提交时再绑，
+        // 否则同一个批次里的多条拖尾会互相覆盖槽 1。useTexture 保持关——条纹由着色器自己采样。
+        Flush(
+            settings.Shader,
+            settings.BlendState,
+            EffectiveSpace(settings),
+            settings.ProjectionWidth,
+            settings.ProjectionHeight,
+            settings.Shader is null ? null : settings.Texture,
+            settings.Sampler ?? SamplerState.LinearWrap);
     }
 
     /// <summary>
@@ -463,7 +790,13 @@ public static class MonoPrimitiveRenderer
         RenderTrail(scratchList, settings, pointsToCreate);
     }
 
-    /// <summary>把点列重采样成 <paramref name="requested"/> 个屏幕坐标点，写入 <c>scratch</c>。</summary>
+    /// <summary>
+    /// 把点列重采样成 <paramref name="requested"/> 个屏幕坐标点，写入 <c>scratch</c>。
+    /// <para>
+    /// 零值槽先滤掉再重采样。调用方常用 <c>Projectile.oldPos</c> 当点列，而它还没被写过的槽就是零值，
+    /// 平滑会把这些槽当成真实坐标，把条带一路拉到世界原点（屏幕左上角）去。
+    /// </para>
+    /// </summary>
     /// <param name="source">原始路径点。</param>
     /// <param name="settings">绘制配置（决定是否样条平滑与偏移函数）。</param>
     /// <param name="requested">期望点数。</param>
@@ -472,16 +805,27 @@ public static class MonoPrimitiveRenderer
     private static bool TryBuildPositions(IReadOnlyList<Vector2> source, MonoPrimitiveSettings settings, int requested, out int count)
     {
         count = 0;
+
+        int cleanCount = 0;
+        for (int i = 0; i < source.Count && cleanCount < MaxPoints; i++)
+        {
+            Vector2 point = source[i];
+            if (point != Vector2.Zero)
+                cleanPositions[cleanCount++] = point;
+        }
+
+        if (cleanCount < 2)
+            return false;
+
+        ReadOnlySpan<Vector2> path = cleanPositions.AsSpan(0, cleanCount);
+
         if (!settings.Smoothen)
         {
             for (int i = 0; i < requested && count < MaxPoints; i++)
             {
                 float t = i / (float)(requested - 1);
-                int index = Math.Min(source.Count - 1, (int)(t * (source.Count - 1)));
-                Vector2 point = source[index];
-                if (point == Vector2.Zero)
-                    continue;
-                scratch[count++] = ToScreen(point + (settings.OffsetFunction?.Invoke(t) ?? Vector2.Zero), settings.Space);
+                int index = Math.Min(cleanCount - 1, (int)(t * (cleanCount - 1)));
+                scratch[count++] = ToScreen(path[index] + (settings.OffsetFunction?.Invoke(t) ?? Vector2.Zero), settings.Space);
             }
             return count >= 2;
         }
@@ -489,13 +833,13 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i < requested && count < MaxPoints; i++)
         {
             float t = i / (float)(requested - 1);
-            float scaled = t * (source.Count - 1);
-            int index = Math.Min(source.Count - 2, (int)scaled);
+            float scaled = t * (cleanCount - 1);
+            int index = Math.Min(cleanCount - 2, (int)scaled);
             float local = scaled - index;
-            Vector2 a = index > 0 ? source[index - 1] : source[index] * 2f - source[index + 1];
-            Vector2 b = source[index];
-            Vector2 c = source[index + 1];
-            Vector2 d = index + 2 < source.Count ? source[index + 2] : source[index + 1] * 2f - source[index];
+            Vector2 a = index > 0 ? path[index - 1] : path[index] * 2f - path[index + 1];
+            Vector2 b = path[index];
+            Vector2 c = path[index + 1];
+            Vector2 d = index + 2 < cleanCount ? path[index + 2] : path[index + 1] * 2f - path[index];
             scratch[count++] = ToScreen(Vector2.CatmullRom(a, b, c, d, local) + (settings.OffsetFunction?.Invoke(t) ?? Vector2.Zero), settings.Space);
         }
         return count >= 2;
@@ -514,11 +858,13 @@ public static class MonoPrimitiveRenderer
         if (Main.dedServ || settings is null || !Ready())
             return;
 
+        WarnIfUnscaledMissing(settings.UseUnscaledMatrix, settings.Space);
+
         sideCount = Math.Clamp(sideCount, 3, MaxPoints);
+        ReservePrimitive(sideCount * 3, sideCount * 3);
         if (!HasRoomFor(sideCount * 3, sideCount * 3))
             return;
 
-        ResetMesh();
         Vector2 centerScreen = ToScreen(center, settings.Space);
         for (int i = 0; i < sideCount; i++)
         {
@@ -529,14 +875,14 @@ public static class MonoPrimitiveRenderer
             Vector2 edge = centerScreen + (MathHelper.TwoPi * t).ToRotationVector2() * radius;
             Vector2 nextEdge = centerScreen + (MathHelper.TwoPi * nextT).ToRotationVector2() * nextRadius;
 
-            // 截面：圆心 0 → 边缘 1；Z 为该切片的半径。
-            int v0 = PushVertex(centerScreen, settings.ColorFunction(t), t, 0f, radius);
-            int v1 = PushVertex(edge, settings.ColorFunction(t), t, 1f, radius);
-            int v2 = PushVertex(nextEdge, settings.ColorFunction(nextT), nextT, 1f, nextRadius);
+            // 截面：圆心 0 → 边缘 1；扇形内部靠线性插值得到 d / r，着色器不需要知道半径。
+            int v0 = PushNormalizedVertex(centerScreen, settings.ColorFunction(t), t, 0f);
+            int v1 = PushNormalizedVertex(edge, settings.ColorFunction(t), t, 1f);
+            int v2 = PushNormalizedVertex(nextEdge, settings.ColorFunction(nextT), nextT, 1f);
             PushTriangle(v0, v1, v2);
         }
 
-        Flush(settings.Shader, settings.BlendState, settings.UseUnscaledMatrix ? MonoGraphicsSpace.Screen : settings.Space, settings.ProjectionWidth, settings.ProjectionHeight);
+        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight);
     }
 
     /// <summary>渲染一圈圆形描边（圆环带），环厚由内径向外径单侧展开。</summary>
@@ -548,11 +894,14 @@ public static class MonoPrimitiveRenderer
         if (Main.dedServ || settings is null || !Ready())
             return;
 
+        WarnIfUnscaledMissing(settings.UseUnscaledMatrix, settings.Space);
+
         pointCount = Math.Clamp(pointCount, 3, MaxPoints - 1);
+        ReservePrimitive((pointCount + 1) * 2, pointCount * 6);
         if (!HasRoomFor((pointCount + 1) * 2, pointCount * 6))
             return;
 
-        ResetMesh();
+        int baseVertex = vertexCount;
         Vector2 centerScreen = ToScreen(center, settings.Space);
         for (int i = 0; i <= pointCount; i++)
         {
@@ -562,15 +911,15 @@ public static class MonoPrimitiveRenderer
             float edgeWidth = settings.EdgeWidthFunction(t);
             Color color = settings.ColorFunction(t);
 
-            // 截面：内径 0 → 外径 1；Z 为环厚。
-            PushVertex(centerScreen + radial * radius, color, t, 0f, edgeWidth);
-            PushVertex(centerScreen + radial * (radius + edgeWidth), color, t, 1f, edgeWidth);
+            // 截面：内径 0 → 外径 1。
+            PushNormalizedVertex(centerScreen + radial * radius, color, t, 0f);
+            PushNormalizedVertex(centerScreen + radial * (radius + edgeWidth), color, t, 1f);
         }
 
         for (int i = 0; i < pointCount; i++)
-            PushQuad(i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
+            PushQuad(baseVertex + i * 2, baseVertex + i * 2 + 1, baseVertex + i * 2 + 3, baseVertex + i * 2 + 2);
 
-        Flush(settings.Shader, settings.BlendState, settings.UseUnscaledMatrix ? MonoGraphicsSpace.Screen : settings.Space, settings.ProjectionWidth, settings.ProjectionHeight);
+        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight);
     }
 
     #endregion
@@ -606,28 +955,20 @@ public static class MonoPrimitiveRenderer
         quadCorners[3] = new Vector2(-half.X, half.Y);
 
         Vector2 centerScreen = ToScreen(center, space);
-        // 截面：纵向 0 → 1 跨越的像素数就是纹理高度乘以缩放。
-        float span = texture.Height * Math.Abs(scale.Y);
 
-        ResetMesh();
+        ReservePrimitive(4, 6);
+        int baseVertex = vertexCount;
         for (int i = 0; i < 4; i++)
         {
+            // 四边形的 Y 直接就是贴图 v 坐标；Z 写 1，着色器那条还原公式对它不改变。
             float u = i is 1 or 2 ? 1f : 0f;
             float v = i >= 2 ? 1f : 0f;
-            PushVertex(centerScreen + quadCorners[i].RotatedBy(rotation), color, u, v, span);
+            PushNormalizedVertex(centerScreen + quadCorners[i].RotatedBy(rotation), color, u, v);
         }
-        PushQuad(0, 1, 2, 3);
+        PushQuad(baseVertex, baseVertex + 1, baseVertex + 2, baseVertex + 3);
 
-        fallbackTexture = texture;
-        try
-        {
-            // 贴图与 useTexture 由 Flush 统一处理（见那里的注释），这里只负责把 fallbackTexture 架好。
-            Flush(shader, blendState, space, projectionWidth, projectionHeight);
-        }
-        finally
-        {
-            fallbackTexture = null;
-        }
+        // 贴图与 useTexture 由 Flush 记进命令，提交时再绑。
+        Flush(shader, blendState, space, projectionWidth, projectionHeight, texture, SamplerState.LinearClamp, useTexture: true);
     }
 
     #endregion
@@ -646,7 +987,7 @@ public static class MonoPrimitiveRenderer
             return;
         scratch[0] = ToScreen(start, space);
         scratch[1] = ToScreen(end, space);
-        ResetMesh();
+        ReservePrimitive(4, 6);
         BuildStroke(scratch.AsSpan(0, 2), closed: false, width, _ => color);
         Flush(null, null, space, null, null);
     }
@@ -680,7 +1021,7 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i <= segments; i++)
             scratch[i] = centerScreen + (startAngle + sweepAngle * i / segments).ToRotationVector2() * radius;
 
-        ResetMesh();
+        ReservePrimitive((segments + 1) * 2, segments * 6);
         BuildStroke(scratch.AsSpan(0, segments + 1), closed: false, width, _ => color);
         Flush(null, null, space, null, null);
     }
@@ -709,13 +1050,15 @@ public static class MonoPrimitiveRenderer
         if (axial <= 0.001f)
         {
             // 两端重合：直接当实心圆画，别把同一个圆周描两遍。
-            ResetMesh();
-            BuildCircleFan(a, radius, color, arcPoints * 2);
+            int fanSegments = arcPoints * 2;
+            ReservePrimitive(fanSegments * 3, fanSegments * 3);
+            BuildCircleFan(a, radius, color, fanSegments);
             Flush(null, null, space, null, null);
             return;
         }
 
         int outlineCount = arcPoints * 2 + 2;
+        ReservePrimitive(outlineCount + 1, outlineCount * 3);
         if (!HasRoomFor(outlineCount + 1, outlineCount * 3))
             return;
 
@@ -734,11 +1077,10 @@ public static class MonoPrimitiveRenderer
             scratch[slot++] = b + (normal * MathF.Cos(phi) - direction * MathF.Sin(phi)) * radius;
         }
 
-        ResetMesh();
-        // 轮廓是凸的，用中点为扇心填充即可；Z 按"圆心 → 轮廓"的截面跨度取半径。
-        int origin = PushVertex((a + b) * 0.5f, color, 0f, 0f, radius);
+        // 轮廓是凸的，用中点为扇心填充即可；截面从扇心 0 到轮廓 1。
+        int origin = PushNormalizedVertex((a + b) * 0.5f, color, 0f, 0f);
         for (int i = 0; i < outlineCount; i++)
-            PushVertex(scratch[i], color, i / (float)outlineCount, 1f, radius);
+            PushNormalizedVertex(scratch[i], color, i / (float)outlineCount, 1f);
         for (int i = 0; i < outlineCount; i++)
             PushTriangle(origin, origin + 1 + i, origin + 1 + (i + 1) % outlineCount);
 
@@ -771,7 +1113,8 @@ public static class MonoPrimitiveRenderer
         float gap = Math.Max(gapLength, 0.01f);
         float half = Math.Max(thickness, 0.01f) * 0.5f;
 
-        ResetMesh();
+        int dashCount = (int)(length / (dash + gap)) + 1;
+        ReservePrimitive(dashCount * 4, dashCount * 6);
         for (float cursor = 0f; cursor < length; cursor += dash + gap)
         {
             if (!HasRoomFor(4, 6))
@@ -779,10 +1122,10 @@ public static class MonoPrimitiveRenderer
             float dashEnd = Math.Min(length, cursor + dash);
             Vector2 head = a + direction * cursor;
             Vector2 tail = a + direction * dashEnd;
-            int v0 = PushVertex(head - normal * half, color, cursor / length, 0f, thickness);
-            int v1 = PushVertex(head + normal * half, color, cursor / length, 1f, thickness);
-            int v2 = PushVertex(tail + normal * half, color, dashEnd / length, 1f, thickness);
-            int v3 = PushVertex(tail - normal * half, color, dashEnd / length, 0f, thickness);
+            int v0 = PushSegmentVertex(head - normal * half, color, cursor / length, 0f, thickness);
+            int v1 = PushSegmentVertex(head + normal * half, color, cursor / length, 1f, thickness);
+            int v2 = PushSegmentVertex(tail + normal * half, color, dashEnd / length, 1f, thickness);
+            int v3 = PushSegmentVertex(tail - normal * half, color, dashEnd / length, 0f, thickness);
             PushQuad(v0, v1, v2, v3);
         }
 
@@ -825,13 +1168,13 @@ public static class MonoPrimitiveRenderer
         if (maxRadius <= 0.001f)
             return;
 
-        ResetMesh();
+        ReservePrimitive(count + 1, count * 3);
         if (IsConvex(polygon) && HasRoomFor(count + 1, count * 3))
         {
-            // 截面：重心 0 → 轮廓 1，按到重心的距离归一化；Z 为最大重心里程。
-            int origin = PushVertex(centroid, color, 0f, 0f, maxRadius);
+            // 截面：重心 0 → 轮廓 1，按到重心的距离归一化。
+            int origin = PushNormalizedVertex(centroid, color, 0f, 0f);
             for (int i = 0; i < count; i++)
-                PushVertex(polygon[i], color, i / (float)count, Vector2.Distance(centroid, polygon[i]) / maxRadius, maxRadius);
+                PushNormalizedVertex(polygon[i], color, i / (float)count, Vector2.Distance(centroid, polygon[i]) / maxRadius);
             for (int i = 0; i < count; i++)
                 PushTriangle(origin, origin + 1 + i, origin + 1 + (i + 1) % count);
         }
@@ -840,10 +1183,11 @@ public static class MonoPrimitiveRenderer
             int[] triangles = Polygon.Triangulate(polygon);
             if (triangles.Length == 0 || !HasRoomFor(count, triangles.Length))
                 return;
+            int baseVertex = vertexCount;
             for (int i = 0; i < count; i++)
-                PushVertex(polygon[i], color, i / (float)count, Vector2.Distance(centroid, polygon[i]) / maxRadius, maxRadius);
+                PushNormalizedVertex(polygon[i], color, i / (float)count, Vector2.Distance(centroid, polygon[i]) / maxRadius);
             for (int i = 0; i + 2 < triangles.Length; i += 3)
-                PushTriangle(triangles[i], triangles[i + 1], triangles[i + 2]);
+                PushTriangle(baseVertex + triangles[i], baseVertex + triangles[i + 1], baseVertex + triangles[i + 2]);
         }
 
         Flush(null, null, space, null, null);
@@ -867,7 +1211,7 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i < count; i++)
             scratch[i] = ToScreen(points[i], space);
 
-        ResetMesh();
+        ReservePrimitive(count * 2, (closed ? count : count - 1) * 6);
         BuildStroke(scratch.AsSpan(0, count), closed, thickness, _ => color);
         Flush(null, null, space, null, null);
     }
@@ -890,7 +1234,7 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i <= segments; i++)
             scratch[i] = ToScreen(EvaluateBezier(controlPoints, i / (float)segments), space);
 
-        ResetMesh();
+        ReservePrimitive((segments + 1) * 2, segments * 6);
         BuildStroke(scratch.AsSpan(0, segments + 1), closed: false, thickness, _ => color);
         Flush(null, null, space, null, null);
     }
@@ -915,13 +1259,12 @@ public static class MonoPrimitiveRenderer
         scratch[2] = ToScreen(position + size, space);
         scratch[3] = ToScreen(position + new Vector2(0f, size.Y), space);
 
-        ResetMesh();
-        // 截面：纵向 0 → 1 跨越的像素数即矩形高度。
-        float span = size.Y;
-        int v0 = PushVertex(scratch[0], topLeft, 0f, 0f, span);
-        int v1 = PushVertex(scratch[1], topRight, 0f, 0f, span);
-        int v2 = PushVertex(scratch[2], bottomRight, 0f, 1f, span);
-        int v3 = PushVertex(scratch[3], bottomLeft, 0f, 1f, span);
+        ReservePrimitive(4, 6);
+        // 渐变完全由顶点色插值得到：上边 Y=0、下边 Y=1。
+        int v0 = PushNormalizedVertex(scratch[0], topLeft, 0f, 0f);
+        int v1 = PushNormalizedVertex(scratch[1], topRight, 0f, 0f);
+        int v2 = PushNormalizedVertex(scratch[2], bottomRight, 0f, 1f);
+        int v3 = PushNormalizedVertex(scratch[3], bottomLeft, 0f, 1f);
         PushQuad(v0, v1, v2, v3);
 
         Flush(null, null, space, null, null);
@@ -993,6 +1336,31 @@ public static class MonoPrimitiveRenderer
     }
 
     #endregion
+}
+
+/// <summary>
+/// 一个图元批次。用 <c>using</c> 包住一段绘制，期间调用的 <c>MonoPrim.*</c> 会攒到一起提交。
+/// <code>
+/// using MonoPrimitiveBatch batch = MonoPrim.Batch();
+/// foreach (MonoTrail trail in trails)
+///     trail.Draw();
+/// </code>
+/// <para>
+/// 作用域里不要再做别的原始绘制：命令是延迟执行的，自己直接调 <c>DrawIndexedPrimitives</c>
+/// 或开 <see cref="SpriteBatch"/> 会与提交时机错开。批次不能嵌套。
+/// </para>
+/// </summary>
+public sealed class MonoPrimitiveBatch : IDisposable
+{
+    internal MonoPrimitiveBatch()
+    {
+    }
+
+    /// <summary>把已经攒下的内容立刻提交，批次仍然有效，可以继续攒。</summary>
+    public void Flush() => MonoPrimitiveRenderer.SubmitBatch();
+
+    /// <summary>提交并结束批次。重复调用安全。</summary>
+    public void Dispose() => MonoPrimitiveRenderer.EndBatch();
 }
 
 /// <summary>把图元渲染器挂进 tModLoader 生命周期。</summary>

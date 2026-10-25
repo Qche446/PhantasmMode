@@ -33,6 +33,11 @@ namespace FargosPhantasmMode.Common.DamageRules
             MonoDamage.Register(new MonoConditionalReductionRule(0.75f, 
                 when: CoffinPhaseChange, 
                 targetType: ModContent.NPCType<CursedCoffin>()));
+            MonoDamage.Register(new MonoConditionalReductionRule(0.75f,
+                when: SpiritPhaseChange,
+                targetType: ModContent.NPCType<CursedSpirit>()));
+
+
 
             // 双子：死亡射线与滚动射击期间各自减伤一半。
             MonoDamage.Register(new MonoConditionalReductionRule(0.5f,
@@ -61,6 +66,9 @@ namespace FargosPhantasmMode.Common.DamageRules
         ///棺材是否在阶段转换状态
         private static bool CoffinPhaseChange(MonoDamageInfo info)
             => MonoDamageSource.TryTargetNpc(info, out NPC npc) && npc.TryGetGlobalNPC<P_CursedCoffin>(out var p) &&
-            (p.Fsm.Current == P_CursedCoffin.State.PhaseTransition1st || p.Fsm.Current == P_CursedCoffin.State.PhaseTransition2nd);
+            (p.Fsm.Current == P_CursedCoffin.State.PhaseTransition1st || p.Fsm.Current == P_CursedCoffin.State.PhaseTransition2nd || (p.Phase < 3 && npc.GetLifePercent() < 0.15f));
+        private static bool SpiritPhaseChange(MonoDamageInfo info)
+            => MonoDamageSource.TryTargetNpc(info, out NPC npc) && npc.TryGetGlobalNPC<P_CursedSpirit>(out var p) &&
+            p.owner.TryGetGlobalNPC<P_CursedCoffin>(out var pc) && (pc.Fsm.Current != P_CursedCoffin.State.CircleRound && npc.GetLifePercent() < 0.15f);
     }
 }

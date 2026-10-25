@@ -1,14 +1,18 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using System.Collections.Generic;
+using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.Shaders;
 using Monochrome.Core.Graphics.Trails;
 using FargowiltasSouls.Assets.ExtraTextures;
+using FargosPhantasmMode.Common;
 
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
 {
-    public class MoonlightTrail : ModProjectile
+    public class MoonlightTrail : ModProjectile, IMonoPixelatedPrimitive
     {
         //public MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.BeforeNPCs;
         private MonoTrail trail;
+        MonoPixelationLayer LayerToRenderTo => MonoPixelationLayer.BeforeNPCs;
         public override string Texture => FargoSoulsUtil.EmptyTexture;
         public override void SetStaticDefaults()
         {
@@ -59,9 +63,10 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
             {
                 PointsToCreate = 60,
                 UseUnscaledMatrix = true,
-                WidthFunction = t => WidthFunction(1 - t),
-                ColorFunction = t => ColorFunction(1 - t),
+                WidthFunction = WidthFunction,
+                ColorFunction = ColorFunction,
                 Texture = FargosTextureRegistry.FadedStreak.Value,
+                Shader = PhanShader.StreakTrail,
                 Offset = 0.5f * Projectile.Size
             };
         }
@@ -71,16 +76,17 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 behindNPCs.Add(index);
         }
         public static Vector2 Offset(NPC npc) => (npc.rotation + MathHelper.PiOver2).ToRotationVector2() * 25;
-        public override bool PreDraw(ref Color lightColor)
+        public override bool PreDraw(ref Color lightColor) => false;
+
+        public void RenderPixelatedPrimitives()
         {
             trail?.DrawFrom(Projectile.oldPos);
-            return false;
         }
 
         public float WidthFunction(float completionRatio)
         {
             float baseWidth = Projectile.scale * 36 * 3.0f;
-            return MathHelper.SmoothStep(baseWidth, baseWidth * 0.3f, completionRatio) * Projectile.Opacity;
+            return MathHelper.SmoothStep(baseWidth, baseWidth * 0.3f, completionRatio) * Projectile.Opacity * 0.5f;
         }
 
         public Color ColorFunction(float completionRatio)
@@ -95,13 +101,6 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 opacity *= MathF.Pow(1 - ((completionRatio - threshold2) / (1 - threshold2)), 2);
             return Color.Lerp(new Color(41, 243, 243), Color.Transparent, completionRatio) * opacity * Projectile.Opacity;
         }
-        /*
-        public void RenderPixelatedPrimitives()
-        {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
-            FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
-            MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 60);
-        }
-        */
+
     }
 }

@@ -9,7 +9,7 @@ namespace FargosPhantasmMode.Common.VisualEquipType
         public const int RibbonTargetSize = 124;
         private const float AnchorRatio = 5f / 15f;
         private static readonly MonoPrimitiveSettings RibbonSettings = new(
-            t => 2.5f + 1.2f * Math.Abs(t - AnchorRatio) / (1f - AnchorRatio),
+            t => 1.25f + 0.6f * Math.Abs(t - AnchorRatio) / (1f - AnchorRatio),
             _ => new(255, 255, 255, 200));
 
         public override void ResizeArrays()

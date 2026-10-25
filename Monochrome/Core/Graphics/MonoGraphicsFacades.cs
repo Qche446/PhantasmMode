@@ -32,6 +32,16 @@ public static class MonoRt
 /// </summary>
 public static class MonoPrim
 {
+    #region 批次
+
+    /// <summary>
+    /// 开一个图元批次：作用域内的调用攒到一起提交，见 <see cref="MonoPrimitiveBatch"/>。
+    /// 多条拖尾、多个粒子一起画时用它，能省掉每个图元一次的缓冲上传。
+    /// </summary>
+    public static MonoPrimitiveBatch Batch() => MonoPrimitiveRenderer.Batch();
+
+    #endregion
+
     #region 网格接口
 
     /// <summary>把点列渲染成一条一次性提交的索引三角形带。<c>pointsToCreate</c> 是重采样后的点数，默认取输入点数。</summary>

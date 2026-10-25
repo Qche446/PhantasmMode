@@ -5,7 +5,7 @@ namespace Monochrome.Core.Graphics.Primitives;
 /// <summary>
 /// GPU 拖尾的配置。位置属于哪个坐标空间由 <see cref="Space"/> 决定。
 /// </summary>
-/// <param name="WidthFunction">沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（0 为尾巴，1 为头部），返回该处的条带<b>全宽</b>（像素）；条带以中心线为轴向两侧各展开一半。<b>注意与 Luminance 的单位不同</b>：它的 <c>WidthFunction</c> 是半宽（两个顶点各向侧面偏移那么多），同一个函数搬过来要乘 2 才画得出同样宽的条带。</param>
+/// <param name="WidthFunction">沿轨迹的宽度函数，入参 <c>t ∈ [0,1]</c>（0 是点列的第一个点，用 <c>Projectile.oldPos</c> 时就是头），返回该处的<b>半宽</b>（像素）：条带以中心线为轴向两侧各展开这么多。与 Luminance 的 <c>WidthFunction</c> 同义——点列顺序和 <c>t</c> 的方向都相同，从那边搬来的函数可以直接用。</param>
 /// <param name="ColorFunction">沿轨迹的颜色函数，入参同上；颜色由 GPU 在顶点间插值。</param>
 /// <param name="OffsetFunction">可选的位置偏移，在减去 <c>Main.screenPosition</c> 之前加在世界坐标上，适合做整体摆动而不改传入的点列。</param>
 /// <param name="Smoothen">是否用 Catmull-Rom 样条重采样点列。点列稀疏时开（默认）；关掉按最近索引取样、不插值，省算力。</param>
@@ -34,12 +34,12 @@ public sealed record MonoPrimitiveSettings(
     SamplerState? Sampler = null)
 {
     /// <summary>等宽单色拖尾的快捷构造：整条轨迹用同一个宽度与颜色。</summary>
-    /// <param name="width">条带全宽（像素）。</param>
+    /// <param name="width">条带全宽（像素）；内部折半后写成 <c>WidthFunction</c> 的半宽。</param>
     /// <param name="color">整条轨迹的颜色。</param>
     /// <param name="shader">可选的自定义着色器。</param>
     /// <param name="space">坐标空间。</param>
     public static MonoPrimitiveSettings Solid(float width, Color color, MonoShader? shader = null, MonoGraphicsSpace space = MonoGraphicsSpace.World)
-        => new(_ => width, _ => color, Shader: shader, Space: space);
+        => new(_ => width * 0.5f, _ => color, Shader: shader, Space: space);
 }
 
 /// <summary>实心圆的配置（三角形扇填充）。</summary>

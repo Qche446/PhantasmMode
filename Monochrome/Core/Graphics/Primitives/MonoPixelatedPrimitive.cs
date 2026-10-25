@@ -27,8 +27,17 @@ public enum MonoPixelationLayer
 /// 它让图元走不含缩放的正交投影，与半分辨率目标的缩放配合出像素块）——目标、时机与放大都由系统负责。
 /// </para>
 /// <para>
+/// 漏写 <c>UseUnscaledMatrix</c> 时系统会兜住并按无缩放投影绘制，但仍然请照写：读代码的人要靠它知道
+/// 这段图元落在一张半分辨率目标里。
+/// </para>
+/// <para>
 /// <b>不要在实现里开关 <see cref="SpriteBatch"/></b>：调用点已经在原始绘制路径上（与 <c>MonoPrim.*</c> 同一约定），
-/// 开着的批次会被随后的原始绘制打乱。这也是本接口不带 <c>SpriteBatch</c> 参数的原因。
+/// 开着的批次会被随后的原始绘制打乱。系统会用 <see cref="MonoPrimitiveBatch"/> 包住整层的绘制，
+/// 在里面另做原始绘制同样会与提交时机错开。
+/// </para>
+/// <para>
+/// 有不由 NPC / 弹幕提交的手工绘制时，用 <see cref="MonoPixelationSystem.EnqueueRender"/> 排进同一层，
+/// 它会排在该层消费者之后、同一个批次里提交。单个消费者抛异常只会损失它自己那部分，系统按类型告警一次。
 /// </para>
 /// </summary>
 public interface IMonoPixelatedPrimitive

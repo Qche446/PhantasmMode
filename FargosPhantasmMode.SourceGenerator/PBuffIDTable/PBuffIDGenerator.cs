@@ -6,7 +6,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-namespace FargosPhantasmMode.SourceGenerator;
+namespace FargosPhantasmMode.SourceGenerator.PBuffIDTable;
 
 [Generator]
 public class PBuffIDGenerator : IIncrementalGenerator
@@ -30,6 +30,9 @@ public class PBuffIDGenerator : IIncrementalGenerator
             // 排除抽象类和开放泛型类。
             if (symbol.IsAbstract || symbol.IsGenericType)
                 return null;
+            // 只处理 public 类。
+            if (symbol.DeclaredAccessibility != Accessibility.Public)
+                return null;
 
             // 检查整个继承链，而不只检查直接基类。
             var baseType = symbol.BaseType;
@@ -46,25 +49,19 @@ public class PBuffIDGenerator : IIncrementalGenerator
             if (!SyntaxFacts.IsValidIdentifier(name) || SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None)
                 return null;
 
-            return new BuffInfo(name, symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+            return new ModTypeInfo(name, symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
         });
-        var externalBuffs = initContext.CompilationProvider.Select(static (compilation, _) => ScanAssembly(compilation, "FargowiltasSouls"));
+        //var externalBuffs = initContext.CompilationProvider.Select(static (compilation, _) => RegisterIDTable.ScanAssembly(compilation, "FargowiltasSouls", ModBuffMetadataName));
 
         var collectedBuffs = buffs
             .Where(static buff => buff is not null)
             .Select(static (buff, _) => buff!)
             .Collect();
 
-        var allBuffs = collectedBuffs.Combine(externalBuffs);
-
-        initContext.RegisterSourceOutput(allBuffs,
+        initContext.RegisterSourceOutput(collectedBuffs,
             static (spc, items) =>
             {
-                var currentBuffs = items.Left;
-                var otherBuffs = items.Right;
-                var mergedBuffs = currentBuffs.Concat(otherBuffs).ToImmutableArray();
-
-                var uniqueBuffs = mergedBuffs
+                var uniqueBuffs = items
                     .GroupBy(static buff => buff.Name)
                     .Where(static group => group.Count() == 1)
                     .Select(static group => group.First())
@@ -103,63 +100,5 @@ public class PBuffIDGenerator : IIncrementalGenerator
                         source.ToString(),
                         Encoding.UTF8));
             });
-    }
-    private static ImmutableArray<BuffInfo> ScanAssembly(Compilation compilation, string targetAssemblyName)
-    {
-        var result = ImmutableArray.CreateBuilder<BuffInfo>();
-
-        var modBuffSymbol = compilation.GetTypeByMetadataName(ModBuffMetadataName);
-
-        if (modBuffSymbol is null)
-            return result.ToImmutable();
-
-        foreach (var reference in compilation.References)
-        {
-            if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assembly)
-                continue;
-
-            // 只扫描指定名称的程序集。
-            if (!string.Equals(assembly.Identity.Name, targetAssemblyName, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            CollectBuffTypes(assembly.GlobalNamespace, modBuffSymbol, result);
-        }
-
-        return result.ToImmutable();
-    }
-
-    private static void CollectBuffTypes(INamespaceSymbol ns, INamedTypeSymbol modBuffSymbol, ImmutableArray<BuffInfo>.Builder result)
-    {
-        foreach (var type in ns.GetTypeMembers())
-            CollectType(type, modBuffSymbol, result);
-
-        foreach (var childNs in ns.GetNamespaceMembers())
-            CollectBuffTypes(childNs, modBuffSymbol, result);
-    }
-
-    private static void CollectType(INamedTypeSymbol type, INamedTypeSymbol modBuffSymbol, ImmutableArray<BuffInfo>.Builder result)
-    {
-        var current = type.BaseType;
-
-        while (current is not null)
-        {
-            if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, modBuffSymbol.OriginalDefinition))
-            {
-                if (!type.IsAbstract && !type.IsGenericType && !type.IsStatic)
-                {
-                    result.Add(new BuffInfo(type.Name, type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-                }
-                break;
-            }
-
-            current = current.BaseType;
-        }
-        foreach (var nested in type.GetTypeMembers())
-            CollectType(nested, modBuffSymbol, result);
-    }
-    private sealed class BuffInfo(string name, string typeName)
-    {
-        public string Name { get; } = name;
-        public string TypeName { get; } = typeName;
     }
 }
