@@ -1,3 +1,5 @@
+using Monochrome.Core.Graphics.RenderTargets;
+
 namespace Monochrome.Core.Graphics.PostProcessing;
 
 /// <summary>
@@ -35,19 +37,10 @@ public sealed class MonoTintPass : IMonoPostFxPass
         if (Main.dedServ)
             return;
 
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-        RenderTargetBinding[] oldTargets = device.GetRenderTargets();
-        try
+        using (MonoRenderTargetScope.Bind(destination, Color.Transparent))
+        using (MonoBatchScope.Begin(spriteBatch, blendState: BlendState.AlphaBlend))
         {
-            device.SetRenderTarget(destination);
-            device.Clear(Color.Transparent);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
             spriteBatch.Draw(source, Vector2.Zero, Tint);
-            spriteBatch.End();
-        }
-        finally
-        {
-            device.SetRenderTargets(oldTargets);
         }
     }
 }

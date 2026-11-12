@@ -6,8 +6,11 @@ public interface IMonoPostFxPass
     /// <summary>执行顺序，越小越先执行。</summary>
     int Order { get; }
 
-    /// <summary>是否启用。为 false 时 <see cref="MonoPostFxPipeline"/> 会跳过它且不消耗一块中间目标。</summary>
-    bool Enabled { get; }
+    /// <summary>
+    /// 是否启用。为 false 时 <see cref="MonoPostFxPipeline"/> 会跳过它且不消耗一块中间目标。
+    /// <para>可写：开关是运行期的事（诊断命令、配置项），不该逼调用方重建整条链。</para>
+    /// </summary>
+    bool Enabled { get; set; }
 
     /// <summary>
     /// 把 <paramref name="source"/> 处理进 <paramref name="destination"/>。

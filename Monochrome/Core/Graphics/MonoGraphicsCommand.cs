@@ -53,8 +53,8 @@ public sealed class MonoGraphicsCommand : ModCommand
 
     private static MonoTintPass? captureTestPass;
 
-    /// <summary>自检用的内置屏幕特效：名字 → 它的 pass（模糊是两个）。</summary>
-    private static readonly Dictionary<string, List<MonoShaderPass>> captureFx = [with(StringComparer.OrdinalIgnoreCase)];
+    /// <summary>自检用的内置屏幕特效：名字 → 它的 pass（模糊是两个，Bloom 是一个复合 pass）。</summary>
+    private static readonly Dictionary<string, List<IMonoPostFxPass>> captureFx = [with(StringComparer.OrdinalIgnoreCase)];
 
     private static MonoPostFxPipeline? captureFxPipeline;
 
@@ -322,35 +322,49 @@ public sealed class MonoGraphicsCommand : ModCommand
     /// <summary>按名字开关一个内置特效；第一次开启时创建、加进自检链并注册。</summary>
     private static bool SetCaptureFx(string name, bool on)
     {
-        if (!captureFx.TryGetValue(name, out List<MonoShaderPass>? passes))
+        if (!captureFx.TryGetValue(name, out List<IMonoPostFxPass>? passes))
         {
             // 关闭一个从没创建过的效果：只校验名字合不合法，不建对象。
             if (!on)
-                return MonoScreenFx.Create(name) is not null;
+                return IsKnownFx(name);
 
-            MonoShaderPass? first = MonoScreenFx.Create(name, out MonoShaderPass? extra);
-            if (first is null)
+            passes = CreateCaptureFx(name);
+            if (passes is null)
                 return false;
 
-            passes = [first];
-            ApplyCaptureFxDemoPreset(first);
-            if (extra is not null)
-            {
-                ApplyCaptureFxDemoPreset(extra);
-                passes.Add(extra);
-            }
             captureFx[name] = passes;
-
             captureFxPipeline ??= new MonoPostFxPipeline();
-            foreach (MonoShaderPass pass in passes)
+            foreach (IMonoPostFxPass pass in passes)
+            {
+                // 演示参数必须在 Add 之前：链只在加入时按 Order 排序。
+                ApplyCaptureFxDemoPreset(pass);
                 captureFxPipeline.Add(pass);
+            }
             MonoScreenCaptureSystem.Register(captureFxPipeline, order: 2000, label: "内置自检：屏幕特效");
         }
 
-        foreach (MonoShaderPass pass in passes)
+        foreach (IMonoPostFxPass pass in passes)
             pass.Enabled = on;
         return true;
     }
+
+    /// <summary>
+    /// 按名字造出自检要的一串 pass。单一滤镜是一到两个，复合效果（<c>bloom</c>）是整条子链收在一个 pass 里。
+    /// </summary>
+    /// <returns>名字不认识时返回 <see langword="null"/>。</returns>
+    private static List<IMonoPostFxPass>? CreateCaptureFx(string name)
+    {
+        MonoShaderPass? first = MonoScreenFx.Create(name, out MonoShaderPass? extra);
+        if (first is not null)
+            return extra is null ? [first] : [first, extra];
+
+        IMonoPostFxPass? composite = MonoScreenFx.CreateComposite(name);
+        return composite is null ? null : [composite];
+    }
+
+    /// <summary>名字是否属于某个内置特效——查询用，不建对象。</summary>
+    private static bool IsKnownFx(string name)
+        => MonoScreenFx.Create(name) is not null || MonoScreenFx.CreateComposite(name) is not null;
 
     /// <summary>
     /// 自检用的参数：把每一条推到"一眼能看出来"的程度。
@@ -359,7 +373,7 @@ public sealed class MonoGraphicsCommand : ModCommand
     /// 但自检需要的是"看不出变化就等于没生效"。两者的目标相反，所以这里单独给一组演示值。
     /// </para>
     /// </summary>
-    private static void ApplyCaptureFxDemoPreset(MonoShaderPass pass)
+    private static void ApplyCaptureFxDemoPreset(IMonoPostFxPass pass)
     {
         switch (pass)
         {
@@ -380,6 +394,14 @@ public sealed class MonoGraphicsCommand : ModCommand
                 break;
             case MonoBlurPass blur:
                 blur.Radius = 5f;
+                break;
+            // Bloom 默认值偏含蓄（阈值 0.62 / 强度 0.85），自检要的是"一眼能看出来"：
+            // 阈值压低到 0.35 让中间调也发光，强度加过 1 让效果超过原亮度。
+            // 半径留在 3 以内：再大就会开始出块状条纹，自检反而分不清那是参数还是缺陷。
+            case MonoBloomPass bloom:
+                bloom.Threshold = 0.35f;
+                bloom.Strength = 1.2f;
+                bloom.Radius = 3f;
                 break;
         }
     }

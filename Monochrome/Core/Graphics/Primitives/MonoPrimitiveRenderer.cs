@@ -677,7 +677,7 @@ public static class MonoPrimitiveRenderer
 
         batching = true;
         commands.Clear();
-        MonoShader.WriteLog = new List<MonoShader.Write>(128);
+        MonoShader.WriteLog = [with(128)];
         ResetMesh();
         return new MonoPrimitiveBatch();
     }

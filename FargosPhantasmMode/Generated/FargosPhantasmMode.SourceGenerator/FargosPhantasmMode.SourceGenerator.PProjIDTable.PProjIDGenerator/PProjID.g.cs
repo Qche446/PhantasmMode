@@ -157,6 +157,12 @@ public static class PProjID
     private static readonly global::System.Lazy<int> __DarkStarTwins = new(() => global::Terraria.ModLoader.ModContent.ProjectileType<global::FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins.DarkStarTwins>());
     public static int DarkStarTwins => __DarkStarTwins.Value;
 
+    private static readonly global::System.Lazy<int> __DeerclopsIceSpike = new(() => global::Terraria.ModLoader.ModContent.ProjectileType<global::FargosPhantasmMode.Content.Bosses.VanillaEternity.Deer.DeerclopsIceSpike>());
+    public static int DeerclopsIceSpike => __DeerclopsIceSpike.Value;
+
+    private static readonly global::System.Lazy<int> __DeerclopsRangedProjectile = new(() => global::Terraria.ModLoader.ModContent.ProjectileType<global::FargosPhantasmMode.Content.Bosses.VanillaEternity.Deer.DeerclopsRangedProjectile>());
+    public static int DeerclopsRangedProjectile => __DeerclopsRangedProjectile.Value;
+
     private static readonly global::System.Lazy<int> __DestroyerDeathray = new(() => global::Terraria.ModLoader.ModContent.ProjectileType<global::FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer.DestroyerDeathray>());
     public static int DestroyerDeathray => __DestroyerDeathray.Value;
 

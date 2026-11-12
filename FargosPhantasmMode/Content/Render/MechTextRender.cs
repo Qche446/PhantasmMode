@@ -1,5 +1,6 @@
 using Monochrome.Core.Graphics;
 using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.RenderTargets;
 using Monochrome.Core.Graphics.Shaders;
 using ReLogic.Graphics;
 using Terraria.GameContent;
@@ -64,36 +65,23 @@ public static class MechTextRender
 
         SpriteBatch spriteBatch = Main.spriteBatch;
         GraphicsDevice device = Main.instance.GraphicsDevice;
-        RenderTargetBinding[] previousTargets = device.GetRenderTargets();
-        PresentationParameters presentation = device.PresentationParameters;
-        RenderTargetUsage previousUsage = presentation.RenderTargetUsage;
 
         spriteBatch.End();
 
-        bool bound = false;
-        presentation.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-        try
+        // 作用域退出时绑回原来那块目标，绑后备缓冲的那一下不会把界面清掉。
+        bool bound;
+        using (MonoRenderTargetScope.Bind(lease.Target, Color.Transparent))
         {
-            device.SetRenderTarget(lease.Target);
             bound = device.GetRenderTargets().Length > 0;
             if (bound)
             {
-                device.Clear(Color.Transparent);
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None,
-                    RasterizerState.CullNone, null, Matrix.CreateScale(uiScale) * Matrix.CreateTranslation(Padding, Padding, 0f));
-                ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, line.Text, Vector2.Zero, Color.White,
-                    0f, Vector2.Zero, textScale, line.MaxWidth, line.Spread);
-                spriteBatch.End();
+                using (MonoBatchScope.Begin(spriteBatch, SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                           transform: Matrix.CreateScale(uiScale) * Matrix.CreateTranslation(Padding, Padding, 0f)))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, line.Text, Vector2.Zero, Color.White,
+                        0f, Vector2.Zero, textScale, line.MaxWidth, line.Spread);
+                }
             }
-        }
-        finally
-        {
-            if (previousTargets.Length > 0 && previousTargets[0].RenderTarget is not null)
-                device.SetRenderTargets(previousTargets);
-            else
-                device.SetRenderTarget(null);
-
-            presentation.RenderTargetUsage = previousUsage;
         }
 
         if (!bound)

@@ -5,7 +5,7 @@ namespace Monochrome.Core.Graphics.PostProcessing;
 /// <summary>
 /// 内置屏幕特效的<b>名字表与工厂</b>：让"有哪些现成的效果"变成一件可以枚举、可以按名字取用的事。
 /// <para>
-/// 存在的理由有两个：诊断命令需要一个统一入口（<c>/mono capture fx &lt;名字&gt; on</c>），
+/// 存在的理由有两个：诊断命令需要一个统一入口（<c>/monoshader capture fx &lt;名字&gt; on</c>），
 /// 而消费者也不该被迫记住每个效果的类名与默认参数。用名字拿到的实例参数都是<b>保守默认值</b>，
 /// 想调风格请拿回去改属性。
 /// </para>
@@ -21,6 +21,7 @@ public static class MonoScreenFx
     public static readonly string[] Names =
     [
         "blur",
+        "bloom",
         "colorgrade",
         "chromatic",
         "scanline",
@@ -56,6 +57,26 @@ public static class MonoScreenFx
     /// <summary>按名字造一个效果实例（忽略 <c>blur</c> 的第二个 pass）。</summary>
     /// <param name="name">效果名。</param>
     public static MonoShaderPass? Create(string name) => Create(name, out _);
+
+    /// <summary>
+    /// 按名字造一个<b>复合效果</b>：它不是单个 <see cref="MonoShaderPass"/>，而要自己串起多个着色器、
+    /// 自己持有中间目标。名字不属于复合效果时返回 <see langword="null"/>。
+    /// <para>目前只有 <c>bloom</c>（亮部提取 → 两向模糊 → 加性合成，中间目标是小一号的池租借目标）。</para>
+    /// <para>
+    /// <b>为什么不并进 <see cref="Create(string, out MonoShaderPass?)"/>：</b>那条路要求返回值是
+    /// <see cref="MonoShaderPass"/>，而复合效果的中间步骤共享同一组参数与同一批目标，拆成若干个独立 pass
+    /// 反而需要对外暴露内部状态。分成两个工厂，调用方按"我要的是单一滤镜还是整条子链"各取所需。
+    /// </para>
+    /// </summary>
+    /// <param name="name">效果名，不区分大小写；见 <see cref="Names"/>。</param>
+    public static IMonoPostFxPass? CreateComposite(string name)
+    {
+        return (name?.Trim().ToLowerInvariant()) switch
+        {
+            "bloom" => new MonoBloomPass(),
+            _ => null,
+        };
+    }
 
     /// <summary>
     /// 把一个具名效果加进链里。名字不认识时返回 <see langword="false"/>。
@@ -97,11 +118,22 @@ public static class MonoScreenFx
         foreach (string name in Names)
         {
             MonoShaderPass? pass = Create(name);
-            bool ready = pass is not null && pass.IsAvailable;
+            if (pass is not null)
+            {
+                output.Append('\n')
+                      .Append("  ").Append(name.PadRight(12))
+                      .Append(pass.IsAvailable ? "着色器已就绪  " : "着色器未注册  ")
+                      .Append(pass.ShaderName);
+                continue;
+            }
+
+            // 复合效果：一个名字对应一整条子链，没有单一的 ShaderName 可报。
+            IMonoPostFxPass? composite = CreateComposite(name);
+            bool ready = composite is MonoBloomPass bloom && bloom.IsAvailable;
             output.Append('\n')
                   .Append("  ").Append(name.PadRight(12))
                   .Append(ready ? "着色器已就绪  " : "着色器未注册  ")
-                  .Append(pass?.ShaderName ?? "(无)");
+                  .Append("(复合：自持半分辨率目标)");
         }
         return output.ToString();
     }

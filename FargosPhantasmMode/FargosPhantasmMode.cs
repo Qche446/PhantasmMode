@@ -30,12 +30,6 @@ namespace FargosPhantasmMode
 
             Instance = this;
         }
-
-        /// <summary>
-        /// 订阅渲染钩子。不能放在 <see cref="Load"/> 里：Monochrome 要等它自己的
-        /// PostSetupContent 才扫着色器，而加载画面在主线程上会先命中这个钩子，
-        /// 那时注册表还是空的。Monochrome 排在 FPM 之前，走到这里 FPM 的着色器已经注册好了。
-        /// </summary>
         public override void PostSetupContent()
         {
             On_FilterManager.EndCapture += FilterManager_EndCapture;

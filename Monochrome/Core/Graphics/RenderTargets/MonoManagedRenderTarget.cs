@@ -147,8 +147,11 @@ public sealed class MonoManagedRenderTarget : IDisposable
         TimeSinceLastUsage = 0;
     }
 
-    /// <summary>把图形设备的当前渲染目标切换到自己，可选地先清屏。</summary>
-    /// <param name="clearColor">清屏颜色；为 null 时不清屏。</param>
+    /// <summary>把图形设备的当前渲染目标切换到自己，可选地再指定一次清屏颜色。</summary>
+    /// <param name="clearColor">
+    /// 清屏颜色。渲染目标的 usage 是 <c>DiscardContents</c>，FNA 在切入时必定清一次（透明黑），
+    /// 所以为 null 不等于"保留原内容"，只是省掉这次额外的清屏。
+    /// </param>
     /// <exception cref="InvalidOperationException">在专用服务器上被调用。</exception>
     public void SwapToRenderTarget(Color? clearColor = null)
     {
@@ -164,18 +167,10 @@ public sealed class MonoManagedRenderTarget : IDisposable
     public void CopyContentsFrom(RenderTarget2D source)
     {
         ThrowIfNoGraphicsDevice();
-        RenderTargetBinding[] oldTargets = Main.instance.GraphicsDevice.GetRenderTargets();
-        try
+        using (MonoRenderTargetScope.Bind(Target, Color.Transparent))
+        using (MonoBatchScope.Begin(Main.spriteBatch, blendState: BlendState.Opaque, samplerState: Main.DefaultSamplerState))
         {
-            Main.instance.GraphicsDevice.SetRenderTarget(Target);
-            Main.instance.GraphicsDevice.Clear(Color.Transparent);
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
             Main.spriteBatch.Draw(source, Vector2.Zero, Color.White);
-            Main.spriteBatch.End();
-        }
-        finally
-        {
-            Main.instance.GraphicsDevice.SetRenderTargets(oldTargets);
         }
     }
 

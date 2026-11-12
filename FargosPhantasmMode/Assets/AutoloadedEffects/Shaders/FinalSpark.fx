@@ -1,11 +1,3 @@
-// FPM 的对比度滤镜（自 FSS 的 FinalSpark 改写，用于 Mutant 的终结阶段）。
-//
-// 屏幕 pass 的着色器契约（与 Monochrome 的屏幕特效一致，模板见 Assets/Effects/Screen/）：
-//   1. 顶点输入沿用图元顶点布局，UV 直接取 TextureCoordinates.xy；
-//   2. 输入贴图绑在采样槽 1；
-//   3. uWorldViewProjection / globalTime / screenSize 由渲染路径自动写入；
-//   4. 淡入淡出走 fxOpacity——这里它是唯一的强度参数，0 时结果与原始画面完全一致。
-
 sampler uSource : register(s1);
 
 matrix uWorldViewProjection;

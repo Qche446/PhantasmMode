@@ -1,5 +1,6 @@
 using Monochrome.Core.Graphics;
 using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.RenderTargets;
 using Monochrome.Core.Physics;
 
 namespace FargosPhantasmMode.Common.VisualEquipType
@@ -12,16 +13,24 @@ namespace FargosPhantasmMode.Common.VisualEquipType
             t => 1.25f + 0.6f * Math.Abs(t - AnchorRatio) / (1f - AnchorRatio),
             _ => new(255, 255, 255, 200));
 
-        public override void ResizeArrays()
+        private bool hooked;
+        public override void PostSetupContent()
         {
+            MonoRenderTargetManager.RenderTargetUpdateLoop += RenderRibbons;
+            hooked = true;
         }
-        public override void PostDrawTiles()
+        public override void Unload()
         {
-            if (Main.dedServ)
+            if (!hooked)
             {
                 return;
             }
 
+            MonoRenderTargetManager.RenderTargetUpdateLoop -= RenderRibbons;
+            hooked = false;
+        }
+        private static void RenderRibbons()
+        {
             for (int i = 0; i < Main.maxPlayers; i++)
             {
                 Player player = Main.player[i];
@@ -45,11 +54,9 @@ namespace FargosPhantasmMode.Common.VisualEquipType
             modPlayer.ribbonTargetOrigin = BoundsCenter(modPlayer.ribbonRope.Points) - new Vector2(RibbonTargetSize * 0.5f);
 
             GraphicsDevice device = Main.instance.GraphicsDevice;
-            RenderTargetBinding[] previous = device.GetRenderTargets();
             device.SetRenderTarget(target);
             device.Clear(Color.Transparent);
             MonoRopeRenderer.DrawToTarget(modPlayer.ribbonRope, target, modPlayer.ribbonTargetOrigin, RibbonSettings);
-            device.SetRenderTargets(previous);
         }
         private static RenderTarget2D EnsureTarget(VisualEquipPlayer modPlayer)
         {
@@ -59,7 +66,7 @@ namespace FargosPhantasmMode.Common.VisualEquipType
                 target = new RenderTarget2D(Main.instance.GraphicsDevice, RibbonTargetSize, RibbonTargetSize, false, SurfaceFormat.Color, DepthFormat.None);
                 modPlayer.ribbonTarget = target;
             }
-
+            
             return target;
         }
         private static Vector2 BoundsCenter(Vector2[] points)

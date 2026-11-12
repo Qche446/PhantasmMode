@@ -1,4 +1,5 @@
 using Monochrome.Core.Graphics.Primitives;
+using Monochrome.Core.Graphics.RenderTargets;
 using Monochrome.Core.Graphics.Screen;
 using Monochrome.Core.Graphics.Shaders;
 
@@ -69,20 +70,13 @@ public abstract class MonoShaderPass : IMonoPostFxPass
         if (resolved is null || !MonoPrimitiveRenderer.IsReady)
             return;
 
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-        RenderTargetBinding[] oldTargets = device.GetRenderTargets();
-        try
+        using (MonoRenderTargetScope.Bind(destination))
         {
-            device.SetRenderTarget(destination);
             // 刻意不 Clear：全屏四边形会写满 destination 的每一个像素（含 alpha），清屏是纯浪费的填充率。
             // 这一点由 MonoScreenCapture.DrawFullscreen 保证：它的投影与四边形都按 destination 的尺寸算。
             ApplyParameters(resolved);
             resolved.SetParameter("fxOpacity", MathHelper.Clamp(Opacity, 0f, 1f));
             MonoScreenCapture.DrawFullscreen(source, destination, resolved);
-        }
-        finally
-        {
-            device.SetRenderTargets(oldTargets);
         }
     }
 

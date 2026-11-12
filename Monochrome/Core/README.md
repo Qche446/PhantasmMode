@@ -57,6 +57,7 @@ Monochrome 的 L1 核心：子系统注册表、事件总线、对象池、确�
   - [5.10 一个完整的接线（可参照案例）](#510-一个完整的接线可参照案例)
   - [5.11 MonoNet —— 世界级字段的下发](#511-mononet--世界级字段的下发)
   - [5.12 网络层的边界（这一版做什么、不做什么）](#512-网络层的边界这一版做什么不做什么)
+  - [5.13 MonoRowSkins —— 模组列表行皮肤](#513-monorowskins--模组列表行皮肤)
 - [6. 零分配是怎么做到的](#6-零分配是怎么做到的)
 - [7. 验收](#7-验收)
   - [7.1 离线验收台](#71-离线验收台monochromecoretests)
@@ -133,6 +134,7 @@ Monochrome/Core/
 ├─ MonoEase.cs                  MonoTween（池化补间；缓动曲线本身在 MonoUtil，本文件不再自带一份）
 ├─ MonoLog.cs                   分级日志 + 环形缓冲 + MonoLogInterpolatedStringHandler
 ├─ MonoCoreCommand.cs           /monocore 诊断 + 自检入口（处理器，不是 ModCommand）
+├─ UI/                          对外公共入口：MonoRowSkins 模组列表行皮肤（见 UI/README.md）
 ├─ Physics/                     L2 物理求解器的宿主：MonoPhysicsSystem + MonoRopeRenderer（见 Physics/README.md）
 └─ Graphics/                    L4 表现层（命名空间 Monochrome.Core.Graphics.*，见它自己的 README）
 ```
@@ -239,6 +241,7 @@ Monochrome/Core/
 | 实体的自定义字段要过网（`SendExtraAI` 那对方法体） | `MonoNet.Fields<TEntity>(...)`（§5.11） |
 | 看网络层的账本 / 连通性 | `/mononet stat` / `/mononet tables` / `/mononet ping`（§5.11） |
 | 网络层这一版做什么、不做什么 | §5.12 |
+| 换掉自己模组在模组列表里那一行的底板（与名字） | `MonoRowSkins.Register(...)`（§5.13） |
 
 ---
 
@@ -746,6 +749,34 @@ public override void ReceiveExtraAI(NPC npc, BitReader bits, BinaryReader r) => 
 - 实体字段表的脏掩码：tML 没有"这次是全量"的标记，只写变化会让中途加入的人拿到旧值。
 - 位域字段：统一走字节，一张表才能同时覆盖 `ModNPC`（拿不到 `BitWriter`）与 `GlobalNPC`。
 - 把实体字段表的形状哈希并进加入时的协议哈希：代价是每张表都要在 `Load` 里触发一次注册；形状哈希只放在 `/mononet tables` 里供两端对照。
+
+### 5.13 MonoRowSkins —— 模组列表行皮肤
+
+**它是什么**：让模组换掉自己在 tModLoader 模组列表里那一行的底板，名字文字也可以一并接管。
+这一行是内部的 `UIModItem`，
+底板与边框写死在里面、类型也不公开，所以只能靠 IL 钩子（`MonoModRowSkinHook`）：
+注册过皮肤的行跳过 `UIPanel.DrawSelf` 并接管名字文字，没注册的行原样。
+
+**怎么用**：在 `PostSetupContent` 或之后注册一次。
+
+```csharp
+MonoRowSkins.Register("MyMod", static context =>
+{
+    Rectangle bounds = new(
+        (int)context.Outer.X, (int)context.Outer.Y,
+        (int)context.Outer.Width, (int)context.Outer.Height);
+    context.Batch.Draw(TextureAssets.MagicPixel.Value, bounds, Color.Black);
+});
+```
+
+想自己画名字就给 `Register` 传第三个参数 `Action<MonoRowNameContext>`，位置、缩放、字体都已算好；
+不传则保留原版文字。Monochrome 自己那行也走同一条注册（`MonoModRowStyle.Draw` + `DrawName`）。
+
+**三条边界**（详细契约见 [`UI/README.md`](UI/README.md)）：
+
+- 批次已经 Begin 过，回调里不要再 `Begin`/`End`；坐标是 UI 单位。
+- 原版底板**已经跳过**，皮肤要自己把整行铺满（包含 12px 圆角与悬停边框，这两件也归皮肤）。
+- 绑定的是模组名而不是行对象（行每进一次界面就重建），回调抛异常会让该皮肤当场停用。
 
 ---
 

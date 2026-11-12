@@ -1,15 +1,3 @@
-// FPM 的幽火融合球材质：把融合场当遮罩，用宇宙噪声与色调把它画成火焰。
-//
-// 由 MonoPrimitiveRenderer.RenderQuad 驱动（整屏四边形）：
-//   Coord.x = u、Coord.y = v（都是 0..1）
-//   融合场贴图绑在 s1
-//   噪声贴图绑在 s2（由 CosmicFireMetaballSystem 在 ConfigureComposite 里绑）
-//
-// 三段取值：
-//   a > m          → 场够厚，铺噪声（火焰的实体）
-//   |a - m| < n    → 贴着阈值的薄边，铺纯色
-//   其余           → 按 a² 衰减的色调（火焰外晕）
-
 sampler uField : register(s1);
 sampler uNoise : register(s2);
 

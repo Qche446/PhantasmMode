@@ -2,7 +2,6 @@ using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Global;
 using FargowiltasSouls.Content.Bosses.VanillaEternity;
 using FargowiltasSouls.Core.Globals;
-using Monochrome.Common.MonoUtil;
 using Monochrome.Content.Worms;
 using Terraria.ModLoader.IO;
 namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EaterOfWorlds;
@@ -12,10 +11,8 @@ public class P_EowHead : PModeNPCBehaviour
     private const float Spacing = 38f;
     public override int NPCType => NPCID.EaterofWorldsHead;
     public NPC Npc;
-    // 提示音只能本地播，这两个字段保证每个相位轮次只响一次（这个实例是所有头共用的）
     private int lastKind = -1;
     private int sweepSoundEntered = -1;
-    // SFollow 每一轮锁一次目标点，round 记住这是第几轮，免得每帧都重锁
     private Vector2 sFollowTarget;
     private int sFollowRound = -1;
     public Player Player => Main.player[Npc.target];
@@ -23,7 +20,6 @@ public class P_EowHead : PModeNPCBehaviour
     public ref float Ahead => ref Npc.ai[1];
     public override void OnFirstTick(NPC npc) => npc.GetGlobalNPC<EaterofWorldsHead>().RunEmodeAI = false;
 
-    // 相位是整场共享的，哪只头同步都写同一份值；这样读写顺序不必再靠「谁是 leader」对齐
     public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
     {
         base.SendExtraAI(npc, bitWriter, binaryWriter);
@@ -71,7 +67,6 @@ public class P_EowHead : PModeNPCBehaviour
 
         EowPhase.Tick(npc);
 
-        // 相位是共享状态，只有真正换相位的那一帧才播
         if (EowPhase.Kind != lastKind)
         {
             if (EowPhase.Kind == (int)EowPhase.Phase.UTurn)
@@ -81,7 +76,7 @@ public class P_EowHead : PModeNPCBehaviour
         }
 
         //哎哎，领域
-        if (Main.LocalPlayer.active && npc.Distance(Main.LocalPlayer.Center) < 8000f)
+        if (Main.LocalPlayer.active && !Main.LocalPlayer.ghost && !Main.LocalPlayer.dead && npc.Distance(Main.LocalPlayer.Center) < 8000f)
             Main.LocalPlayer.AddBuff(PBuffID.RottenAirFlow, 2);
         switch ((EowPhase.Phase)EowPhase.Kind)
         {

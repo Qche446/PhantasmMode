@@ -3,6 +3,8 @@
 Monochrome 的图形与特效层：图元网格、渲染目标、着色器与热重载、粒子、融合球、屏幕后处理与相机跟随。
 代码位于 `Monochrome/Core/Graphics/`，命名空间 `Monochrome.Core.Graphics`。
 
+> **定位**：后处理与屏幕特效（`PostProcessing/`、`Screen/`）是**可用的参考实现**——能跑、能当模板抄，但 FPM 的内容几乎不依赖它们，后续也不再往这个方向加新 pass。真正在用、会继续维护的是图元层、渲染目标、着色器与热重载、粒子、融合球、拖尾。
+
 | 想看什么 | 去哪 |
 |---|---|
 | 最短的上手路径：怎么把一个特效写出来 | [模组级 README](../../README.md) |
@@ -115,6 +117,7 @@ Monochrome/Core/Graphics/
 ├─ MonoGraphicsSpace.cs              枚举：World / Screen / UI          ← 不变量 I 的定义处
 ├─ MonoGraphicsFacades.cs            MonoPrim（图元门面）、MonoRt（RT 门面）
 ├─ MonoSpriteBatchExtensions.cs      批次状态助手                       ← 不变量 II 的工具
+├─ MonoBatchScope.cs                 一次批次的作用域（Begin / End 成对）
 ├─ MonoGraphicsCommand.cs            /monoshader（着色器与屏幕后处理诊断）
 ├─ Primitives/                       ★ 图元层：几何 → 三角形网格 → GPU
 │  ├─ MonoPrimitiveVertex.cs         顶点布局 + 附加数据位契约
@@ -124,7 +127,8 @@ Monochrome/Core/Graphics/
 │  ├─ MonoRenderTargetPool.cs        帧内短租（池 + Lease）
 │  ├─ MonoManagedRenderTarget.cs     跨帧长期持有 + 跟随分辨率
 │  ├─ MonoRenderTarget.cs            受管目标的兼容包装
-│  └─ MonoRenderTargetManager.cs     统一维护全部受管目标
+│  ├─ MonoRenderTargetManager.cs     统一维护全部受管目标
+│  └─ MonoRenderTargetScope.cs       切目标的作用域（绑后备缓冲时不清屏）
 ├─ Shaders/                          着色器
 │  ├─ MonoShader.cs                  参数缓存 / 纹理绑定 / pass 选择 / 热替换
 │  ├─ MonoShaderManager.cs           注册表、自动加载、写回授权判定
@@ -215,6 +219,8 @@ Monochrome/Core/Graphics/
 | 画一块带旋转或自定义着色器的贴图 | `MonoPrim.RenderQuad`（§5.2） |
 | 帧内借用渲染目标 | `MonoRt.Rent` / `MonoRenderTargetPool.Rent`（§5.6） |
 | 一块跟随屏幕分辨率的渲染目标 | `MonoRt.ScreenSized`（§5.6） |
+| 切一块渲染目标、画完切回来 | `MonoRenderTargetScope.Bind`（§5.6） |
+| 开一个批次并保证收掉 | `MonoBatchScope`（§5.4） |
 | 写/用自定义着色器 | `MonoShaderManager` + `MonoShader`（§5.5） |
 | 马上看到 `.fx` 改动 | `/monoshader reload <名字>`（§5.5） |
 | 成百上千个带行为的粒子 | 派生 `MonoParticle`（§5.8） |
@@ -401,6 +407,22 @@ var screenTarget = MonoRt.ScreenSized();
 
 **边界**：它只是助手，不会隐式切换批次——什么时候切仍然由调用方决定。
 
+#### MonoBatchScope
+
+```csharp
+using (MonoBatchScope.Begin(Main.spriteBatch, blendState: BlendState.Opaque, samplerState: Main.DefaultSamplerState))
+    spriteBatch.Draw(source, Vector2.Zero, Color.White);
+
+using (MonoBatchScope.BeginImmediate(spriteBatch, BlendState.Opaque))
+    spriteBatch.Draw(source, Vector2.Zero, Tint);
+```
+
+进入时 `Begin`，退出时 `End`，所以 body 抛异常时批次也会收掉。默认参数就是全屏拷贝那一套：
+`Immediate` / `Opaque` / `LinearClamp` / `Identity` / 关闭深度与剔除；要别的组合就传对应的参数。
+
+**边界**：它不接管已经打开的批次——进入时若有批次开着，`Begin` 照旧抛 `InvalidOperationException`。
+"结束当前批次 → 做点别的 → 按原参数重开"仍然用上面那几个助手，因为还原上一个批次的参数要读 FNA 的内部字段。
+
 ---
 
 ### 5.5 Shaders —— 着色器
@@ -530,6 +552,31 @@ PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回
 
 **边界**：它回收的是**不属于自己**的对象，所以受管目标的 `Dispose` 才必须保持"可重建"语义。
 
+#### MonoRenderTargetScope
+
+```csharp
+using (MonoRenderTargetScope.Bind(target, Color.Transparent))   // target 为 null 表示后备缓冲
+    DrawSomething();
+
+using (lease.Scope())                                          // 租约可能为 null，为 null 时什么都不做
+    DrawSomething();
+```
+
+进入时记下当前绑定、切过去，退出时切回来。它存在的理由是**绑回后备缓冲那一下会清屏**：后备缓冲的 usage
+取 `PresentationParameters.RenderTargetUsage`，默认正是 `DiscardContents`，FNA 在切入时立刻
+`Clear(Target | DepthBuffer | Stencil)`。作用域绑后备缓冲时会临时把那项设置改成 `PreserveContents`、
+绑完立刻还原——只影响这一次绑定，不改全局行为（常开着会有性能代价）。
+
+**边界**：
+
+- 它保护不了渲染目标自己的 usage：`RenderTarget2D.RenderTargetUsage` 的 setter 不是 public，
+  想让某块目标保留内容只能在八参构造时指定。往 `DiscardContents` 的目标上绑之前，内容照样会被清。
+- `clearColor: null` 只表示"作用域不主动清"，不代表内容保住了。
+- 专用服务器上 `Bind` 直接返回一个什么都不做的作用域。
+
+**没有换过去的地方**：`MonoBloomPass`（一次会话里连切三次目标）与 `MonoMetaballManager`（还要存 Viewport）
+保留手写的存/还。作用域在那里只省两条语句，却会让人以为那些地方的状态恢复也是自动的。
+
 ---
 
 ### 5.7 PostProcessing —— 后处理链
@@ -542,13 +589,29 @@ PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回
 ```csharp
 public interface IMonoPostFxPass
 {
-    int Order { get; }      // 越小越先执行
-    bool Enabled { get; }   // false 时被跳过，且不消耗中间目标
+    int Order { get; }          // 越小越先执行
+    bool Enabled { get; set; }  // 可写；false 时被跳过，且不消耗中间目标
     void Apply(RenderTarget2D source, RenderTarget2D destination, SpriteBatch spriteBatch);
 }
 ```
 
-实现方约定：自己 `SetRenderTarget` 到 `destination`，画完恢复调用前的绑定；批次自己 `Begin`/`End`。
+实现方约定：用 `MonoRenderTargetScope.Bind(destination)` 切到 `destination`、用 `MonoBatchScope` 开批次；
+两个作用域退出时绑定与批次都会自己恢复（§5.4、§5.6）。
+
+**同一块 `DiscardContents` 目标不能在两步之间重新绑定。** FNA 的 `GraphicsDevice.SetRenderTargets` 在切入
+这类目标时会立刻清空它（颜色、深度、模板一起），于是"绑 A → 画 → 绑 B → 绑回 A"会把第一次画的内容全丢掉，
+而且不报错、不留日志。池里的中间目标与原版的屏幕目标都是这个 usage。要连续往同一块目标上画两步，
+就只 `SetRenderTarget` 一次：`MonoPostFxPipeline.CopyTo` 自己完成"绑定 + 清屏 + 铺满 + 恢复"，
+`CopyToBound` 是"目标已经绑好、只要铺满"的版本。
+
+作用域（§5.6）解决的是另一件事：它让"切回来"那一下不清屏。它不能让你在同一块 `DiscardContents` 目标上
+分两次绑着画——那一步只能靠"只绑一次"。
+
+**世界绘制阶段不要切渲染目标。** `Filters.Scene.BeginCapture` 到 `EndCapture` 之间绑的是
+`Main.screenTarget`（原版用六参构造建的目标，同样落在这个 usage 上），`PreDrawTiles` / `PostDrawTiles`
+两个钩子都在这段里面。在这两个钩子里 `SetRenderTarget` 到别处、画完再切回来，世界画面就会被上面那条规则
+清成黑底，只剩之后才画的东西。离屏渲染放到世界绘制之前（`Main.OnPreDraw`，推荐订阅
+`MonoRenderTargetManager.RenderTargetUpdateLoop`），或者 `EndCapture` 之后。
 
 #### MonoPostFxPipeline
 
@@ -558,6 +621,7 @@ public interface IMonoPostFxPass
 | `IsActive` | 至少有一个 pass 处于启用状态。屏幕捕获用它决定"要不要为这一帧申请捕获" |
 | `Apply(source, destination, batch)` | 先挡 `Main.dedServ` 并静默返回；`source` 与 `destination` 是同一块时记一次日志并跳过（FNA 不允许一块纹理同时当渲染目标和采样源）；没有启用的 pass 就退化成一次整幅拷贝；否则租两块中间目标做 ping-pong |
 | `CopyTo(src, dst, sb)` | `internal`，`MonoScreenCapture` 也用它，所以两条路径的拷贝语义是同一份实现 |
+| `CopyToBound(src, sb)` | `internal`，只铺满当前已绑定的目标，不碰绑定也不清屏；给"一块目标要连画两步"的 pass 用 |
 
 ping-pong 的意义是两个 pass 之间不需要新的渲染目标，把每帧的 RT 分配降到零。
 
@@ -672,93 +736,46 @@ new MonoEmitter
 
 ### 5.9 Metaballs —— 融合球
 
-多个球的影响力场相加后取等值面，所以靠近时会自然粘连——这正是它相对"半透明圆盘"的全部价值。
+多个球的影响力场相加后取等值面，靠近时会自然粘连；这套东西相对"半透明圆盘"全部的价值就在这里。
 
-#### MonoMetaballSettings
+#### 怎么定义一类球
 
-| 设置 | 默认 | 说明 |
-|---|---|---|
-| `Threshold` | 0.5 | **融合积极性**：两球多早开始搭桥。融合距离 `0.5 → 3R`、`0.25 → 2.33R`、`0.1 → 2.11R`、`0.02 → 2.04R` |
-| `SupportRadius(visible)` | — | `visible / max(0.1, 1 - clamp(Threshold, 0, 0.9))`。提交时支撑半径按它放大，等值面因此恰好落在你给的 `Radius` 上 |
-| `Softness` / `EdgeWidth` / `EdgeColor` | — | 合成时的阈值过渡宽度与边缘带 |
-| `InfluencePower` | — | 影响力曲线的幂次，决定融合手感 |
-| `Segments` / `ResolutionDivisor` / `Opacity` | 24 / 2 / — | 每颗球的分段数、半分辨率累积的除数、整体不透明度 |
-| `CompositeShader` | null | 这一层合成时用的着色器；null 表示用内置的 `Monochrome.MetaballComposite` |
-| `ConfigureComposite` | null | 标准 uniform 写完之后调用，用来补这一层自己的参数与贴图槽 |
+派生 `MonoMetaballType`（`ModType`，由 tML 自动创建并注册，取用走 `ModContent.GetInstance<T>()`），覆写两件事：
 
-**阈值不改变球的大小**：可见半径恒等于你给的 `Radius`。
+| 成员 | 作用 |
+|---|---|
+| `UpdateParticle(particle)` | 每帧改速度、大小或 `ExtraInfo0`–`3`；位移由管理器在这之后统一施加 |
+| `ShouldKillParticle(particle)` | 返回 `true` 就被回收 |
 
-**参数是按层来的**：`MonoMetaballManager.Settings` 是默认的那一份，没单独设过的层都用它；要"血稠、电稀"就给某一层单独设一份——
+提交用 `CreateParticle(position, velocity, size, …)`。`ShouldRender` 默认"有球就画"，没有粒子时既不推进也不占绘制开销；有额外判据（例如宿主 NPC 还活着）再覆写它。
 
-```csharp
-MonoMetaballManager.SetSettings("blood", new MonoMetaballSettings { Threshold = 0.2f, InfluencePower = 2f });
-MonoMetaballManager.SetSettings("blood", null);   // 恢复默认
-```
+#### 观感
 
-`SettingsFor(layer)` 取这一层当前生效的那份（累积、合成、`Sample` 都用它）。**`ResolutionDivisor` 只在层第一次累积时生效**——累积目标是那时按它建的，之后改不会重建，要改就 `FreeLayer` 之后再发。
+| 成员 | 说明 |
+|---|---|
+| `FieldTexture` / `FieldTextureFrame` | 写场时每颗球画的软圆，以及要从图集里取的那块；返回 `null` 时这一类型什么都写不进去 |
+| `LayerTextures` | 每层一张材质，条目数决定层数，也决定要几张整屏目标 |
+| `EdgeColor` | 默认边着色器画的轮廓色 |
+| `Space` | `World`（默认）或 `UI`；UI 层的场合成进自己的整屏目标，再在 `PostDrawInterface` 贴出去 |
+| `LayerIsFixedToScreen` / `CalculateManualOffsetForLayer` | 材质贴不贴屏幕、逐层滚动偏移 |
+| `PrepareShaderForTarget(layerIndex)` | 换掉默认材质；覆写时自己写 uniform 与贴图槽，**记得调 `Apply()`** |
 
-**界面上的融合球（UIMetaball）**：给这一层把 `Space` 设成 `MonoGraphicsSpace.UI`，位置就按 UI 坐标给：
+默认合成用内置的 `Monochrome.MetaballEdge`（`MonoMetaballType.EdgeShaderName`）。槽位约定：正在绘制的层目标由绘制方绑在 s0，自己的贴图从 s1 起绑。
 
-```csharp
-MonoMetaballManager.SetSettings("ui.glow", new MonoMetaballSettings
-{
-    Space = MonoGraphicsSpace.UI,
-    Threshold = 0.35f,
-});
-MonoMetaballManager.Add("ui.glow", new MonoMetaball(uiPosition, 24f, Color.Cyan));
-```
+两层接口之外还有两个钩子：`DrawInstances()` 改"怎么把球写进场"（默认每颗一张 `FieldTexture` 的四边形），`ExtraDrawing()` 在写场末尾补笔。
 
-管理器会把这一层合成进它自己的一张整屏目标，然后在界面相位（`PostDrawInterface`）当普通贴图贴出去——它不跟世界镜头跑，也不需要抢 `End()` / `Begin()` 的空隙（界面批那时是开着的，只画一次 `SpriteBatch.Draw`）。两条代价：
+#### 两个时机
 
-- 每多一个 UI 层就多一张整屏 RT（世界层只有半分辨率的场目标）；
-- `Main.UIScaleMatrix` 在累积那一刻（`Main.OnPreDraw`）还是上一帧的值，所以 **UI 缩放变化的那一帧会偏一帧**。
+1. **写场**——`MonoRenderTargetManager.RenderTargetUpdateLoop`（即 `Main.OnPreDraw`，那时没有活动批次，可以切渲染目标）。每个类型先 `Update()` 再逐层画进自己的整屏目标，逐层先清成透明。
+2. **合成**——`On_Main.DrawProjectiles` 的**最前面**，于是落在弹幕之下。绘制位置取 `Main.screenLastPosition - Main.screenPosition`，把写场与合成之间那一帧的镜头差补回来。
 
-`AutoDraw = false` 时这条自动路不生效——那时 `Draw` 只把结果合成到当前绑定的目标，UI 层要自己接上界面相位。
+登记、换世界清粒子、卸载时 `Retire` 层目标，都由 `MonoMetaballManager` 统一做，派生类不写钩子。
 
-**换合成着色器**：某一层的材质想自己写（例如叠一张噪声贴图当火焰），给它 `CompositeShader` 与 `ConfigureComposite`。内置的五个 uniform（`uThreshold` / `uSoftness` / `uEdgeWidth` / `uEdgeColor` / `uOpacity`）仍会按这一层的值写入，着色器里没有同名的会自动跳过：
+#### 边界
 
-```csharp
-MonoMetaballManager.SetSettings("flame", new MonoMetaballSettings
-{
-    CompositeShader = MonoShaderManager.GetShader("MyMod.Flame"),
-    ConfigureComposite = s => s
-        .SetParameter("color", new Color(57, 10, 110))
-        .SetTexture(noise, 1, SamplerState.LinearWrap),
-});
-```
-
-`AutoDraw` 是全局开关，没有逐层版本：需要自己挑合成时机的层得把整个管理器的自动合成关掉，再在选定的时机调 `Draw(layer)`（FPM 的幽火就在 `On_Main.DrawProjectiles` 里这么用）。着色器被卸载后这一层退回内置合成，不会画不出来。
-
-#### 两种球
-
-| 类型 | 特点 | 提交 |
-|---|---|---|
-| `MonoMetaball` | 只有数据，没有行为 | `MonoMetaballManager.Add(layer, ball)`，层在每帧 `PreUpdateWorld` 被清空，等于每帧重新提交 |
-| `MonoMetaballInstance` | 有自己的行为与生命周期，形状与 `MonoParticle` 对齐 | `new MyBlob(pos).Spawn()`；层名由 `LayerName` 提供。管理器在 `PostUpdateWorld` 推进：`Update` → 位移 → 计龄 → 回收 |
-
-两者可以混在同一层里一起融合。
-
-#### MonoMetaballBrush
-
-往融合场里写球的低层入口：`Begin(shader, blendState, segments)` 与 `Ball(center, visibleRadius, color, strength, influencePower)`。
-它内部会把可见半径换算成支撑半径，所以调用方不必关心阈值。
-
-#### MonoMetaballManager
-
-按"层"收集，同层融合、跨层互不影响。GPU 路线分两段：
-
-1. **累积**：订阅 `MonoRenderTargetManager.RenderTargetUpdateLoop`（时机是 `Main.OnPreDraw`），
-   把每层的球用加法混合画进该层的**半分辨率**目标（着色器 `Monochrome.MetaballField`，
-   走"每颗球一个扇形"的图元路径）。
-2. **合成**：用 `smoothstep` 阈值把场切成等值面，再加一圈边缘带
-   （`Monochrome.MetaballComposite`，整屏四边形 + 采样槽 1 的贴图）。
-
-`AutoDraw` 默认为 true，所以调用方只要提交，不必在绘制相位手动调 `Draw`。`Sample(point)` 给出
-GPU 场的 CPU 版本，用它可以对照"GPU 画得对不对"。`DrawFallback` 只是"半透明圆盘 + 描边"，
-不会让两个球粘连，是降级路径。
-
-累积用的混合状态是自己持有的 `(One, One)`（预乘加法），不碰 FNA 的共享状态。
-
+- 每个类型每层一张整屏渲染目标，层数是显性成本；
+- 写场用 `Matrix.Identity`（`Main.OnPreDraw` 时 `Main.GameViewMatrix` 还是上一帧的缩放，套上去场会画错地方），合成用 `Main.GameViewMatrix`；世界层按 1:1 屏幕像素对齐，采样 `PointWrap`；
+- 当前唯一消费者是 FPM 的幽火（`FargosPhantasmMode/Common/MetaBalls/CosmicFireMetaBall.cs`），它用自己的着色器 `FargosPhantasmMode.BigTentacle` 接管合成。
 ---
 
 ### 5.10 Screen —— 屏幕特效与相机
@@ -874,7 +891,7 @@ MonoCameraFollow.FollowPlayer();                     // 或 Follow(世界坐标�
 
 #### 着色器契约（`Assets/Effects/Screen/*.fx`）
 
-六个内置特效的 `.fx` 都按同一套约定写，看懂这四条就能自己加一条：
+`Assets/Effects/Screen/` 下的 `.fx` 基本都按同一套约定写，看懂这四条就能自己加一条：
 
 | # | 约定 | 为什么 |
 |---|---|---|
@@ -885,6 +902,9 @@ MonoCameraFollow.FollowPlayer();                     // 或 Follow(世界坐标�
 
 第 4 条的名字必须是 `fxOpacity`：图元渲染路径每次提交都调用 `SetCommonParameters()`，
 而它每帧把 `opacity` 写成 1，叫 `opacity` 会被覆盖、淡出直接失效。
+
+**唯一的例外是 `Bloom.fx`**：它只做"亮部提取"这一步，输出 alpha 恒为 0、不做 `lerp(fxOpacity)`——
+它不直接上台面，模糊与合成在后面由 C# 侧接手（见下面 `bloom` 那段）。
 
 #### MonoShaderPass
 
@@ -898,7 +918,7 @@ MonoCameraFollow.FollowPlayer();                     // 或 Follow(世界坐标�
 | `Enabled` / `Opacity` | 关掉后不参与；`Opacity` 是 `[0,1]` 淡出，要淡入淡出就动它而不是改强度参数 |
 | `Apply` | 绑定目标 → 写参数 → 铺满 → 恢复绑定。**不清 `Clear`**：全屏四边形会写满每个像素（含 alpha），清屏是纯浪费的填充率 |
 
-#### 六个内置特效
+#### 七个内置特效
 
 ```csharp
 MonoPostFxPipeline pipeline = MonoPostFxSystem.GetOrCreate("Monochrome.Main");
@@ -914,9 +934,31 @@ MonoScreenCaptureSystem.Register(pipeline);
 | `scanline` | `MonoScanlinePass` | 40 | `Strength = 0.25`、`Count = 540`、`Speed = 0` |
 | `grain` | `MonoGrainPass` | 50 | `Strength = 0.08`、`Scale = 600`、`Monochrome = true` |
 | `vignette` | `MonoVignettePass` | 60 | `Strength = 0.65`、`Softness = 0.55`、`Color = 黑` |
+| `bloom` | `MonoBloomPass` | 5 | `Threshold = 0.62`、`Strength = 0.85`、`Radius = 3` px；**复合 pass**，自持半分辨率目标 |
 
-默认 Order 就是推荐叠法：**模糊 → 定调 → 光学瑕疵 → 扫描线 → 噪点 → 暗角**。模糊要在最前
-（否则会把别的效果抹掉），色差在模糊之后（否则彩边被糊掉），噪点与暗角在最后。
+`bloom` 与其它六个不是一类东西：它不是单个 `MonoShaderPass`。加性合成需要"原始画面"和"模糊结果"
+**同时**在手，而 `IMonoPostFxPass.Apply` 只递进来 `source` 与 `destination`，串行链上的一个 pass
+拿不到两步之前的输入。所以它在一次 `Apply` 里自己做完四步：亮部提取（`Bloom.fx`：阈值 + 强度预乘）
+→ 横向模糊 → 纵向模糊（复用 `Monochrome.Blur`，不另写着色器）→ 整幅拷贝原始画面，再把模糊结果
+"只加颜色"地叠上去。
+
+合成用的是自定义混合状态而不是 `BlendState.Additive`：后者的颜色源因子是 `SourceAlpha`，而亮部提取的
+输出 alpha 恒为 0，用它等于没加。自定义的那份把颜色源因子换成 `One`、alpha 通道写成"写 0、保留下层"。
+
+两块中间目标都是半分辨率（向 `MonoRenderTargetPool` 租借，四步里复用同一对），填充率只有全分辨率的
+四分之一，每帧共 3 次 RT 切换。"半分辨率"是它的默认形态而不是参数：Bloom 是低频信号，几何减半看不出来。
+
+第 ④ 步只把 `destination` 绑一次：`SetRenderTarget` → `Clear` → `CopyToBound` → 加性绘制。早期版本先用
+`CopyTo` 再 `SetRenderTarget(destination)`，而 `CopyTo` 的 `finally` 已经把绑定切回去了，那一句就变成
+"重新切入"，刚拷进去的原始画面随即被清空，画面上只剩 alpha 恒 0 的光晕，最终表现为"除 UI 全黑"。
+
+`Radius` 超过 3 会开始出块状条纹——`Monochrome.Blur` 是 5 抽头，相邻样本间隔就是这个半径，
+间隔太大时样本之间会漏空。要做更宽的发光请叠加更多对模糊，而不是一味调大它。也不做 HDR 提取：
+8 bit 目标上超过阈值的高光会被裁到 1.0，对像素画风格没有影响。
+
+默认 Order 就是推荐叠法：**发光 → 模糊 → 定调 → 光学瑕疵 → 扫描线 → 噪点 → 暗角**。发光先于模糊
+（从原始画面里提取，再让整体被抹开），模糊要在其它滤镜之前（否则会把它们抹掉），色差在模糊之后
+（否则彩边被糊掉），噪点与暗角在最后。
 
 `colorgrade` 的默认是完全恒等的，这样它可以在任何链里存在而不改变画面；想调风格再改参数。
 
@@ -937,10 +979,14 @@ MonoScreenCaptureSystem.Register(pipeline);
 3. 想在 `/monoshader capture fx` 里也能开关它，就在 `MonoScreenFx.Names` 与 `Create` 各加一行；
 4. 新 `.fx` 会被构建自动编成 `.fxc`（脚本递归扫 `Assets/Effects/**/*.fx`）。
 
+如果新效果要串多步、要自持中间目标（像 `bloom` 那样），那就别走 `MonoShaderPass`：直接实现
+`IMonoPostFxPass`，在 `MonoScreenFx.Names` 与 `CreateComposite` 各加一行。诊断命令对两种效果一视同仁，
+因为它只认 `IMonoPostFxPass` 与 `Enabled`。
+
 #### 还缺什么
 
-Bloom（亮部提取 + 降采样 + 加性合成）与 Distortion（需要第二张采样槽）都还没有；`RenderQuad` 已经
-能画进任意尺寸的目标，所以做 Bloom 的路是通的。Pixelate 不做——Luminance 已经有了。
+Distortion（需要第二张采样槽）还没有：它要在采样画面之外再读一张扭曲源，而图元提交路径目前只绑
+槽 1，得先给 `MonoPrimitiveRenderer` 加第二条贴图通道。Pixelate 不做——Luminance 已经有了。
 
 ---
 
@@ -1083,7 +1129,7 @@ recorded.Update(Projectile.Center);
 | 纹理切换 | 尽量 0 | 图集（尚未实现） |
 | 每帧纹理上传 | 0 | 没有 `SetData` 到纹理的路径 |
 | 全屏 RT 数量 | ≤ 2 张全分辨率 | ping-pong 恰好两块 |
-| 后处理 Pass 数 | ≤ 5 | 由调用方控制 |
+| 后处理 Pass 数 | ≤ 5 | 由调用方控制；`bloom` 虽然内含四步绘制，但在链上只占一个位置 |
 | 着色器变体 | 单文件 ≤ 4 个 technique | 由资产方控制 |
 | 每次形状的 GPU 提交 | — | **一次**，这是图元层存在的全部意义 |
 | 绘制路径上的托管分配 | 0 | 静态 `scratch` / `quadCorners` / `scratchList`；虚线整条一个网格；弧与贝塞尔不 `new[]` |
@@ -1103,7 +1149,7 @@ recorded.Update(Projectile.Center);
 | 界面空间粒子的两条限制 | 见 §5.8 | 需要界面侧自定义混合或着色器时得自己在 `End()` / `Begin()` 之间画 |
 | 相机跟随 | 平滑跟随 + 死区 + 前瞻 + 漂移守卫已实现，默认关闭 | 速度自适应缩放没做，理由是硬性的（见 §5.10） |
 | 纹理工具 | 无 | 图集 / 描边生成 / 调色板替换 / 9-slice / 预渲染动画贴图全部未做 |
-| 着色器资产 | 10 个：图元默认、拖尾条纹、融合球两个、屏幕特效六个 | 缺 Bloom 与 Distortion；**且 6 个屏幕特效只经过编译与参数核对，没有逐条目视确认过**——`/monoshader capture fx <名字> on` 就是为这件事准备的 |
+| 着色器资产 | 11 个：图元默认、拖尾条纹、融合球两个、屏幕特效七个（含 Bloom 的亮部提取） | 缺 Distortion；**且这七个屏幕着色器只经过编译与参数核对，没有逐条目视确认过**——`/monoshader capture fx <名字> on` 就是为这件事准备的 |
 | 融合球的形状 | `MonoMetaballBrush` 只有 `Ball` | 一个实例可以用 `DrawField` 摆出复杂形状，但**单颗非圆**不行 |
 | 屏幕裁剪 | `Flush` 没有设 `ScissorRectangle` | 屏幕外的图元照样进光栅化。要做就得用自己持有的 `RasterizerState` 实例，不能改 FNA 的共享静态对象 |
 | 屏幕特效的质量档位 | 只有代码侧的 `Enabled` 静态总开关 | 蓝图要求 ModConfig 里的低/中/高与关闭项，**没有** |
@@ -1133,6 +1179,7 @@ recorded.Update(Projectile.Center);
 | Luminance 的文件监视器停不掉 | 日志报"`ShaderWatchers` 字段找不到"，实际它**一直是属性** | 属性优先、字段兜底，并缓存解析结果 |
 | 粒子画成一条横跨全屏的竖线 | `TextureAssets.MagicPixel` 是 1×1000 而不是 1×1 | 记住尺寸；要固定像素大小就用矩形重载 |
 | `.fx`-only 重载后 Luminance 握着已释放的 `Effect` | 同一个 `Effect` 被两边注册表共享，而 `Dispose`/`Replace` 会释放它 | `MonoShader` 明确不拥有 `Effect`，并在重载后同步 Luminance 注册表 |
+| 切走再切回屏幕后世界全黑 | `PostDrawTiles` 里 `SetRenderTarget` 到离屏目标、画完 `SetRenderTargets(previous)` 切回 `screenTarget`，画面被清成黑底，只剩之后才画的东西 | 离屏渲染搬到 `Main.OnPreDraw`；并提供 `MonoRenderTargetScope`，绑回后备缓冲时临时 `PreserveContents` |
 | `RenderQuad` 的投影写死成屏幕尺寸 | 把四边形画进非全屏目标时只盖住一部分，角落留着上次的内容 | 补 `projectionWidth` / `projectionHeight` 两个可选参数 |
 
 ### 不一致

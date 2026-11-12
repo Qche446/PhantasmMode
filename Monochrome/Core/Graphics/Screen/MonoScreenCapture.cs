@@ -98,7 +98,8 @@ public static class MonoScreenCapture
     /// （<see cref="MonoPrimitiveRenderer.RenderQuad"/>，采样槽 s1），它的顶点签名与参数语义
     /// 已被图元、融合球、粒子共用并上机验证过。
     /// <para>
-    /// 投影与四边形都按 <paramref name="destination"/> 的尺寸算，所以半分辨率目标也是精确 1:1 的。
+    /// 投影按 <paramref name="destination"/> 的尺寸算，四边形按 <c>destination / source</c> 放大，
+    /// 所以"同尺寸 1:1"与"全屏源铺进半分辨率目标"两种情形都正好铺满；后者的重采样交给 <see cref="SamplerState.LinearClamp"/>。
     /// </para>
     /// </summary>
     /// <param name="source">要铺满目标的贴图。</param>
@@ -111,6 +112,9 @@ public static class MonoScreenCapture
             return;
 
         Vector2 center = destination.Size() * 0.5f;
-        MonoPrimitiveRenderer.RenderQuad(source, center, Vector2.One, 0f, Color.White, shader, blendState ?? BlendState.Opaque, MonoGraphicsSpace.Screen, destination.Width, destination.Height);
+        // RenderQuad 的四边形尺寸是"贴图尺寸 × scale"，投影却是按 destination 算的；
+        // 传 Vector2.One 只在两边同尺寸时铺满，源更大时会变成放大裁切（Bloom 的降采样就踩过这个）。
+        Vector2 scale = new(destination.Width / (float)source.Width, destination.Height / (float)source.Height);
+        MonoPrimitiveRenderer.RenderQuad(source, center, scale, 0f, Color.White, shader, blendState ?? BlendState.Opaque, MonoGraphicsSpace.Screen, destination.Width, destination.Height);
     }
 }

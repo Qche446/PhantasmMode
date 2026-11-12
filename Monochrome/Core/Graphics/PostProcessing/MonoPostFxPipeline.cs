@@ -140,19 +140,24 @@ public sealed class MonoPostFxPipeline
     /// <param name="spriteBatch">用于绘制的批次。</param>
     internal static void CopyTo(Texture2D source, RenderTarget2D destination, SpriteBatch spriteBatch)
     {
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-        RenderTargetBinding[] oldTargets = device.GetRenderTargets();
-        try
-        {
-            device.SetRenderTarget(destination);
-            device.Clear(Color.Transparent);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
+        using (MonoRenderTargetScope.Bind(destination, Color.Transparent))
+            CopyToBound(source, spriteBatch);
+    }
+
+    /// <summary>
+    /// 把 <paramref name="source"/> 整幅画进<b>当前已绑定的目标</b>，不碰渲染目标绑定、不清理目标。
+    /// <para>
+    /// 给"同一块目标要连画两步"的场合用：<b>一块 DiscardContents 的目标不能在两步之间重新绑定</b>——
+    /// FNA 的 <c>GraphicsDevice.SetRenderTargets</c> 在切入这类目标时会立刻执行一次
+    /// <c>Clear(Target | DepthBuffer | Stencil)</c>，切回去等于把上一步的内容清掉。
+    /// 所以调用方自己 <c>SetRenderTarget</c> 一次、<c>Clear</c> 一次，然后用本方法接着画。
+    /// </para>
+    /// </summary>
+    /// <param name="source">来源。</param>
+    /// <param name="spriteBatch">用于绘制的批次。</param>
+    internal static void CopyToBound(Texture2D source, SpriteBatch spriteBatch)
+    {
+        using (MonoBatchScope.BeginImmediate(spriteBatch, BlendState.Opaque))
             spriteBatch.Draw(source, Vector2.Zero, Color.White);
-            spriteBatch.End();
-        }
-        finally
-        {
-            device.SetRenderTargets(oldTargets);
-        }
     }
 }
