@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Content.Buffs;
+using FargosPhantasmMode.Content.Buffs;
 using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
@@ -80,7 +80,7 @@ namespace FargosPhantasmMode.Content.Projectiles
             var Noise = FargosTextureRegistry.CracksNoise;
             var maxOpacity = Projectile.Opacity * 0.5f;
 
-            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
+            MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.ShockWaveShader");
             shader.SetCommonParameters();
             shader.TrySetParameter("Radius", radius * Projectile.scale);
             shader.TrySetParameter("Center", Projectile.Center);

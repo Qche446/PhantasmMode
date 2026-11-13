@@ -64,45 +64,46 @@ public sealed class MonoShader : IDisposable
     /// <summary>注册用的名字（形如 <c>模组名.文件名</c>）。</summary>
     public string Name { get; }
 
-    /// <summary>
-    /// 模组相对资产路径（不含扩展名），形如
-    /// <c>Monochrome/Assets/Effects/Primitives/StandardPrimitive</c>。
-    /// <para>
-    /// <b>热重载靠它反推 <c>.fx</c> 源文件</b>（见 <see cref="MonoShaderReloader"/>）：斜杠前是模组名，
-    /// 后面是模组内相对路径。用 <see cref="MonoShaderManager.SetShader(string, Effect)"/> 手工装进来的着色器这里是空串，
-    /// 因此不参与源文件热重载。
-    /// </para>
-    /// </summary>
+    /// <summary>完整资源路径，不含扩展名。</summary>
     public string AssetPath { get; }
-
-    /// <summary>
-    /// 是否允许 Monochrome 把编好的 <c>.fxc</c> 写回这个着色器所属模组的源目录（即热重载）。
-    /// <para>
-    /// <b>它管的是写回，不管注册。</b>注册是全场的：任何模组的着色器资产都会被读进注册表。
-    /// 写回会动别人的磁盘，所以只对声明了 <see cref="MonoShaderScopeAttribute"/> 的模组开放。
-    /// </para>
-    /// </summary>
-    public bool CanWriteBack { get; }
-
-    /// <summary>底层的 FNA 效果对象。<b>热重载后这个引用会被换掉</b>，不要长期持有它。</summary>
-    public Effect Effect { get; private set; }
-
-    /// <summary><see cref="Effect"/> 的同义属性，便于与 Luminance 风格代码对接。</summary>
+    /// <summary>稳定资源句柄，供 Asset/Effect 批次绑定复用。</summary>
+    public MonoEffectResource Resource { get; }
+    private Effect? lastEffect;
+    private int parameterRevision;
+    private EffectTechnique? cachedTechnique;
+    /// <summary>当前 Effect；Asset 替换后自动失效参数和 Pass 缓存。</summary>
+    public Effect Effect
+    {
+        get
+        {
+            Effect current = Resource.Effect;
+            if (!ReferenceEquals(current, lastEffect))
+            {
+                lastEffect = current;
+                ResetParameterCache();
+                warnedMissingPass = false;
+                LoadedAtUtc = DateTime.UtcNow;
+            }
+            if (parameterRevision != Resource.ParameterRevision)
+            {
+                ResetParameterCache();
+                parameterRevision = Resource.ParameterRevision;
+            }
+            return current;
+        }
+    }
+    /// <summary>当前 Effect 的别名，不应跨绘制保存。</summary>
     public Effect WrappedEffect => Effect;
-
-    /// <summary>是否已释放。</summary>
+    /// <summary>包装是否已释放。</summary>
     public bool IsDisposed { get; private set; }
+    /// <summary>最近解析资源的时间。</summary>
+    public DateTime LoadedAtUtc { get; private set; } = DateTime.UtcNow;
 
-    /// <summary>本次（或最近一次热重载后）装入的 UTC 时间，供诊断显示。</summary>
-    public DateTime LoadedAtUtc { get; private set; }
-
-    internal MonoShader(string name, Effect effect, string assetPath = "", bool canWriteBack = false)
+    internal MonoShader(string name, MonoEffectResource resource, string assetPath = "")
     {
         Name = name;
+        Resource = resource;
         AssetPath = assetPath;
-        Effect = effect;
-        CanWriteBack = canWriteBack;
-        LoadedAtUtc = DateTime.UtcNow;
     }
 
     /// <summary>按名字取参数。<b>名字不存在时返回 null（FNA 的字符串索引器不抛异常）</b>，不要忘记判空。</summary>
@@ -126,6 +127,8 @@ public sealed class MonoShader : IDisposable
         EffectParameter? parameter = Effect.Parameters[name];
         if (parameter is null)
             return false;
+        if (WriteLog is not null && !SuppressRecording)
+            WriteLog.Add(new Write(this, name, value));
         if (parameterCache.TryGetValue(name, out object? old) && Equals(old, value))
             return false;
 
@@ -133,8 +136,6 @@ public sealed class MonoShader : IDisposable
             return false;
 
         parameterCache[name] = value;
-        if (WriteLog is not null && !SuppressRecording)
-            WriteLog.Add(new Write(this, name, value));
         return true;
     }
 
@@ -210,6 +211,7 @@ public sealed class MonoShader : IDisposable
         parameterCache.Clear();
         cachedPass = null;
         cachedPassName = null;
+        cachedTechnique = null;
     }
 
     /// <summary>写入一个参数，返回自身以便链式调用（忽略"未变化/不存在"的返回值）。</summary>
@@ -296,50 +298,24 @@ public sealed class MonoShader : IDisposable
 
     private EffectPass? ResolvePass(EffectTechnique technique, string? pass)
     {
-        if (cachedPass is not null && string.Equals(cachedPassName, pass, StringComparison.Ordinal))
+        if (cachedPass is not null && ReferenceEquals(cachedTechnique, technique)
+            && string.Equals(cachedPassName, pass, StringComparison.Ordinal))
             return cachedPass;
 
         EffectPass? resolved = technique.Passes[pass ?? DefaultPassName] ?? technique.Passes[0];
         cachedPass = resolved;
+        cachedTechnique = technique;
         cachedPassName = pass;
         return resolved;
     }
 
-    /// <summary>
-    /// 用新编译出来的 effect 替换当前实现（热重载）。必须同时失效参数缓存与 pass 缓存：旧的
-    /// <see cref="EffectParameter"/> / <see cref="EffectPass"/> 绑在已经被换掉的 <see cref="Effect"/> 上，
-    /// 继续写会静默无效。
-    /// <para>
-    /// 不 <c>Dispose</c> 旧的 <see cref="Effect"/>：同一个资产名在 <c>AssetRepository</c> 的缓存里
-    /// 只有一个实例，别的着色器管理系统（最典型的是 Luminance 的 <c>ManagedShader</c>）也持有它。
-    /// 在这里释放，对方立刻变成"持有已释放对象"。释放交给 AssetRepository，或由 GC/FNA 终结器处理。
-    /// </para>
-    /// </summary>
-    /// <param name="replacement">新编译的 effect。</param>
-    internal void Replace(Effect replacement)
-    {
-        Effect = replacement;
-        LoadedAtUtc = DateTime.UtcNow;
-        ResetParameterCache();
-        warnedMissingPass = false;
-    }
-
-    /// <summary>
-    /// 标记本包装对象不再使用。<b>刻意不 <c>Dispose</c> 底层的 <see cref="Effect"/>。</b>
-    /// <para>
-    /// 理由与 <see cref="Replace"/> 相同：那个 <see cref="Effect"/> 可能同时被 AssetRepository 的缓存
-    /// 与别的着色器管理器（例如 Luminance 的 <c>ManagedShader</c>）持有，我们只是引用者之一，不是所有者。
-    /// 在模组卸载时释放它是"顺手"，但一旦释放顺序与对方不巧，就会把对方正在用的对象弄死——
-    /// 而少释放一个 Effect 的代价只是等 GC，几乎为零。
-    /// </para>
-    /// </summary>
+    /// <summary>释放本包装与独立克隆；不释放源资产。</summary>
     public void Dispose()
     {
-        if (IsDisposed)
-            return;
+        if (IsDisposed) return;
         IsDisposed = true;
-        parameterCache.Clear();
-        cachedPass = null;
-        cachedPassName = null;
+        ResetParameterCache();
+        lastEffect = null;
+        Resource.Dispose();
     }
 }

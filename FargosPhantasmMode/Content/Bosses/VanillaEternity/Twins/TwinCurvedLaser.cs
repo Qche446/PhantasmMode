@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -210,7 +210,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (Projectile.hide)
                 return;
 
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.RetinazerDeathray");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.RetinazerDeathray");
 
             // 设置着色器参数
             shader.TrySetParameter("mainColor", new Color(240, 220, 240, 0));

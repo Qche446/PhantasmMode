@@ -9,7 +9,7 @@ namespace Monochrome.Core.Graphics;
 /// <c>/monoshader</c>：着色器与屏幕后处理的诊断。只读的随时可用：<c>status</c>（注册名、装入时间、资产路径）、
 /// <c>capture status</c>、<c>capture fx</c>（列出内置屏幕特效）。
 /// <para>
-/// 会改状态的只在开发期生效：<c>reload</c>（编译并替换 <see cref="Effect"/>）、
+/// 会改状态的只在开发期生效：<c>reload</c>（显示 tml-build 使用说明）、
 /// <c>capture test</c>（挂一条整幅染色链验证屏幕捕获通路）、<c>capture fx &lt;名字&gt; on|off</c>。
 /// 判定见 <see cref="MonoDebug"/>。
 /// </para>
@@ -35,7 +35,7 @@ public sealed class MonoGraphicsCommand : ModCommand
     public override string Usage =>
         "/monoshader help                       显示这条清单" +
         "\n/monoshader status                     着色器与屏幕捕获的概要" +
-        "\n/monoshader reload [名字|all|*]        编译 .fx 并替换正在用的 Effect（仅开发期）" +
+        "\n/monoshader reload [名字|all|*]        显示 tml-build 热重载使用说明" +
         "\n/monoshader capture                    屏幕捕获与后处理链的状态" +
         "\n/monoshader capture fxs                列出全部内置屏幕特效" +
         "\n/monoshader capture test [on|off]      挂一条整幅染色链，验证捕获通路（仅开发期）" +
@@ -43,7 +43,7 @@ public sealed class MonoGraphicsCommand : ModCommand
 
     /// <inheritdoc/>
     public override string Description =>
-        "Monochrome 的图形诊断、屏幕后处理自检与着色器热重载。（输入 /monoshader help 看全部子命令）";
+        "Monochrome 的图形诊断、屏幕后处理自检与着色器资源状态。（输入 /monoshader help 看全部子命令）";
 
     /// <summary>提供帮助的子命令名。</summary>
     private const string HelpSubCommand = "help";
@@ -220,8 +220,8 @@ public sealed class MonoGraphicsCommand : ModCommand
 
 
     /// <summary>
-    /// 列出注册表内容。资产路径为空说明它是用 <c>SetShader</c> 手工装的，不参与源文件热重载；
-    /// 标了 <c>[只读]</c> 的是宿主模组没声明 <c>[MonoShaderScope]</c>，<c>/monoshader reload</c> 不会写回它的源目录。
+    /// 列出 Monochrome 内置资源；外部集合由各消费者自行持有。
+    /// 状态显示 Asset 借用或独立克隆。外部集合由消费者管理。
     /// </summary>
     private static string DescribeShaders()
     {
@@ -233,30 +233,14 @@ public sealed class MonoGraphicsCommand : ModCommand
                   .Append(name)
                   .Append(" loaded ").Append(shader.LoadedAtUtc.ToLocalTime().ToString("HH:mm:ss"))
                   .Append(shader.AssetPath.Length > 0 ? "  <- " + shader.AssetPath : "  <- (手工装入，无源文件)")
-                  .Append(shader.CanWriteBack ? "  [可写回]" : "  [只读，宿主未声明 MonoShaderScope]");
+                  .Append(shader.Resource.IsIsolated ? "  [独立克隆]" : "  [Asset]");
         }
         return output.ToString();
     }
 
-    /// <summary>不带名字就重载全部（默认做 mtime 预筛）；<c>all</c> / <c>*</c> 表示强制全部重编。</summary>
+    // Keep a helpful response for users of the previous command; no compiler or watcher remains here.
     private static string Reload(string[] tokens)
-    {
-        // tokens = [reload, (名字|all|*)]，也兼容旧写法 [shader, reload, (名字|all|*)]。
-        if (tokens.Length >= 2 && tokens[0].Equals("shader", StringComparison.OrdinalIgnoreCase))
-            tokens = tokens[1..];
-
-        if (tokens.Length < 2)
-        {
-            var (results, skipped) = MonoShaderReloader.ReloadAll();
-            return MonoShaderReloader.Describe(results, skipped);
-        }
-        if (tokens[1] is "all" or "*")
-        {
-            var (results, skipped) = MonoShaderReloader.ReloadAll(force: true);
-            return MonoShaderReloader.Describe(results, skipped);
-        }
-        return MonoShaderReloader.Describe([MonoShaderReloader.Reload(tokens[1])]);
-    }
+        => "Shader 编译与热重载已交给 tml-build。请使用 IDE 的 experimental 启动配置，或构建并重新加载模组。";
 
     /// <summary>
     /// 挂/摘一条内置的整幅染色链。

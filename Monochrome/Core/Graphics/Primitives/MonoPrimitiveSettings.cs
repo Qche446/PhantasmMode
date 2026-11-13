@@ -33,6 +33,9 @@ public sealed record MonoPrimitiveSettings(
     Texture2D? Texture = null,
     SamplerState? Sampler = null)
 {
+    /// <summary>Asset/Effect 绘制入口；设置后优先于 Shader。参数在提交时应用。</summary>
+    public MonoEffectBinding? EffectBinding { get; init; }
+
     /// <summary>等宽单色拖尾的快捷构造：整条轨迹用同一个宽度与颜色。</summary>
     /// <param name="width">条带全宽（像素）；内部折半后写成 <c>WidthFunction</c> 的半宽。</param>
     /// <param name="color">整条轨迹的颜色。</param>
@@ -59,7 +62,11 @@ public sealed record MonoCircleSettings(
     int? ProjectionHeight = null,
     bool UseUnscaledMatrix = false,
     BlendState? BlendState = null,
-    MonoGraphicsSpace Space = MonoGraphicsSpace.World);
+    MonoGraphicsSpace Space = MonoGraphicsSpace.World)
+{
+    /// <summary>Asset/Effect 绘制入口；设置后优先于 Shader。</summary>
+    public MonoEffectBinding? EffectBinding { get; init; }
+}
 
 /// <summary>圆形描边（圆环带）的配置。</summary>
 /// <param name="EdgeWidthFunction">沿角度的环厚函数，入参 <c>t ∈ [0,1]</c>。环带由内径向外径单侧展开。</param>
@@ -80,4 +87,8 @@ public sealed record MonoCircleEdgeSettings(
     int? ProjectionHeight = null,
     bool UseUnscaledMatrix = false,
     BlendState? BlendState = null,
-    MonoGraphicsSpace Space = MonoGraphicsSpace.World);
+    MonoGraphicsSpace Space = MonoGraphicsSpace.World)
+{
+    /// <summary>Asset/Effect 绘制入口；设置后优先于 Shader。</summary>
+    public MonoEffectBinding? EffectBinding { get; init; }
+}

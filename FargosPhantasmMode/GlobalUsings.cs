@@ -15,3 +15,6 @@ global using Monochrome.Common.MonoUtil.Damage;
 global using Monochrome.Content.Damage;
 global using Monochrome.Common.MonoUtil;
 
+
+global using global::FargosPhantasmMode.Core.Systems;
+global using TextRefs = FargosPhantasmMode.Core.LocalizationReferences.Mods.FargosPhantasmMode;

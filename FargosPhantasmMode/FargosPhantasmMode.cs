@@ -10,7 +10,6 @@ using Monochrome.Common.MonoUtil;
 
 namespace FargosPhantasmMode
 {
-    [MonoShaderScope]
     public class FargosPhantasmMode : Mod
     {
         internal static FargosPhantasmMode Instance;
@@ -32,11 +31,14 @@ namespace FargosPhantasmMode
         }
         public override void PostSetupContent()
         {
-            On_FilterManager.EndCapture += FilterManager_EndCapture;
+            PModeShaders.Initialize(this);
+            if (!Main.dedServ)
+                On_FilterManager.EndCapture += FilterManager_EndCapture;
         }
         public override void Unload()
         {
             On_FilterManager.EndCapture -= FilterManager_EndCapture;
+            PModeShaders.Unload();
             Rt?.Retire();
             Rt = null;
         }
@@ -69,7 +71,7 @@ namespace FargosPhantasmMode
             sb.Draw(Main.screenTargetSwap, Vector2.Zero, Color.White);
             sb.End();
             // 取不到就跳过这层着色，不要抛：热重载等场合注册表可能暂时没有它。
-            if (MonoShaderManager.TryGet("FargosPhantasmMode.BigTentacle", out var shader) && shader is not null)
+            if (PModeShaders.Library.TryGet("FargosPhantasmMode.BigTentacle", out var shader) && shader is not null)
             {
                 sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
                 gd.Textures[1] = PhantasmTextureRegistry.UniverseNoise.Value;

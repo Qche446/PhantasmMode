@@ -68,6 +68,10 @@ public static class MonoPrim
     public static void RenderQuad(Texture2D texture, Vector2 center, Vector2 scale, float rotation, Color color, MonoShader? shader = null, BlendState? blendState = null, MonoGraphicsSpace space = MonoGraphicsSpace.World, int? projectionWidth = null, int? projectionHeight = null)
         => MonoPrimitiveRenderer.RenderQuad(texture, center, scale, rotation, color, shader, blendState, space, projectionWidth, projectionHeight);
 
+    /// <summary>用 Asset/Effect 绑定绘制四边形；坐标与投影约定同 RenderQuad。</summary>
+    public static void RenderQuadWithEffect(Texture2D texture, Vector2 center, Vector2 scale, float rotation, Color color, MonoEffectBinding effectBinding, BlendState? blendState = null, MonoGraphicsSpace space = MonoGraphicsSpace.World, int? projectionWidth = null, int? projectionHeight = null)
+        => MonoPrimitiveRenderer.RenderQuadWithEffect(texture, center, scale, rotation, color, effectBinding, blendState, space, projectionWidth, projectionHeight);
+
     #endregion
 
     #region 即时图元（蓝图 §11.8）

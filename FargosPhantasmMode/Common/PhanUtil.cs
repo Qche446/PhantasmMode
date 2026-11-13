@@ -14,24 +14,6 @@ namespace FargosPhantasmMode.Common
         public static float AngleDifference(this Vector2 start, Vector2 end) => MathHelper.WrapAngle(end.ToRotation() - start.ToRotation());
         public static Vector2 Axisymmetry(this Vector2 oldvel, Vector2 axis) => oldvel.RotatedBy(2 * oldvel.AngleDifference(axis));
         public static Vector2 Axisymmetry(this Vector2 oldp, Vector2 line1, Vector2 line2) => (oldp - line2).Axisymmetry(line1 - line2) + line2;
-
-        public static List<Vector2> GetLightningLinePoint(Vector2 start, Vector2 end, int pointCount, float Amplitude, Random random)
-        {
-            if (pointCount < 2)
-                throw new ArgumentException("pointCount 必须 ≥ 2");
-            List<Vector2> points = [];
-            Vector2 r = end - start;
-            Vector2 nr = r.SafeNormalize(Vector2.Zero);
-            Vector2 nt = new Vector2(-nr.Y, nr.X);
-            for (int i = 0; i < pointCount; i++)
-            {
-                float t = (float)i / ((float)pointCount - 1f);
-                Vector2 basePos = VecLerp(start, end, t);
-                float offset = (float)(random.NextDouble() * 2 - 1) * Amplitude * (1 - Math.Abs(t - 0.5f) * 2);
-                points.Add(basePos + nt * offset);
-            }
-            return points;
-        }
         public static readonly FieldInfo _sbMatrixField = typeof(SpriteBatch).GetField("transformMatrix", BindingFlags.Instance | BindingFlags.NonPublic);
         public static readonly MethodInfo SetLegacyStrike = typeof(NetMessage).GetMethod("SetLegacyStrike", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -40,7 +22,7 @@ namespace FargosPhantasmMode.Common
         public static PmodeGlobalNPC Phantasm(this NPC npc) => npc.GetGlobalNPC<PmodeGlobalNPC>();
         public static PmodePlayer Phantasm(this Player player) => player.GetModPlayer<PmodePlayer>();
         public static PModeGlobalProj Phantasm(this Projectile proj) => proj.GetGlobalProjectile<PModeGlobalProj>();
-        public readonly static MonoShader TrailShader_F = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+        public static MonoShader TrailShader_F => PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail");
         /// <summary>
         /// 80
         /// </summary>

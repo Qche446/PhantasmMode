@@ -1,16 +1,22 @@
 {
-	"profiles": {
-		"Terraria": {
-			"commandName": "Executable",
-			"executablePath": "$(DotNetName)",
-			"commandLineArgs": "$(tMLPath)",
-			"workingDirectory": "$(tMLSteamPath)"
-		},
-		"TerrariaServer": {
-			"commandName": "Executable",
-			"executablePath": "$(DotNetName)",
-			"commandLineArgs": "$(tMLServerPath)",
-			"workingDirectory": "$(tMLSteamPath)"
-		}
-	}
+  "profiles": {
+    "Terraria Client": {
+      "commandName": "Executable",
+      "executablePath": "$(MonochromeTmlDotNet)",
+      "commandLineArgs": "\"$(MonochromeTmlAssembly)\"",
+      "workingDirectory": "$(MonochromeTmlDirectory)"
+    },
+    "Terraria Server": {
+      "commandName": "Executable",
+      "executablePath": "$(MonochromeTmlDotNet)",
+      "commandLineArgs": "\"$(MonochromeTmlAssembly)\" -server",
+      "workingDirectory": "$(MonochromeTmlDirectory)"
+    },
+    "Terraria Client (tml-build experimental)": {
+      "commandName": "Executable",
+      "executablePath": "$(MonochromeTmlDotNet)",
+      "commandLineArgs": "Tomat.TML.ClientBootstrap.dll --working-directory \"$(MonochromeTmlDirectory).\" --binary \"$(MonochromeTmlAssembly)\" --mode client --mod $(AssemblyName) --sdk-natives-directory \"$(TmlBuildNativeRoot).\" --tml-build-version $(TmlBuildSdkVersion) --tml-version $(TmlVersion) --tml-version-resolved $(TmlVersionResolved) --features \"$(TmlBuildBootstrapFeatures)\"",
+      "workingDirectory": "$(TmlBuildBootstrapRoot)"
+    }
+  }
 }

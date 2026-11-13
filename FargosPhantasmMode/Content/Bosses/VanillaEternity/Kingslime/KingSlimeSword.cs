@@ -120,7 +120,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Kingslime
         }
         public void RenderPixelatedPrimitives()
         {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
             MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, UseUnscaledMatrix: true, Shader: shader), 20);
         }

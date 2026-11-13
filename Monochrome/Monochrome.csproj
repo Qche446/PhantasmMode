@@ -1,19 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\tModLoader.targets" />
-
+<Project>
+	<Import Project="Tools\TmlBuild.Local.props" />
+	<Import Project="Sdk.props" Sdk="Tomat.Terraria.ModLoader.Sdk" Version="2.1.2" />
 	<PropertyGroup>
+		<TmlVersion>stable</TmlVersion>
 		<LangVersion>preview</LangVersion>
 		<TargetFramework>net8.0</TargetFramework>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
+		<DefaultItemExcludes>$(DefaultItemExcludes);Tests/**</DefaultItemExcludes>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == ''">powershell</MonochromePowerShell>
-		<MonochromePowerShell Condition="'$(MonochromePowerShell)' == 'powershell' AND Exists('$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe')">$(LocalAppData)\Microsoft\WindowsApps\pwsh.exe</MonochromePowerShell>
+		<TmlBuildUseShaderCompile>true</TmlBuildUseShaderCompile>
+		<TmlBuildIncludeSourceGenerators>true</TmlBuildIncludeSourceGenerators>
+		<TmlBuildGenerateLaunchSettings>false</TmlBuildGenerateLaunchSettings>
+		<TmlBuildBootstrapFeatures>tomat.enablemod;tomat.assethotreloading;lolxd87.splashskip</TmlBuildBootstrapFeatures>
 	</PropertyGroup>
-	<Target Name="CompileMonochromeShaders" BeforeTargets="CoreCompile" Condition="'$(MonochromeShaderCompile)' != 'false'">
-		<Exec Command="&quot;$(MonochromePowerShell)&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Tools\CompileMonochromeShaders.ps1&quot; -CompilerPath &quot;$(MonochromeShaderCompiler)&quot;"
-		      StandardOutputImportance="low" StandardErrorImportance="high" />
-	</Target>
+
+	<ItemGroup><Compile Remove="Tests/**/*.cs" /></ItemGroup>
+	<Import Project="Sdk.targets" Sdk="Tomat.Terraria.ModLoader.Sdk" Version="2.1.2" />
+	<Import Project="Tools\TmlBuild.Local.targets" />
 </Project>

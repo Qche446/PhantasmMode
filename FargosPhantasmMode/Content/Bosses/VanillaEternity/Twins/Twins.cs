@@ -2801,7 +2801,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                     return;
                 var maxOpacity = npc.Opacity * AuraOpacity;
 
-                MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.TwinsAuraShader");
+                MonoShader borderShader = PModeShaders.Library.GetShader("FargowiltasSouls.TwinsAuraShader");
                 borderShader.TrySetParameter("colorMult", 7.35f);
                 borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
                 borderShader.TrySetParameter("radius", radius);

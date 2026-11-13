@@ -44,6 +44,7 @@ public static class MonoPrimitiveRenderer
         public int StartIndex;
         public int IndexCount;
         public MonoShader? Shader;
+        public MonoEffectBinding? EffectBinding;
         public BlendState? BlendState;
         public MonoGraphicsSpace Space;
         public int? ProjectionWidth;
@@ -68,6 +69,7 @@ public static class MonoPrimitiveRenderer
     private static readonly List<DrawCommand> commands = new(MaxCommands);
     /// <summary>当前图元从索引缓冲的哪个下标开始，提交时用它切出这条命令的范围。</summary>
     private static int commandIndexStart;
+    private static readonly List<MonoShader.Write> pendingShaderWrites = new(16);
 
     /// <summary>是否处在 <see cref="MonoPrimitiveBatch"/> 的作用域里。</summary>
     private static bool batching;
@@ -267,7 +269,23 @@ public static class MonoPrimitiveRenderer
         }
 
         if (vertexCount > 0 && (vertexCount + vertexNeed > MaxVertices || indexCount + indexNeed > MaxIndices))
-            SubmitCommands();
+        {
+            // Current primitive's setters ran before ReservePrimitive. Preserve writes that
+            // don't belong to the previous command block being submitted now.
+            List<MonoShader.Write>? log = MonoShader.WriteLog;
+            int consumed = commands.Count > 0 ? commands[^1].WriteEnd : 0;
+            pendingShaderWrites.Clear();
+            if (log is not null)
+                for (int i = consumed; i < log.Count; i++)
+                    pendingShaderWrites.Add(log[i]);
+            try
+            {
+                SubmitCommands();
+                if (log is not null)
+                    log.AddRange(pendingShaderWrites);
+            }
+            finally { pendingShaderWrites.Clear(); }
+        }
 
         commandIndexStart = indexCount;
     }
@@ -397,7 +415,8 @@ public static class MonoPrimitiveRenderer
     /// <param name="texture">要绑到采样槽 1 的贴图；为 null 时不动槽 1。</param>
     /// <param name="sampler">上面那张贴图的采样状态；为 null 时用 <see cref="SamplerState.LinearClamp"/>。</param>
     /// <param name="useTexture">是否让着色器把槽 1 的贴图乘进颜色。只有 <see cref="RenderQuad"/> 会开。</param>
-    private static void Flush(MonoShader? shader, BlendState? blendState, MonoGraphicsSpace space, int? projectionWidth, int? projectionHeight, Texture2D? texture = null, SamplerState? sampler = null, bool useTexture = false)
+    /// <param name="effectBinding">可选的 Asset/Effect 绘制绑定，优先于 shader。</param>
+    private static void Flush(MonoShader? shader, BlendState? blendState, MonoGraphicsSpace space, int? projectionWidth, int? projectionHeight, Texture2D? texture = null, SamplerState? sampler = null, bool useTexture = false, MonoEffectBinding? effectBinding = null)
     {
         if (vertexCount <= 0 || indexCount <= 0 || !Ready())
         {
@@ -423,6 +442,7 @@ public static class MonoPrimitiveRenderer
             StartIndex = commandIndexStart,
             IndexCount = indexCount - commandIndexStart,
             Shader = shader,
+            EffectBinding = effectBinding,
             BlendState = blendState,
             Space = space,
             ProjectionWidth = projectionWidth,
@@ -488,11 +508,32 @@ public static class MonoPrimitiveRenderer
                     continue;
 
                 // 没传 shader 就用默认图元着色器；连它也没加载到才回退到 BasicEffect。
-                MonoShader? shader = command.Shader ?? ResolveDefaultShader();
+                MonoShader? shader = command.EffectBinding is null ? command.Shader ?? ResolveDefaultShader() : null;
                 device.BlendState = command.BlendState ?? BlendState.AlphaBlend;
                 Matrix matrix = ResolveMatrix(command);
 
-                if (shader is not null)
+                if (command.EffectBinding is not null)
+                {
+                    // 混合批次仍消费 MonoShader 日志，避免后一条命令丢失它之前的状态写入。
+                    ReplayShaderWrites(writeStart, command.WriteEnd);
+                    writeStart = command.WriteEnd;
+                    if (command.SnapshotTexture is not null)
+                    {
+                        device.Textures[1] = command.SnapshotTexture;
+                        if (command.SnapshotSampler is not null)
+                            device.SamplerStates[1] = command.SnapshotSampler;
+                    }
+                    if (command.Texture is not null)
+                    {
+                        device.Textures[1] = command.Texture;
+                        device.SamplerStates[1] = command.Sampler ?? SamplerState.LinearClamp;
+                    }
+
+                    // 回调设置强类型/原生参数，框架随后设置投影并应用 pass。
+                    if (!command.EffectBinding.Apply(matrix, command.Texture is not null && command.UseTexture > 0f))
+                        continue;
+                }
+                else if (shader is not null)
                 {
                     // 先还原录制时设备槽 1 的状态（覆盖直接写设备槽的消费者），再按命令绑 settings.Texture。
                     if (command.SnapshotTexture is not null)
@@ -512,10 +553,11 @@ public static class MonoPrimitiveRenderer
                     writeStart = command.WriteEnd;
 
                     // useTexture **必须每条都显式写**——MonoShader 的参数带缓存，不写会沿用上一条的值。
-                    shader.SetParameter("uWorldViewProjection", matrix)
+                    if (!shader.SetParameter("uWorldViewProjection", matrix)
                           .SetCommonParameters()
                           .SetParameter("useTexture", command.Texture is null ? 0f : command.UseTexture)
-                          .Apply();
+                          .Apply())
+                        continue;
                 }
                 else
                 {
@@ -539,11 +581,12 @@ public static class MonoPrimitiveRenderer
             device.Indices = oldIndexBuffer;
             device.RasterizerState = oldRasterizer;
             device.BlendState = oldBlend;
+            // 用户参数回调抛异常时也不能遗留命令和参数引用到下一批。
+            commands.Clear();
+            MonoShader.WriteLog?.Clear();
+            ResetMesh();
         }
 
-        commands.Clear();
-        MonoShader.WriteLog?.Clear();
-        ResetMesh();
         CountSubmission(submittedVertices);
     }
 
@@ -763,8 +806,9 @@ public static class MonoPrimitiveRenderer
             EffectiveSpace(settings),
             settings.ProjectionWidth,
             settings.ProjectionHeight,
-            settings.Shader is null ? null : settings.Texture,
-            settings.Sampler ?? SamplerState.LinearWrap);
+            settings.Shader is null && settings.EffectBinding is null ? null : settings.Texture,
+            settings.Sampler ?? SamplerState.LinearWrap,
+            effectBinding: settings.EffectBinding);
     }
 
     /// <summary>
@@ -882,7 +926,7 @@ public static class MonoPrimitiveRenderer
             PushTriangle(v0, v1, v2);
         }
 
-        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight);
+        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight, effectBinding: settings.EffectBinding);
     }
 
     /// <summary>渲染一圈圆形描边（圆环带），环厚由内径向外径单侧展开。</summary>
@@ -919,7 +963,7 @@ public static class MonoPrimitiveRenderer
         for (int i = 0; i < pointCount; i++)
             PushQuad(baseVertex + i * 2, baseVertex + i * 2 + 1, baseVertex + i * 2 + 3, baseVertex + i * 2 + 2);
 
-        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight);
+        Flush(settings.Shader, settings.BlendState, EffectiveSpace(settings.UseUnscaledMatrix, settings.Space), settings.ProjectionWidth, settings.ProjectionHeight, effectBinding: settings.EffectBinding);
     }
 
     #endregion
@@ -944,6 +988,16 @@ public static class MonoPrimitiveRenderer
     /// </param>
     /// <param name="projectionHeight">投影区域高度；为 null 时取 <c>Main.screenHeight</c>。</param>
     public static void RenderQuad(Texture2D texture, Vector2 center, Vector2 scale, float rotation, Color color, MonoShader? shader = null, BlendState? blendState = null, MonoGraphicsSpace space = MonoGraphicsSpace.World, int? projectionWidth = null, int? projectionHeight = null)
+        => RenderQuadCore(texture, center, scale, rotation, color, shader, blendState, space, projectionWidth, projectionHeight, null);
+
+    /// <summary>用 Asset/Effect 绑定绘制贴图四边形；坐标、投影与 RenderQuad 相同。独立命名以兼容原来的 null shader 调用。</summary>
+    public static void RenderQuadWithEffect(Texture2D texture, Vector2 center, Vector2 scale, float rotation, Color color, MonoEffectBinding effectBinding, BlendState? blendState = null, MonoGraphicsSpace space = MonoGraphicsSpace.World, int? projectionWidth = null, int? projectionHeight = null)
+    {
+        ArgumentNullException.ThrowIfNull(effectBinding);
+        RenderQuadCore(texture, center, scale, rotation, color, null, blendState, space, projectionWidth, projectionHeight, effectBinding);
+    }
+
+    private static void RenderQuadCore(Texture2D texture, Vector2 center, Vector2 scale, float rotation, Color color, MonoShader? shader, BlendState? blendState, MonoGraphicsSpace space, int? projectionWidth, int? projectionHeight, MonoEffectBinding? effectBinding)
     {
         if (Main.dedServ || texture is null || !Ready())
             return;
@@ -968,7 +1022,7 @@ public static class MonoPrimitiveRenderer
         PushQuad(baseVertex, baseVertex + 1, baseVertex + 2, baseVertex + 3);
 
         // 贴图与 useTexture 由 Flush 记进命令，提交时再绑。
-        Flush(shader, blendState, space, projectionWidth, projectionHeight, texture, SamplerState.LinearClamp, useTexture: true);
+        Flush(shader, blendState, space, projectionWidth, projectionHeight, texture, SamplerState.LinearClamp, useTexture: true, effectBinding: effectBinding);
     }
 
     #endregion

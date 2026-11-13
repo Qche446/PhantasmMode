@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
@@ -89,7 +89,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return false;
             var maxOpacity = Projectile.Opacity;
 
-            MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.WoFAuraShader");
+            MonoShader borderShader = PModeShaders.Library.GetShader("FargowiltasSouls.WoFAuraShader");
             borderShader.TrySetParameter("colorMult", 7.35f);
             borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             borderShader.TrySetParameter("radius", radius);

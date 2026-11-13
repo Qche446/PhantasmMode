@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Assets.ExtraTextures;
+using FargosPhantasmMode.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -63,7 +63,7 @@ namespace FargosPhantasmMode.Content.Sky
                 // 设置着色器参数
                 noiseTexture = PhantasmTextureRegistry.FireNoise2.Value;
                 var blackTile = TextureAssets.MagicPixel;
-                shader = MonoShaderManager.GetShader("FargosPhantasmMode.AbomSkyEffect");
+                shader = PModeShaders.Library.GetShader("FargosPhantasmMode.AbomSkyEffect");
                 Main.spriteBatch.GraphicsDevice.Textures[1] = noiseTexture;
                 shader.TrySetParameter("maxOpacity", this.intensity * 0.6f);
                 shader.TrySetParameter("time", (float)Main.GlobalTimeWrappedHourly);

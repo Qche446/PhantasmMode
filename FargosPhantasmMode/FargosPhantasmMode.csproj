@@ -1,13 +1,24 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\tModLoader.targets" />
+<Project>
+    <Import Project="..\Monochrome\Tools\TmlBuild.Local.props" />
+    <Import Project="Sdk.props" Sdk="Tomat.Terraria.ModLoader.Sdk" Version="2.1.2" />
+    <PropertyGroup>
+        <TmlVersion>stable</TmlVersion>
+        <TmlBuildUseShaderCompile>true</TmlBuildUseShaderCompile>
+        <TmlBuildIncludeSourceGenerators>true</TmlBuildIncludeSourceGenerators>
+		<TmlBuildUseLocalizationCompiler>true</TmlBuildUseLocalizationCompiler>
+        <TmlBuildGenerateLaunchSettings>false</TmlBuildGenerateLaunchSettings>
+        <TmlBuildBootstrapFeatures>tomat.enablemod;tomat.assethotreloading;lolxd87.splashskip</TmlBuildBootstrapFeatures>
+    </PropertyGroup>
 	
 	<PropertyGroup>
 		<LangVersion>preview</LangVersion>
 		<TargetFramework>net8.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <DefaultItemExcludes>$(DefaultItemExcludes);Generated/**</DefaultItemExcludes>
 	</PropertyGroup>
 	<PropertyGroup>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/Generated</CompilerGeneratedFilesOutputPath>
+		<CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/obj/Generated</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
@@ -33,4 +44,10 @@
 		<AdditionalFiles Include="**/*.csv" />
 	</ItemGroup>
 
+    <Import Project="Sdk.targets" Sdk="Tomat.Terraria.ModLoader.Sdk" Version="2.1.2" />
+    <!-- SDK 2.1.2 music Loader registers before tML's own AutoloadMusic and duplicates the slot. -->
+    <ItemGroup>
+        <AdditionalFiles Remove="Assets/Music/**/*" />
+    </ItemGroup>
+    <Import Project="..\Monochrome\Tools\TmlBuild.Local.targets" />
 </Project>

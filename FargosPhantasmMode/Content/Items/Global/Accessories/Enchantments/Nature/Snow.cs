@@ -188,7 +188,7 @@ namespace FargosPhantasmMode.Content.Items.Global.Accessories.Enchantments.Natur
         public override bool PreDraw(ref Color lightColor) => false;
         public void RenderPixelatedPrimitives()
         {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
             MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 100);
         }

@@ -61,7 +61,7 @@ namespace Monochrome
 		}
 
 		/// <summary>
-		/// 在所有模组的内容都注册完之后，把依赖本模组的着色器资产扫进
+		/// 在内容注册完之后，把 Monochrome 自己的着色器资产载入
 		/// <see cref="MonoShaderManager"/>，然后排空等待队列。
 		/// <para>
 		/// 必须等到 <c>PostSetupContent</c>：<c>ModContent.Request</c> 要求资产的注册表已经建立。
@@ -72,13 +72,7 @@ namespace Monochrome
 		{
 			if (Main.dedServ)
 				return;
-			foreach (Mod mod in ModLoader.Mods)
-				MonoShaderManager.LoadForMod(mod);
-			MonoShaderManager.HasFinishedLoading = true;
-			while (MonoShaderManager.PostShaderLoadActions.TryDequeue(out Action? action))
-				action?.Invoke();
-
-			MonoShaderReloader.TrySuppressLuminanceAutoReload();
+			MonoShaderManager.LoadBuiltIns(this);
 		}
 	}
 }

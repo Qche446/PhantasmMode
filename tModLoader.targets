@@ -1,0 +1,12 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Legacy consumers use the same cached stable release as the SDK projects. -->
+  <Import Project="$(MSBuildThisFileDirectory)Monochrome\Tools\TmlBuild.Local.props" />
+  <Import Project="$(TML_BUILD_CACHE_DIRECTORY)version-aliases.props" Condition="Exists('$(TML_BUILD_CACHE_DIRECTORY)version-aliases.props')" />
+  <PropertyGroup>
+    <_MonochromeStableTargets>$(TML_BUILD_CACHE_DIRECTORY)versions\$(TmlVersionStable)\tMLMod.targets</_MonochromeStableTargets>
+  </PropertyGroup>
+  <Import Project="$(_MonochromeStableTargets)" Condition="'$(TmlVersionStable)' != '' AND Exists('$(_MonochromeStableTargets)')" />
+  <Target Name="RequireMonochromeStableTargets" BeforeTargets="PrepareForBuild" Condition="'$(TmlVersionStable)' == '' OR !Exists('$(_MonochromeStableTargets)')">
+    <Error Text="Restore Monochrome or FargosPhantasmMode with tml-build first to download the stable tModLoader targets." />
+  </Target>
+</Project>

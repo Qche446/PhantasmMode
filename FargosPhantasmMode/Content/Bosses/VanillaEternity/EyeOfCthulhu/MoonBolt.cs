@@ -1,15 +1,8 @@
-using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Buffs.Masomode;
-using FargowiltasSouls.Core.Systems;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Monochrome.Core.Net;
-using System;
 using Terraria.GameContent;
-using Monochrome.Core.Graphics.Trails;
 using Monochrome.Core.Graphics.Primitives;
-using Monochrome.Core.Graphics.Shaders;
 using Monochrome.Core.Graphics;
 using FargosPhantasmMode.Common;
 
@@ -179,13 +172,9 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
         }
         public override void OnHitPlayer(Player target, Player.HurtInfo info)
         {
-            if (WorldSavingSystem.MasochistModeReal)
-            {
-                target.AddBuff(ModContent.BuffType<ShadowflameBuff>(), 300);
-                target.AddBuff(BuffID.Bleeding, 600);
-                target.AddBuff(BuffID.Obstructed, 15);
-            }
-
+            target.AddBuff(ModContent.BuffType<ShadowflameBuff>(), 300);
+            target.AddBuff(BuffID.Bleeding, 600);
+            target.AddBuff(BuffID.Obstructed, 15);
             target.AddBuff(ModContent.BuffType<BerserkedBuff>(), 120);
             target.AddBuff(ModContent.BuffType<CurseoftheMoonBuff>(), 120);
         }

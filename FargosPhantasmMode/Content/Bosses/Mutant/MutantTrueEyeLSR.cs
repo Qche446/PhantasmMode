@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
@@ -310,7 +310,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         {
             if (!base.Projectile.hide)
             {
-                MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.GenericDeathray");
+                MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.GenericDeathray");
                 Vector2 value = base.Projectile.Center + base.Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance * 1.1f;
                 Vector2 center = base.Projectile.Center;
                 Vector2[] array = new Vector2[8];

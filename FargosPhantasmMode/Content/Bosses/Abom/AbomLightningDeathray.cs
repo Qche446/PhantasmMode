@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
 using FargowiltasSouls.Core.Systems;
 using Microsoft.Xna.Framework;
@@ -124,7 +124,7 @@ namespace FargosPhantasmMode.Content.Bosses.Abom
             if (Projectile.velocity == Vector2.Zero)
                 return false;
 
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillDeathray");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.WillDeathray");
             // Get the laser end position.
             Vector2 laserEnd = Projectile.Center + Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance;
 

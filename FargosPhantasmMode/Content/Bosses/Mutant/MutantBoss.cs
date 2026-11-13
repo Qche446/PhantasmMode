@@ -4556,7 +4556,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return;
             var maxOpacity = npc.Opacity;
 
-            MonoShader borderShader = MonoShaderManager.GetShader("FargowiltasSouls.MutantP1Aura");
+            MonoShader borderShader = PModeShaders.Library.GetShader("FargowiltasSouls.MutantP1Aura");
             borderShader.TrySetParameter("colorMult", 7.35f);
             borderShader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             borderShader.TrySetParameter("radius", radius);

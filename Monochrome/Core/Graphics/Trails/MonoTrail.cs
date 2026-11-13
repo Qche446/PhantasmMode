@@ -67,6 +67,9 @@ public class MonoTrail
     /// <summary>自定义着色器；为 <see langword="null"/> 时用内置的 <c>Monochrome.StreakTrail</c>。</summary>
     public MonoShader? Shader;
 
+    /// <summary>Asset/Effect 绘制入口；设置后优先于 Shader，不使用默认拖尾着色器。</summary>
+    public MonoEffectBinding? EffectBinding;
+
     /// <summary>给着色器采样的贴图；为 <see langword="null"/> 时用程序生成的条纹贴图。绑到采样槽 1。</summary>
     public Texture2D? Texture;
 
@@ -222,8 +225,9 @@ public class MonoTrail
     /// <summary>提交一次绘制。</summary>
     private void Render(IReadOnlyList<Vector2> positions)
     {
-        MonoShader? shader = Shader ?? ResolveShader();
-        Texture2D? texture = Texture ?? (shader is null ? null : MonoTrailTextures.Streak);
+        MonoEffectBinding? binding = EffectBinding ?? (Shader is null ? DefaultEffectBinding : null);
+        MonoShader? shader = binding is null ? Shader : null;
+        Texture2D? texture = Texture ?? (shader is null && binding is null ? null : MonoTrailTextures.Streak);
 
         MonoPrim.RenderTrail(
             positions,
@@ -240,9 +244,15 @@ public class MonoTrail
                 null,
                 Space,
                 texture,
-                Sampler),
+                Sampler) { EffectBinding = binding },
             PointsToCreate);
     }
+
+    private static MonoEffectBinding? defaultEffectBinding;
+    private static MonoEffectBinding DefaultEffectBinding => defaultEffectBinding ??= new(
+        global::Monochrome.Core.AssetReferences.Assets.Effects.Primitives.StreakTrail.Asset);
+
+    internal static void ResetEffectBinding() => defaultEffectBinding = null;
 
     /// <summary>取内置拖尾着色器；资产没加载到时返回 <see langword="null"/>（此时会退回顶点色路径）。</summary>
     public static MonoShader? ResolveShader()

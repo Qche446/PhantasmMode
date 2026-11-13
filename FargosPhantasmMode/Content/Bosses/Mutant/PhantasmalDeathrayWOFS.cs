@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Masomode;
@@ -269,7 +269,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
             if (Projectile.hide)
                 return;
 
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WoFDeathray");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.WoFDeathray");
 
             // Get the laser end position.
             Vector2 laserEnd = Projectile.Center + Projectile.velocity.SafeNormalize(Vector2.UnitY) * Projectile.localAI[1] * 1.5f;

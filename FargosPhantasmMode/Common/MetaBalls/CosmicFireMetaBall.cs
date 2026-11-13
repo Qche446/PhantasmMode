@@ -60,7 +60,7 @@ namespace FargosPhantasmMode.Common.MetaBalls
         /// </summary>
         public override void PrepareShaderForTarget(int layerIndex)
         {
-            if (!MonoShaderManager.TryGet(FlameShaderName, out MonoShader shader) || shader is null)
+            if (!PModeShaders.Library.TryGet(FlameShaderName, out MonoShader shader) || shader is null)
             {
                 if (!warnedMissingShader)
                 {
