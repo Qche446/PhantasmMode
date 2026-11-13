@@ -21,13 +21,11 @@ namespace FargosPhantasmMode.Content.Sky
 
         public override void OnLoad()
         {
-            // ��ȡ�����Լ���AbomBoss����
             abomBossType = ModContent.NPCType<FargowiltasSouls.Content.Bosses.AbomBoss.AbomBoss>();
         }
 
         public override void Update(GameTime gameTime)
         {
-            // ��������Լ���AbomBoss�Ƿ���
             if (NPC.AnyNPCs(abomBossType))
             {
                 this.intensity += 0.01f;
@@ -60,10 +58,9 @@ namespace FargosPhantasmMode.Content.Sky
                     new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * opacity * 1.5f);
                 spriteBatch.End();
                 
-                // ������ɫ������
                 noiseTexture = PhantasmTextureRegistry.FireNoise2.Value;
                 var blackTile = TextureAssets.MagicPixel;
-                shader = MonoShaderManager.GetShader("FargosPhantasmMode.AbomSkyEffect");
+                shader = PModeShaders.Library.GetShader("FargosPhantasmMode.AbomSkyEffect");
                 shader.SetCommonParameters();
                 Main.spriteBatch.GraphicsDevice.Textures[1] = noiseTexture;
                 shader.TrySetParameter("maxOpacity", this.intensity * 0.6f);

@@ -12,6 +12,66 @@ Monochrome 的图形与特效层：图元网格、渲染目标、着色器与热
 | 每个部件什么时候被谁调用、有哪些坑 | 本文件 |
 | 数学与几何工具 | `Common/MonoUtil/`（每类都有 XML 注释） |
 
+## Asset/Effect 与图元批次
+
+拖尾、圆、圆环的 settings 和 `MonoTrail` 可设置 `EffectBinding`；四边形通过
+`MonoPrim.RenderQuadWithEffect(..., effectBinding: binding)` 使用。它优先于 `Shader`，不经过
+`MonoShaderManager`。同一批次可以混用两种入口，仍按原顺序绘制并共用缓冲上传。
+
+```csharp
+// 录制时保存本次值；提交时才取得 Asset.Value 并应用参数。
+var binding = MonoEffectBinding.Create(
+    myEffectAsset, (Strength: strength, Tint: tint),
+    static (state, effect) =>
+    {
+        effect.Parameters["strength"]?.SetValue(state.Strength);
+        effect.Parameters["tint"]?.SetValue(state.Tint.ToVector4());
+    });
+var settings = new MonoPrimitiveSettings(widthFunction, colorFunction)
+{
+    EffectBinding = binding
+};
+using (MonoPrim.Batch())
+    MonoPrim.RenderTrail(points, settings);
+```
+
+tml-build 的强类型参数同样可以使用：在上述 static 回调中创建/填充项目生成的
+`Parameters`，调用其 `Apply(effect.Parameters, "AutoloadPass")`。不调用生成的
+`WrapperShaderData.Apply()`，Pass 由批次应用。例如已生成 `Bloom` 资源时：
+
+```csharp
+var binding = MonoEffectBinding.Create(Bloom.Asset, (Threshold: 0.6f, Strength: 1.2f),
+    static (state, effect) =>
+    {
+        var parameters = new Bloom.Parameters
+        {
+            threshold = state.Threshold,
+            strength = state.Strength
+        };
+        parameters.Apply(effect.Parameters, "AutoloadPass");
+    });
+```
+
+`Bloom` 仅演示生成参数接口，实际图元效果还须兼容 `MonoPrimitiveVertex` 的顶点布局。
+生成的 Parameters 为 class，这种示例每次提交会分配一个对象；频繁绘制时可为每个稳定绑定
+持有独立参数对象并完整赋值，或直接在 static 回调内用原生 SetValue。
+
+回调只设置参数/纹理，不绘制、不嵌套提交、不修改批次状态。每条命令必须有独立且完整的
+自定义参数状态；Create 复制 struct，但其中的数组/对象引用不会深拷贝，提交前不能修改。
+直接传 Action 时也不能捕获会变化的循环变量、实体字段或共享 Parameters，否则仍会串值。
+框架先设置通用参数，再运行回调，最后覆盖 `uWorldViewProjection` 并应用指定 Pass。
+回调中的采样槽绑定优先于 settings.Texture；其他设备状态遵守原有绘制作用域约定。
+不修改 Effect 的 CurrentTechnique；使用指定 Pass 所在的当前 technique。找不到 Pass 时跳过绘制。
+
+资源在提交时重新解析，兼容更新后的 Effect；绑定借用 MonoEffectResource，也不会自动截取之前直接
+写入 Effect 的状态。同一个 Effect 若也被 MonoShader/Luminance 写入，需要自行隔离实例或
+失效对应缓存；借用同一 MonoEffectResource 的绑定会通知 MonoShader 缓存失效。不同句柄若借用同一 Asset 仍需自行协调。
+实验启动配置启用 tml-build 热重载，普通直启保持无插件。
+
+游戏内验收建议：同一批次交错绘制两种入口（Asset 入口使用同一资产、不同参数），比较
+立即绘制与批次绘制；增加到超过顶点容量以验证自动分块；更新自有 .fxc 后验证新资产值；
+测试自定义 Pass 缺失时只跳过对应命令。编译和无图形设备的参数副本测试不能代替这些画面检查。
+
 ## 目录
 
 - [1. 三条不变量](#1-三条不变量)
@@ -131,8 +191,9 @@ Monochrome/Core/Graphics/
 │  └─ MonoRenderTargetScope.cs       切目标的作用域（绑后备缓冲时不清屏）
 ├─ Shaders/                          着色器
 │  ├─ MonoShader.cs                  参数缓存 / 纹理绑定 / pass 选择 / 热替换
-│  ├─ MonoShaderManager.cs           注册表、自动加载、写回授权判定
-│  └─ MonoShaderReloader.cs          运行时编译与写回
+│  ├─ MonoShaderManager.cs           内置效果的兼容查询
+│  ├─ MonoShaderLibrary.cs           消费者明确导入与筛选
+│  └─ MonoEffectResource.cs          Asset 解析 / 克隆所有权 / 更新
 ├─ Particles/                        对象式粒子：基类 + 四个现成件 + 发射器
 ├─ Metaballs/                        融合球数据与 GPU 等值面
 ├─ Text/                             文字绘制（测量 / 锚点 / 多行 / 描边 / 换行 / 打字机）
@@ -178,16 +239,16 @@ Monochrome/Core/Graphics/
 | 阶段 | 谁被调用 | 做什么 |
 |---|---|---|
 | **加载期（一次）** | `MonoPrimitiveSystem.OnModLoad` | 排队创建图元 GPU 资源（`MonoPrimitiveRenderer.Initialize`） |
-| | `MonoShaderManager.OnModLoad` | 建空注册表 |
+| | `MonoShaderLibrary` | 集合由各消费者创建 |
 | | `MonoRenderTargetManager.OnModLoad` | 挂 `Main.OnPreDraw` 与 `On_Main.SetDisplayMode`（专用服务器跳过） |
 | | `MonoParticleManager.Load` | 挂 `On_Main.DrawDust` |
 | | `MonoScreenCaptureSystem.Load` | 挂 `On_FilterManager.EndCapture` |
-| | `Monochrome.PostSetupContent` | 扫每个模组的着色器资产（`LoadForMod`），再排空 `PostShaderLoadActions` |
+| | `Monochrome.PostSetupContent` | 只载入 Monochrome 自己的效果，再排空 `PostShaderLoadActions` |
 | **每帧更新** | `MonoMetaballManager.PreUpdateWorld` | 清空所有层，于是 `Add` 等于"每帧重新提交" |
 | | `MonoParticleManager.PostUpdateDusts` | 推进粒子的行为、位置、旋转、寿命，回收到寿的 |
 | | `MonoScreenEffectsSystem.PreUpdateEntities` | 算"这一帧世界要不要推进"（世界更新闸门 hook 读它）、递减定格计数 |
 | | `MonoScreenCaptureSystem.PreUpdateEntities` | 按"有没有启用的 pass"同步是否向原版申请屏幕捕获 |
-| | `MonoShaderManager.PostUpdateEverything` | 每秒一次：压住 Luminance 的文件监视器 |
+| | 消费者 `PostSetupContent` | 按自己的策略导入外部效果 |
 | **每帧绘制前** | `MonoRenderTargetManager.HandleTargetUpdateLoop`（`Main.OnPreDraw`，`Main.cs:59544`） | 保存/恢复渲染目标绑定 → 触发 `RenderTargetUpdateLoop` → 递增闲置计数、到期回收 |
 | **相机定位** | `MonoScreenEffectsSystem.ModifyScreenPosition`（`Main.cs:60765`） | 把震动位移加进 `Main.screenPosition`，推进 trauma 衰减 |
 | | `MonoCameraFollow.ModifyScreenPosition` | 只在开启跟随时生效：把跟随基准换成自己的焦点（§5.10） |
@@ -222,7 +283,7 @@ Monochrome/Core/Graphics/
 | 切一块渲染目标、画完切回来 | `MonoRenderTargetScope.Bind`（§5.6） |
 | 开一个批次并保证收掉 | `MonoBatchScope`（§5.4） |
 | 写/用自定义着色器 | `MonoShaderManager` + `MonoShader`（§5.5） |
-| 马上看到 `.fx` 改动 | `/monoshader reload <名字>`（§5.5） |
+| 马上看到 `.fx` 改动 | 实验启动配置的 tml-build 资源热重载（§5.5） |
 | 成百上千个带行为的粒子 | 派生 `MonoParticle`（§5.8） |
 | 现成的粒子（光点 / 火花 / 烟 / 光条） | `Particles/Builtin/` 下的四个（§5.8） |
 | 按节拍持续发射 | `MonoEmitter`（§5.8） |
@@ -427,89 +488,63 @@ using (MonoBatchScope.BeginImmediate(spriteBatch, BlendState.Opaque))
 
 ### 5.5 Shaders —— 着色器
 
-#### 运行时只认 `.fxc` / `.xnb`
+Shader 编译、代码生成与 IDE 热重载由 tml-build 2.1.2 负责。自有 `.fx` 和 `.fxc`
+位于 `Assets/Effects`；完整效果目标为 `fx_2_0`，其中可使用 `vs_3_0/ps_3_0`。
+编译器来自开发环境 SDK，不再随 Monochrome 打包。`.fx` 保存为无 BOM UTF-8。
 
-- tML 的 `AdditionalFiles` 收集 `**/*.fx`（`tMLMod.targets:41`），但只喂 IDE 与分析器，不产生可加载资源。
-- 资产读取器注册表只有 `.png` / `.xnb` / `.rawimg` / **`.fxc`** / `.wav` / `.mp3` / `.ogg`
-  （`Terraria.Initializers\AssetInitializer.cs:27-33`），没有 `.fx`。
-- `FxcReader` 的实现就是 `new Effect(graphicsDevice, bytes)`（`FxcReader.cs:27`）；FNA 不含 HLSL 编译器。
-- 因此 `.fxc` 必须是**完整效果**（`fx_2_0`）。实测产物头：`/T fx_2_0` → `01 09 FF FE`；
-  裸 `/T ps_3_0` → `00 03 FF FF`，`new Effect` 解析不了。
-- **"效果目标是 `fx_2_0`"不等于"着色器只能是 2_0"**：`fx_2_0` 里写 `compile vs_3_0 / ps_3_0` 是合法的，
-  实测同一份源编出来的产物头与 `ps_2_0` 那版完全一致（`fx_3_0` 这个目标 fxc 根本不接受）。
-  要动态分支、要更多寄存器就直接写 3_0；FargowiltasSouls 的 19 个着色器都这么写。
-  于是编译脚本不需要按文件换 profile，始终 `/T fx_2_0`。
+#### 消费者决定外部导入范围
 
-所以 `.fx` 是源码、`.fxc` 是产物，**两个都要进仓库也都要进 `.tmod`**——`.fx` 进包是因为运行时重载要靠它。
+```csharp
+private readonly MonoShaderLibrary shaders = new();
 
-| 环节 | 位置 |
-|---|---|
-| 源 | `Assets/Effects/**/*.fx` |
-| 产物 | 同目录同名 `.fxc`，与 `.fx` 一起提交 |
-| 编译器 | `Assets/AutoloadedEffects/Compiler/{fxc.exe, d3dcompiler_47.dll}`（随模组打包，所以运行时重载可用） |
-| 脚本 | `Tools/CompileMonochromeShaders.ps1`，只重编比 `.fxc` 新的 `.fx`，`-Force` 强制全编 |
-| MSBuild | `Monochrome.csproj` 的 `CompileMonochromeShaders` target，`BeforeTargets="CoreCompile"` |
+// PostSetupContent：只读取指定模组，默认创建独立克隆。
+shaders.Import(fssMod,
+    static path => Path.GetFileName(path) is "BlobTrail" or "WillDeathray");
 
-#### 构建链与 PowerShell 的编码要求是矛盾的
+// 可改 directory，或通过 TryLoad(name, fullAssetPath, out shader) 精确导入。
+var shader = shaders.GetShader("FargowiltasSouls.BlobTrail");
+var binding = new MonoEffectBinding(shader.Resource);
 
-`fxc` **拒绝 BOM**（带 BOM 的 `.fx` 在 `(1,1)` 报 `X3000: Illegal character in shader file`，
-报错位置在最开头，很容易被误读成语法错），而 Windows PowerShell **5.1 要求**含中文的 `.ps1`
-必须带 UTF-8 BOM，否则把中文当乱码、报一堆 `MissingEndCurlyBrace`。
+// Unload：只释放自己持有的包装与克隆；从不释放 FSS 原 Asset.Value。
+shaders.Dispose();
+```
 
-因此不要用"统一编码"的思路解决，而是消除对编码的依赖：`Monochrome.csproj` 优先调用
-PowerShell 7（默认按 UTF-8 读脚本，不需要 BOM），找不到才退回 5.1（那时那份 BOM 仍然必要）。
-构建脚本与运行时重载器都会在编译前再规范化一次源文件（去 BOM / UTF-16 转 UTF-8），
-但仓库里的 `.fx` 本身也应存成无 BOM UTF-8，否则别的工具（如 ModdersToolkitFXBuilder）依旧编不过。
+`Import` 扫指定目录及子目录中的 `.fxc/.xnb`，过滤器接收无扩展名的相对路径。
+同一路径重复导入复用已有对象，别名碰撞会拒绝；调用方应确保自选目录里的 `.xnb` 是 Effect。
+默认 `clone: true`；自有资源可选择 `clone: false`。
+不同集合持有不同克隆，适合不同消费者隔离状态。一个集合内仍共享实例，绘制须完整设置参数。
+FPM 的白名单在 `PModeShaders`，不会调用 Luminance 的 ShaderManager。
 
-#### `/monoshader reload [名字|all|*]`
+#### MonoEffectResource 和 MonoShader
 
-改完 `.fx` 不用重启游戏。它编到临时文件 → 构造新 `Effect` → **构造成功才替换** → 原子写回源目录的
-`.fxc`，所以编译失败只回一行错误，旧特效原样保留。
+`MonoEffectResource` 在首次绘制才克隆，源 Asset 的 Effect 身份改变后创建新克隆，旧克隆排到主线程释放。
+克隆失败不释放上一实例，下次可以重试；借用模式永不释放源 Effect。资源只在客户端绘制线程解析。
+`Dispose` 可以重复调用，之后不得再绘制该资源；集合清空后可重新导入。
 
-| 形式 | 行为 |
-|---|---|
-| 不带名字 | 全部重载，但做 mtime 预筛，被跳过的项会明确写出来 |
-| `<名字>` | 点名一律重编，不做预筛 |
-| `all` / `*` | 强制全部重编 |
+`MonoShader` 保留 `SetParameter/TrySetParameter`、`SetTexture`、`Apply` 和批次录制接口。
+每次解析当前资源，资源变化时失效旧参数值和 Pass 缓存；Technique 改变也重新解析 Pass。
+批次录制的参数意图不受值缓存省略，自动分块保留下一条命令的未消费参数。
+绑定回调绕过 MonoShader 写参数时会递增资源修订号，使同句柄的 MonoShader 缓存失效。
+直接访问 `resource.Effect` 修改参数后应调用 `resource.InvalidateParameters()`。
+数组/对象状态仍由调用方保证提交前不变，不自动深拷贝；静态设置的参数在资源更新后需要重新设置。
 
-`MonoShaderReloader` 的源文件优先取所属模组的 `SourceFolder`；没有源目录时退回从 `.tmod` 里取出
-`.fx` 写到临时目录，所以 `.fx` 必须留在包里。它只重编宿主声明了 `[MonoShaderScope]` 的着色器（见下）。
+`MonoShaderManager` 仅是内置效果的兼容入口，供默认图元、UI、融合球和现有后处理使用。
+它同样以 Asset 为资源来源，不再全场扫描、不含编译器、不压制 Luminance 文件监听。
 
-#### MonoShaderManager
+#### 开发期热重载与验收
 
-按与 Luminance 相同的约定自动加载：文件名以 `.fxc` 或 `.xnb` 结尾，且路径含
-`Assets/AutoloadedEffects/Shaders`（Monochrome 自己额外认 `Assets/Effects`）。
-`Monochrome.PostSetupContent` 对每个已加载模组各调一次，所以任何已加载模组的着色器都会进这张表。
+两个项目的 `Terraria Client (tml-build experimental)` 启用 `tomat.assethotreloading`。
+普通 Steam/VS 直启无插件，修改 Shader 后须构建并重新加载模组。
+`/monoshader reload` 只给出该流程说明，不再执行自研编译或写回。
+增删参数、更改参数类型或 Pass 时需重新生成 C#，不能只替换运行中的 Effect。
 
-**注册不设门槛**：消费者按 `<模组名>.<文件名>` 就能取到别的模组的着色器，与 Luminance 的注册语义一致。
-设门的是**写回**：只有模组主类声明了 `[MonoShaderScope]`（Monochrome 自己总是算在内）才允许热重载把编好的
-`.fxc` 写回它的源目录，因为那是会动别人磁盘的操作。没声明的着色器照常可读，只是 `CanWriteBack` 为
-`false`，`/monoshader reload` 会跳过它们并在汇总里报出数量。判据不用"程序集引用了 Monochrome"，
-因为那只说明消费者用到了某个类型——只用到会被内联的常量时，编译器不会写出那条引用，判定会静默失效。
+SDK 的监听范围是所有存在有效 SourceFolder 的已加载模组，导入白名单不等于 SDK 监听白名单。
+外部克隆隔离参数，不会阻止其他管理器自行热重载。自有资源放在 Assets/Effects，避开 Luminance 自动目录。
 
-外来模组只认 `Assets/AutoloadedEffects/Shaders`：`Assets/Effects` 是很常见的目录名，别人放在那里的 `.xnb`
-多半是贴图（tML 会把 `.png` 编成同名 `.xnb`），按 `Effect` 去请求只会刷一串加载失败的警告。
-
-同名 `.fxc` 与 `.xnb` 并存时以 `.fxc` 为准（分两趟扫，先 `.fxc` 后 `.xnb`）。这个顺序是必需的：
-`Mod.GetFileNames()` 的枚举顺序没有任何保证，单趟扫描等于把"用哪一份"交给运气。热重载写回 `.fxc`
-时会顺手删掉同名 `.xnb`，加载期发现重复也会记一条日志（只对可写回的模组）。
-
-#### MonoShader
-
-参数缓存、纹理绑定、pass 选择与热替换。参数缓存的意义是跳过重复的 `SetValue`（那要穿过 FNA 的指针层）。
-
-| 成员 | 说明 |
-|---|---|
-| `TrySetParameter` / `SetParameter` | 名字不存在或值未变化时返回 false，不视为错误 |
-| `SetTexture(texture, index)` | 绑到采样槽并写 `textureSize{index}`；自定义图元的贴图从槽 **1** 开始（槽 0 归 `SpriteBatch`） |
-| `Apply(pass)` | pass 名查不到时退回第 0 个 pass（FNA 的字符串索引器返回 null 而不抛） |
-| `ResetParameterCache` | 同一个 `Effect` 被别处绕过本类直接写参数时必须调用 |
-| `Replace` / `Dispose` | **都不释放底层 `Effect`**——同一个资产名在 `AssetRepository` 缓存里只有一个实例，Luminance 的 `ManagedShader` 也持有它 |
-
-#### 第一个资产：`Monochrome.StandardPrimitive`
-
-图元的默认着色器模板，pass 名 `AutoloadPass`，贴图绑在采样槽 1。`debugMode ≥ 0.5` 输出顶点契约可视化
-（R = 还原后的截面、G = 半宽 / 32、B = 长度参数），可用来肉眼验证契约；`useTexture` 默认 0，即纯顶点色。
+验收顺序：先普通启动查看默认 StreakTrail、DarkStar/P_CoffinWaveShot 的 FSS BlobTrail；
+再验证立即绘制/批次交错、相同资源不同参数和缓冲自动分块；最后实验启动连续修改自有 Shader。
+同时显示 FSS 原有效果，确认互不影响；重载模组后再重复，检查克隆释放与重新导入。
+离线所有权测试及编译通过不代表 GPU 画面、Bootstrap 插件或连续热重载已验收。
 
 ---
 
@@ -1170,7 +1205,7 @@ recorded.Update(Projectile.Center);
 |---|---|---|
 | 着色器链 **0% 可用** | 编不过又不报错：`.fx` 从没被编过，注册的资产路径还都带尾点 | csproj 的条件改成肯定式判断、脚本改用 `/T fx_2_0`、去扩展名改用 `path[..^Path.GetExtension(path).Length]` |
 | `MonoPostFxPipeline.Apply` 条件写反 | 有启用的 pass 时反而直接返回，所有 pass 永不执行。**编译零警告** | 改成 `== 0`，并补 `Main.dedServ` 早退 |
-| `LoadForMod` 抛 NRE | `Mod.GetFileNames()` 对没有 `.tmod` 的模组返回 **null** 而不是空表 | 先判空再遍历 |
+| `Import` 抛 NRE | `Mod.GetFileNames()` 对没有 `.tmod` 的模组返回 **null** 而不是空表 | 先判空再遍历 |
 | `MonoUtil.Polygon.Triangulate` 顺时针输入索引错位 | 耳切在副本的索引空间里算，输出却当成输入编号；顺时针 L 形的三角形面积合计 9 而多边形只有 5 | 加一层"副本索引 → 输入索引"的映射；修复后 10/10 用例通过，输出绕行恒为逆时针 |
 | `MonoPostFxPipeline.Apply` 每帧分配数组 | `passes.Where(...).ToArray()` | 换成复用的 `List` 字段 |
 | `.ps1` 的 BOM 被编辑工具静默丢掉 | 构建报 `MSB3073`，报错完全不提编码 | 加回 BOM；根治办法是构建优先调用 PowerShell 7 |
@@ -1204,7 +1239,7 @@ recorded.Update(Projectile.Center);
 | **`Rent` 返回的东西一用就崩** | 专用服务器上 `Rent` 返回 `null` | 判空 |
 | **服务器上访问受管目标就崩** | 专用服务器没有 `GraphicsDevice` | 用 `MonoManagedRenderTarget.IsAvailable` 提前分支 |
 | **受管目标注销了却还能用** | 只调了 `Dispose()`——它只丢纹理，不注销 | 要永久注销请调 `Retire()` |
-| **加载时 `LoadForMod` 抛 NRE** | `Mod.GetFileNames()` 可能返回 `null` | 已修；你在别处用 `GetFileNames()` 时同样要判空 |
+| **加载时 `Import` 抛 NRE** | `Mod.GetFileNames()` 可能返回 `null` | 已修；你在别处用 `GetFileNames()` 时同样要判空 |
 | **粒子画成一条横跨全屏的竖线** | 用了 `TextureAssets.MagicPixel` 当贴图 | 见 §5.8 |
 | **`/monoshader reload` 报 `X3000`，位置是 `(1,1)`** | `.fx` 带 BOM | 重载器会自动规范化，但源文件本身也应存成无 BOM UTF-8 |
 | **重载成功但下次启动还是旧效果** | 同名 `.xnb` 与 `.fxc` 并存 | 已修：`.fxc` 优先，且写回时删掉同名 `.xnb` |

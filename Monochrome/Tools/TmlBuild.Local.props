@@ -1,0 +1,10 @@
+<Project>
+	<!-- Optional machine-only runtime configuration; never selects the tML assembly. -->
+	<Import Project="$(MSBuildThisFileDirectory)..\..\tModLoader.Local.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\tModLoader.Local.props')" />
+	<PropertyGroup>
+		<OS Condition="'$(OS)' == '' AND $([MSBuild]::IsOSPlatform('Windows'))">Windows_NT</OS>
+		<!-- SDK 2.1.2 concatenates this path with filenames; retain the separator. -->
+		<TML_BUILD_CACHE_DIRECTORY Condition="'$(TML_BUILD_CACHE_DIRECTORY)' == '' AND '$(OS)' == 'Windows_NT'">$(APPDATA)\tml-build\</TML_BUILD_CACHE_DIRECTORY>
+		<TML_BUILD_CACHE_DIRECTORY Condition="'$(TML_BUILD_CACHE_DIRECTORY)' != ''">$([MSBuild]::EnsureTrailingSlash('$(TML_BUILD_CACHE_DIRECTORY)'))</TML_BUILD_CACHE_DIRECTORY>
+	</PropertyGroup>
+</Project>

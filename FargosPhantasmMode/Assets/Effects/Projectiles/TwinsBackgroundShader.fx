@@ -93,6 +93,7 @@ technique Technique1
 {
     pass AutoloadPass
     {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
+        // This effect exceeds ps_2_0's 64 arithmetic instructions under the SDK compiler.
+        PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }

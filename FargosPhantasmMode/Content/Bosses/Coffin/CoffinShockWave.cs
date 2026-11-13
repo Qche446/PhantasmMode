@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using Monochrome.Core.Graphics.Shaders;
 using Terraria.GameContent;
@@ -37,7 +37,7 @@ public class CoffinShockWave : ModProjectile
         var diagonalNoise = FargosTextureRegistry.WavyNoise;
         var blackTile = TextureAssets.MagicPixel;
         float R = Math.Abs(Projectile.ai[1] - Vel * Timer);
-        MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShockWaveShader");
+        MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.ShockWaveShader");
         shader.TrySetParameter("screenPosition", Main.screenPosition);
         shader.TrySetParameter("screenSize", Main.ScreenSize.ToVector2());
         shader.TrySetParameter("color1", Color.Purple);

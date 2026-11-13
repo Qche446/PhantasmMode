@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
@@ -153,7 +153,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
         }
         public void RenderPixelatedPrimitives()
         {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail");
             FargosTextureRegistry.FadedStreak.Value.SetTexture1();
             MonoPrim.RenderTrail(base.Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, (float _) => base.Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 44);
         }

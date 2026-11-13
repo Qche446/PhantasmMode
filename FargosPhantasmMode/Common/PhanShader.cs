@@ -1,4 +1,4 @@
-﻿using Monochrome.Core.Graphics.Shaders;
+using Monochrome.Core.Graphics.Shaders;
 
 namespace FargosPhantasmMode.Common;
 
@@ -8,7 +8,7 @@ public static class PhanShader
     /// <summary>
     /// 常规FSS的拖尾shader
     /// </summary>
-    public static MonoShader BlobTrail => MonoShaderManager.TryGet(BlobTrailName, out MonoShader shader) ? shader : null;
+    public static MonoShader BlobTrail => PModeShaders.Library.TryGet(BlobTrailName, out MonoShader shader) ? shader : null;
     private const string MonoTrailName = "Monochrome.StreakTrail";
     /// <summary>
     /// monochrome的拖尾shader，若要和FSS的那个宽度相同，widthfunction大小得减半

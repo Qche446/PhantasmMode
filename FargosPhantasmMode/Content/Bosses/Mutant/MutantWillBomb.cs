@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Content.Bosses.Champions.Will;
 using FargowiltasSouls.Content.Bosses.MutantBoss;
 using FargowiltasSouls.Content.Buffs.Boss;
@@ -299,7 +299,7 @@ namespace FargosPhantasmMode.Content.Bosses.Mutant
                 return false;
             }
 
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillDeathray");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.WillDeathray");
             Vector2 value = base.Projectile.Center + base.Projectile.velocity.SafeNormalize(Vector2.UnitY) * drawDistance;
             Vector2 value2 = base.Projectile.Center - base.Projectile.velocity * 150f;
             Vector2[] array = new Vector2[8];

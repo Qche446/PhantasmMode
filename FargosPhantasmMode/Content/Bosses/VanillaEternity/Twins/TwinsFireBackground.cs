@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -83,7 +83,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             if (!blackTile.IsLoaded || !diagonalNoise.IsLoaded)
                 return false;
 
-            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
+            MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.TwinsBackgroundShader");
             shader.SetCommonParameters();
             shader.TrySetParameter("isRetinazer", (int)Projectile.ai[1] == NPCID.Retinazer);
             shader.TrySetParameter("colorMult", 7.35f);

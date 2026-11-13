@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.Sounds;
 using FargowiltasSouls.Content.Buffs.Masomode;
 using FargowiltasSouls.Content.Projectiles.Deathrays;
@@ -144,7 +144,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Destroyer
             Color brightColor = new Color(0, 150, 255, 100);
 
             // 获取着色器
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.WillBigDeathray");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.WillBigDeathray");
             shader.TrySetParameter("mainColor", brightColor);
             Texture2D fademap = ModContent.Request<Texture2D>("FargowiltasSouls/Assets/ExtraTextures/Trails/WillStreak").Value;
             FargoSoulsUtil.SetTexture1(fademap);

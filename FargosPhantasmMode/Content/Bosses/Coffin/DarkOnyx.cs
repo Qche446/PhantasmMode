@@ -195,7 +195,7 @@ namespace FargosPhantasmMode.Content.Bosses.Coffin
 
         public void RenderPixelatedPrimitives()
         {
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail");
             FargoSoulsUtil.SetTexture1(FargosTextureRegistry.FadedStreak.Value);
             MonoPrim.RenderTrail(Projectile.oldPos, new MonoPrimitiveSettings(WidthFunction, ColorFunction, _ => base.Projectile.Size * 0.5f, UseUnscaledMatrix: true, Shader: shader), 30);
         }

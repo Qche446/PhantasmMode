@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Common;
+using FargosPhantasmMode.Common;
 using FargosPhantasmMode.Content.InfoDisplays;
 using FargowiltasSouls;
 using FargowiltasSouls.Content.Items;
@@ -123,7 +123,7 @@ namespace FargosPhantasmMode.Content.Items.Accessories
             Vector2 rectTopLeft = center;
             Rectangle drawRect = new Rectangle((int)rectTopLeft.X, (int)rectTopLeft.Y, (int)rectSize.X, (int)rectSize.Y);
 
-            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ShadowveilHeartRings");
+            MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.ShadowveilHeartRings");
             shader.TrySetParameter("globalTime", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("screenPosition", rectTopLeft);
             shader.TrySetParameter("screenSize", rectSize);

@@ -63,10 +63,13 @@ public class P_CoffinWaveShot : ModProjectile, IMonoPixelatedPrimitive
     }
     protected void EnsureTrail()
     {
+        if (Main.dedServ)
+            return;
         trail ??= new()
         {
             Texture = FargosTextureRegistry.FadedStreak.Value,
-            Shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail"),
+            EffectBinding = new Monochrome.Core.Graphics.Primitives.MonoEffectBinding(
+                    PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail").Resource),
             WidthFunction = WidthFunction,
             ColorFunction = ColorFunction,
             Offset = Projectile.Size * 0.5f,

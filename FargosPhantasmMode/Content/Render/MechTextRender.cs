@@ -46,7 +46,7 @@ public static class MechTextRender
         if (!MonoPrimitiveRenderer.IsReady)
             return false;
 
-        if (!MonoShaderManager.TryGet(ShaderName, out var shader) || shader is null)
+        if (!PModeShaders.Library.TryGet(ShaderName, out var shader) || shader is null)
             return false;
 
         DynamicSpriteFont font = line.Font ?? FontAssets.MouseText.Value;

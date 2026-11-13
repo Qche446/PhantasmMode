@@ -37,7 +37,7 @@ namespace FargosPhantasmMode.Content.Projectiles
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.StyxGazerShader");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.StyxGazerShader");
             Texture2D value = ModContent.Request<Texture2D>("FargowiltasSouls/Content/Bosses/AbomBoss/AbomSword").Value;
             Vector2 vector = projectile.velocity.SafeNormalize(Vector2.UnitY);
             Vector2 vector2 = vector * projectile.scale * value.Height;

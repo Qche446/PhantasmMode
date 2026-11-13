@@ -1,4 +1,4 @@
-﻿using FargowiltasSouls;
+using FargowiltasSouls;
 using FargowiltasSouls.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -54,7 +54,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             var blackTile = TextureAssets.MagicPixel;
             var noise = FargosTextureRegistry.Techno1Noise;
             /*
-            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.ScanTelegraphShader");
+            MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.ScanTelegraphShader");
             Main.spriteBatch.GraphicsDevice.Textures[1] = noise.Value;
             shader.TrySetParameter("color", Color.Green);
             shader.TrySetParameter("screenPosition", Main.screenPosition);
@@ -71,7 +71,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             float arcAngle = Direct;
             float arcWidth = AngleRange * timeLerp;
             Color color = Color.Green;
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.DestroyerScanTelegraph");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.DestroyerScanTelegraph");
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", radius);

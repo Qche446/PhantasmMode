@@ -1,4 +1,4 @@
-﻿using FargosPhantasmMode.Assets.ExtraTextures;
+using FargosPhantasmMode.Assets.ExtraTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -28,7 +28,7 @@ namespace FargosPhantasmMode.Content.Render
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.LinearWrap, null, null, null, Main.UIScaleMatrix);
             
             var diagonalNoise = PhantasmTextureRegistry.FireNoise;
-            MonoShader shader = MonoShaderManager.GetShader("FargosPhantasmMode.BurnText");
+            MonoShader shader = PModeShaders.Library.GetShader("FargosPhantasmMode.BurnText");
             Main.spriteBatch.GraphicsDevice.Textures[1] = diagonalNoise.Value;
             shader.SetCommonParameters();
             shader.TrySetParameter("burnIntensity", burnIntensity); 

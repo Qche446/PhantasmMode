@@ -15,15 +15,21 @@ The git root is the parent `ModSources/` directory, not this folder. Three proje
 - `../FargosPhantasmMode.SourceGenerator/`: Roslyn incremental generators (referenced as an analyzer).
 - `../Monochrome.CoreTests/`: a plain console project that checks Monochrome's game-independent core (pools, RNG, scheduler, coroutines, timeline, tween).
 
-Other dependencies are DLLs in `lib/` (`FargowiltasSouls.dll`, `Fargowiltas.dll`, `Luminance.dll`), referenced with `Private=false`. `../tModLoader.targets` imports `tMLMod.targets` from a hard-coded Steam path (`E:\SteamLibrary\...`).
+Other dependencies are DLLs in `lib/` (`FargowiltasSouls.dll`, `Fargowiltas.dll`, `Luminance.dll`), referenced with `Private=false`. Both mods use tml-build 2.1.2 with `TmlVersion=stable`: NuGet imports the cached release's targets. The legacy `../tModLoader.targets` also resolves that cached stable version. Machine-specific .NET host overrides belong in the ignored `../tModLoader.Local.props`; they must not redirect the tML assembly to Steam.
 
 ## Commands
 
+After switching tML versions, restore before building and reload the VS projects:
+
 ```bash
-dotnet build FargosPhantasmMode.csproj -p:BuildMod=false
+dotnet restore FargosPhantasmMode.csproj --disable-parallel -m:1
 ```
 
-`-p:BuildMod=false` skips packaging into `Mods/*.tmod`. That step writes outside the repo and fails in a sandbox; compilation itself still succeeds. Drop the flag (or use tModLoader's in-game "Build + Reload") to produce a playable `.tmod`.
+```bash
+dotnet build FargosPhantasmMode.csproj -p:BuildMod=false -p:TmlBuildPackageMod=false
+```
+
+Use `-p:BuildMod=false -p:TmlBuildPackageMod=false` to skip packaging into `Mods/*.tmod` with the tml-build SDK. That step writes outside the repo and fails in a sandbox; compilation itself still succeeds. Drop the flag (or use tModLoader's in-game "Build + Reload") to produce a playable `.tmod`.
 
 ```bash
 dotnet run --project ../Monochrome.CoreTests
@@ -55,11 +61,11 @@ The source generator emits static classes with lazy `int` properties for every p
 - `PProjID` / `PBuffID`: this mod's projectiles and buffs (e.g. `PProjID.AbomBlast`).
 - `FProjID` / `FBuffID`: FargowiltasSouls' projectiles and buffs, scanned from the referenced assembly.
 
-Use these instead of `ModContent.ProjectileType<T>()`. Output is written to `Generated/` for inspection only (`EmitCompilerGeneratedFiles`); those `.cs` files are excluded from compilation, so never edit them.
+Use these instead of `ModContent.ProjectileType<T>()`. Output is written to `obj/Generated/` for inspection only (`EmitCompilerGeneratedFiles`); those `.cs` files are excluded from compilation, so never edit them.
 
 ### Rendering
 
-- Shaders: `.fx` sources live in `Assets/AutoloadedEffects/Shaders/` and are compiled to `.fxc` next to them with the bundled `fxcompiler.exe` (ModdersToolkit FX builder). Commit both. They load through Monochrome's `MonoShaderManager`, opted in by `[MonoShaderScope]` on the Mod class, and are looked up as `"FargosPhantasmMode.<FileName>"` via `MonoShaderManager.TryGet`. A missing shader must be skipped, not thrown on.
+- Shaders: `.fx`/`.fxc` live in `Assets/Effects/`, built by tml-build 2.1.2. Generated accessors are in `obj/Generated`; never edit generated output. `PModeShaders.Library` explicitly imports own resources and a whitelist of FSS resources; external effects use independent clones. `MonoShaderManager` only contains Monochrome built-ins. No MonoShaderScope, custom shader compiler, or Luminance watcher suppression remains. Missing optional shaders should be skipped.
 - `FargosPhantasmMode.cs` hooks `On_FilterManager.EndCapture` to draw a screen-sized render target (`MonoRt.ScreenSized()`) with particle layers and composite it through the `BigTentacle` shader.
 - Monochrome's invariants apply to code built on it. Hold cross-frame references with `MonoHandle`, never raw indices. Gameplay logic uses `MonoTime.Tick`; purely visual code uses `MonoTime.RealTime`. Per-frame paths allocate nothing (no `new`, LINQ, dictionary lookups or string building).
 

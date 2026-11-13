@@ -119,6 +119,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
             float ratio = Projectile.velocity.Length() / (Projectile.width * 3);
             if (ratio > 1)
                 Projectile.velocity /= ratio;
+            if (Main.dedServ)
+                return;
             trail ??= new(20)
             {
                 UseUnscaledMatrix = true,
@@ -126,7 +128,8 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.Twins
                 WidthFunction = t => MathHelper.SmoothStep(Projectile.scale * Projectile.width * 0.65f, 1.75f, t),
                 ColorFunction = t => Color.Lerp(Color.OrangeRed, Color.Transparent, t),
                 Texture = FargosTextureRegistry.FadedStreak.Value,
-                Shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail"),
+                EffectBinding = new Monochrome.Core.Graphics.Primitives.MonoEffectBinding(
+                    PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail").Resource),
                 Offset = 0.5f * Projectile.Size
             };
 

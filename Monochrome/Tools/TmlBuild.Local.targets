@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <!-- Upstream calls this tMLSteamPath even for an extracted stable release. -->
+    <MonochromeTmlDirectory>$(tMLSteamPath)</MonochromeTmlDirectory>
+    <MonochromeTmlAssembly Condition="'$(tMLSteamPath)' != ''">$([System.IO.Path]::GetFullPath('$(tMLSteamPath)$(tMLPath)'))</MonochromeTmlAssembly>
+    <!-- GitHub archives do not bundle .NET. Steam may supply the runtime,
+         while the assembly and working directory always use the stable cache. -->
+    <_MonochromeSteamDirectory Condition="Exists('$(TmlSteamTargetsPath)')">$([System.IO.Path]::GetDirectoryName('$(TmlSteamTargetsPath)'))</_MonochromeSteamDirectory>
+    <MonochromeTmlDotNet Condition="'$(MonochromeTmlDotNet)' == '' AND Exists('$(tMLSteamPath)dotnet\dotnet.exe')">$(tMLSteamPath)dotnet\dotnet.exe</MonochromeTmlDotNet>
+    <MonochromeTmlDotNet Condition="'$(MonochromeTmlDotNet)' == '' AND Exists('$(_MonochromeSteamDirectory)\dotnet\dotnet.exe')">$(_MonochromeSteamDirectory)\dotnet\dotnet.exe</MonochromeTmlDotNet>
+    <MonochromeTmlDotNet Condition="'$(MonochromeTmlDotNet)' == ''">$(DotNetName)</MonochromeTmlDotNet>
+  </PropertyGroup>
+  <Target Name="ValidateMonochromeStableTml" BeforeTargets="ResolveReferences" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="'$(TmlVersion)' != 'stable'" Text="Monochrome and FPM must target TmlVersion=stable." />
+    <Error Condition="'$(TmlVersionResolved)' == '' OR !Exists('$(MonochromeTmlAssembly)')"
+           Text="Stable tModLoader is not restored. Run dotnet restore, then reload the project before building or launching." />
+  </Target>
+</Project>

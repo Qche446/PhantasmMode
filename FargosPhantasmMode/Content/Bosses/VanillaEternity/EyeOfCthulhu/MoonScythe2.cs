@@ -94,7 +94,7 @@ namespace FargosPhantasmMode.Content.Bosses.VanillaEternity.EyeOfCthulhu
                 WidthFunction = t => WidthFunction(t),
                 ColorFunction = t => ColorFunction(t),
                 Texture = FargosTextureRegistry.FadedStreak.Value,
-                Shader = MonoShaderManager.GetShader("FargowiltasSouls.BlobTrail"),
+                Shader = PModeShaders.Library.GetShader("FargowiltasSouls.BlobTrail"),
                 Offset = 0.5f * Projectile.Size
             };
         }

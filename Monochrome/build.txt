@@ -1,7 +1,5 @@
 displayName = Monochrome
 author = Qche
 version = 1.0.0
-buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Tools\*, Folders to Port\*, lib\*, docs\*, *README.md, LICENSE
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Tools\*, Tests\*, Properties\*, Folders to Port\*, lib\*, docs\*, *README.md, LICENSE, Assets\AutoloadedEffects\Compiler\*
 side = NoSync
-sortAfter = Luminance
-weakReferences = Luminance

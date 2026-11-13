@@ -1,4 +1,4 @@
-﻿using Fargowiltas.Common.Configs;
+using Fargowiltas.Common.Configs;
 using FargowiltasSouls.Assets.ExtraTextures;
 using FargowiltasSouls.Content.Items.Accessories.Enchantments;
 using FargowiltasSouls.Content.Projectiles.Souls;
@@ -24,7 +24,7 @@ namespace FargosPhantasmMode.Content.Projectiles.Masomode
             Asset<Texture2D> magicPixel = TextureAssets.MagicPixel;
             Asset<Texture2D> wavyNoise = FargosTextureRegistry.WavyNoise;
             float num2 = base.Projectile.Opacity * ModContent.GetInstance<FargoClientConfig>().TransparentFriendlyProjectiles;
-            MonoShader shader = MonoShaderManager.GetShader("FargowiltasSouls.SolarEnchantShader");
+            MonoShader shader = PModeShaders.Library.GetShader("FargowiltasSouls.SolarEnchantShader");
             shader.TrySetParameter("colorMult", 7.35f);
             shader.TrySetParameter("time", Main.GlobalTimeWrappedHourly);
             shader.TrySetParameter("radius", num * base.Projectile.scale);

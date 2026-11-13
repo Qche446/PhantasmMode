@@ -23,7 +23,7 @@ public static class PhantasmModRowSkin
         // 行只有悬停与不悬停两种状态，直接跳变会闪；这里每帧朝目标插值。
         hoverBlend = MathHelper.Lerp(hoverBlend, context.Hovered ? 1f : 0f, 0.2f);
 
-        if (!MonoShaderManager.TryGet(PanelShaderName, out MonoShader shader))
+        if (!PModeShaders.Library.TryGet(PanelShaderName, out MonoShader shader))
         {
             MonoPanel.Draw(spriteBatch, bounds, Color.White);
             return;
@@ -57,7 +57,7 @@ public static class PhantasmModRowSkin
         for (int i = 0; i < 4; i++)
             spriteBatch.DrawString(font, context.Text, context.Position +  1.5f * OutlineOffsets[i], Color.Black, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 
-        if (!MonoShaderManager.TryGet(NameShaderName, out MonoShader shader))
+        if (!PModeShaders.Library.TryGet(NameShaderName, out MonoShader shader))
         {
             spriteBatch.DrawString(font, context.Text, context.Position, Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
             return;

@@ -33,7 +33,7 @@ VertexShaderOutput VertexShaderFunction(in VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-    float2 coords = input.TextureCoordinates;
+    float2 coords = input.TextureCoordinates.xy;
     float4 color = input.Color;
     
     coords.y = (coords.y - 0.5) / input.TextureCoordinates.z + 0.5;

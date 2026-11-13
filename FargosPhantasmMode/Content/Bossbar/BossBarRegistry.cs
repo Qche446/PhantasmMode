@@ -27,6 +27,7 @@ using System.Linq;
 using static FargowiltasSouls.FargowiltasSouls;
 using static Terraria.ModLoader.ModContent;
 using Monochrome.Core.Graphics.Shaders;
+using FargosPhantasmMode.Core;
 
 namespace FargosPhantasmMode.Content.Bossbar
 {
@@ -108,7 +109,7 @@ namespace FargosPhantasmMode.Content.Bossbar
         public static BossBarConfig BaseBarStyle(Color color1, Color color2, float omiga = 0, bool HasShield = false, Func<NPC, int> Shield = null, Func<NPC, int> MaxShield = null) => new ((sb, npc, rectangle) => DoubleColorPulse(sb, npc, rectangle, () => color1, () => color2, npc.GetLifePercent(), omiga), HasShield, Shield, MaxShield);
         private static void DoubleColorPulse(SpriteBatch sb, NPC npc, Rectangle rectangle, Func<Color> color1, Func<Color> color2, float lifeRatio, float omiga)
         {
-            MonoShader healthBarShader = MonoShaderManager.GetShader("FargosPhantasmMode.BossBarShader");
+            MonoShader healthBarShader = PModeShaders.Library.GetShader("FargosPhantasmMode.BossBarShader");
             Texture2D noise = FargosTextureRegistry.WavyNoise.Value;
             sb.GraphicsDevice.Textures[1] = noise;
 
